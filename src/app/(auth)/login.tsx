@@ -8,13 +8,12 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import { useUsuarioService } from "@/services/usuario";
-import { useAuth } from "@/context/authContext";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 
 export default function LoginPagina() {
+  const router = useRouter();
   const usuarioService = useUsuarioService();
-  const { setUsuario } = useAuth();
-
   const [erro, setErro] = useState<boolean>(false);
 
   const handleLogin = async ({ email, password: senha }: any) => {
@@ -69,6 +68,13 @@ export default function LoginPagina() {
                 style={styles.botao}
               >
                 <Text style={styles.textoBotao}>Entrar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => router.replace("/cadastro")}
+                style={styles.botao}
+              >
+                <Text style={styles.textoBotao}>Cadastrar</Text>
               </TouchableOpacity>
             </View>
           </View>

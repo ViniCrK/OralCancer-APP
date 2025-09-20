@@ -1,6 +1,6 @@
 import { supabase } from "@/config/supabase-client";
 
-interface DadosEspecialista {
+interface UsuarioEspecialista {
   email: string;
   senha: string;
   nome: string;
@@ -11,7 +11,7 @@ interface DadosEspecialista {
 
 const UsuarioService = {
   cadastrar: async (
-    dados: DadosEspecialista
+    dados: UsuarioEspecialista
   ): Promise<{ sucesso: boolean }> => {
     const { email, senha } = dados;
 
