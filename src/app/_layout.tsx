@@ -1,8 +1,7 @@
 import { supabase } from "@/config/supabase-client";
-import { useAuth } from "@/context/authContext";
 import { Slot, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export default function RootLayout() {
   const [autenticado, setAutenticado] = useState<boolean | null>(null);

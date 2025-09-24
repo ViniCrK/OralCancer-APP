@@ -1,18 +1,14 @@
 import { supabase } from "@/config/supabase-client";
 
-interface UsuarioEspecialista {
+interface Usuario {
   email: string;
   senha: string;
-  nome: string;
-  sobrenome: string;
-  registro_profissional: string;
-  especialidade: number;
 }
 
 const UsuarioService = {
   cadastrar: async (
-    dados: UsuarioEspecialista
-  ): Promise<{ sucesso: boolean }> => {
+    dados: Usuario
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { email, senha } = dados;
 
     const { data, error } = await supabase.auth.signUp({
@@ -20,19 +16,17 @@ const UsuarioService = {
       password: senha,
     });
 
-    if (error || !data.user) return { sucesso: false };
+    if (error || !data.user)
+      return {
+        sucesso: false,
+        mensagem: error?.message || "Erro desconhecido.",
+      };
 
-    const { error: insertError } = await supabase.from("ESPECIALISTAS").insert([
-      {
-        user_id: data.user.id,
-        nome: dados.nome,
-        sobrenome: dados.sobrenome,
-        registro_profissional: dados.registro_profissional,
-        especialidade_id: dados.especialidade,
-      },
-    ]);
-
-    return { sucesso: !insertError };
+    return {
+      sucesso: true,
+      mensagem:
+        "Usuário criado com sucesso! Verifique seu email para confirmar a conta.",
+    };
   },
 
   entrar: async (
