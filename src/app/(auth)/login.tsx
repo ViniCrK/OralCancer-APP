@@ -31,52 +31,46 @@ export default function LoginPagina() {
         onSubmit={(dados) => handleLogin(dados)}
       >
         {({ handleBlur, handleChange, handleSubmit }) => (
-          <View style={styles.formContainer}>
+          <View style={styles.form}>
             <Text>Logar Especialista</Text>
 
-            <View style={styles.formInputs}>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.inputTexto}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  placeholder="Email"
-                  placeholderTextColor={"#000000"}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoFocus={false}
-                />
-              </View>
+            <TextInput
+              style={styles.input}
+              onChangeText={handleChange("email")}
+              onBlur={handleBlur("email")}
+              placeholder="Email"
+              placeholderTextColor={"#000000"}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoFocus={false}
+            />
 
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.inputTexto}
-                  onChangeText={handleChange("password")}
-                  placeholder="Senha"
-                  placeholderTextColor={"#000000"}
-                  autoCapitalize="none"
-                  secureTextEntry
-                />
-              </View>
+            <TextInput
+              style={styles.input}
+              onChangeText={handleChange("password")}
+              placeholder="Senha"
+              placeholderTextColor={"#000000"}
+              autoCapitalize="none"
+              secureTextEntry
+            />
 
-              {erro && (
-                <Text style={styles.textoErro}>Email ou senha incorretos</Text>
-              )}
+            {erro && (
+              <Text style={styles.mensagem}>Email ou senha incorretos</Text>
+            )}
 
-              <TouchableOpacity
-                onPress={() => handleSubmit()}
-                style={styles.botao}
-              >
-                <Text style={styles.textoBotao}>Entrar</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleSubmit()}
+              style={styles.botao}
+            >
+              <Text style={styles.botaoTexto}>Entrar</Text>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                onPress={() => router.replace("/cadastro")}
-                style={styles.botao}
-              >
-                <Text style={styles.textoBotao}>Cadastrar</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              onPress={() => router.replace("/cadastro")}
+              style={styles.botao}
+            >
+              <Text style={styles.botaoTexto}>Cadastrar</Text>
+            </TouchableOpacity>
           </View>
         )}
       </Formik>
@@ -87,95 +81,11 @@ export default function LoginPagina() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 50,
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  form: {
-    gap: 10,
-    marginBottom: 10,
-  },
-  input: {
-    width: "100%",
-    marginBottom: 5,
-    padding: 5,
-  },
-  logoContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  logo: {
-    width: 240,
-    height: 140,
-    resizeMode: "contain",
-    marginTop: 32,
-    marginBottom: 16,
-  },
-  formContainer: {
-    flex: 3,
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-  },
-  titulo: {
-    fontSize: 42,
-    fontWeight: "medium",
-    textAlign: "center",
-    paddingVertical: 30,
-  },
-  formInputs: {
-    gap: 20,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 50,
-    width: 320,
-    backgroundColor: "#FFF",
-    borderRadius: 10,
-    elevation: 10,
-  },
-  inputIcone: {
-    paddingLeft: 10,
-  },
-  inputTexto: {
-    fontSize: 16,
-    paddingLeft: 10,
-    fontWeight: "regular",
-  },
-  textoErro: {
-    color: "red",
-    fontSize: 12,
-  },
-  botao: {
-    alignSelf: "flex-end",
-    width: 120,
-    padding: 16,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-    backgroundColor: "#3B82F6",
-    borderRadius: 10,
-  },
-  textoBotao: {
-    alignSelf: "center",
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  rodapeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  textoRodape: {
-    fontSize: 16,
-    color: "#3B82F6",
-    textDecorationLine: "underline",
-    textDecorationStyle: "solid",
-    textDecorationColor: "#2547A0",
-  },
+  container: { flex: 1, justifyContent: "center", padding: 20 },
+  titulo: { fontSize: 22, marginBottom: 20, textAlign: "center" },
+  form: { gap: 12 },
+  input: { borderWidth: 1, borderColor: "#ccc", padding: 10, borderRadius: 5 },
+  botao: { backgroundColor: "#3B82F6", padding: 15, borderRadius: 5 },
+  botaoTexto: { color: "#fff", textAlign: "center", fontWeight: "bold" },
+  mensagem: { marginTop: 15, textAlign: "center" },
 });

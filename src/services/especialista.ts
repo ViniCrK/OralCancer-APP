@@ -38,6 +38,22 @@ const EspecialistaService = {
 
     return { sucesso: true, mensagem: "Especialista cadastrado com sucesso!" };
   },
+
+  buscar: async (id: string) => {
+    const { data, error } = await supabase
+      .from("ESPECIALISTAS")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("Erro ao buscar o especialista:", error.message);
+
+      return null;
+    }
+
+    return data;
+  },
 };
 
 export const useEspecialistaService = () => EspecialistaService;

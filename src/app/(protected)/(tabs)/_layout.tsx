@@ -10,6 +10,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="pagina_inicial" options={{ title: "Início" }} />
+      <Tabs.Screen name="avaliacao" options={{ title: "Avaliações" }} />
     </Tabs>
   );
 }
