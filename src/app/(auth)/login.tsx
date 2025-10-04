@@ -32,7 +32,7 @@ export default function LoginPagina() {
       >
         {({ handleBlur, handleChange, handleSubmit }) => (
           <View style={styles.form}>
-            <Text>Logar Especialista</Text>
+            <Text style={styles.titulo}>Acessar sua Conta</Text>
 
             <TextInput
               style={styles.input}
@@ -42,7 +42,7 @@ export default function LoginPagina() {
               placeholderTextColor={"#000000"}
               keyboardType="email-address"
               autoCapitalize="none"
-              autoFocus={false}
+              autoFocus={true}
             />
 
             <TextInput

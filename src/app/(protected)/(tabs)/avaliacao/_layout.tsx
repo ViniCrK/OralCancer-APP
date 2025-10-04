@@ -3,11 +3,12 @@ import { Stack } from "expo-router";
 export default function AvaliacaoLayout() {
   return (
     <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastrar/pagina1" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastrar/pagina2" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastrar/pagina3" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastrar/pagina4" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="index"
+        options={{ title: "Avaliações", headerShown: true }}
+      />
+      <Stack.Screen name="cadastrar" options={{ headerShown: false }} />
+      <Stack.Screen name="[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }

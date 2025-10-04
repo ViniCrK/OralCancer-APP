@@ -40,7 +40,7 @@ export default function CadastroPagina() {
       >
         {({ handleChange, handleSubmit }) => (
           <View style={styles.container}>
-            <Text style={styles.titulo}>Cadastro de Usuário</Text>
+            <Text style={styles.titulo}>Cadastre-se</Text>
 
             <View style={styles.form}>
               <TextInput
@@ -50,7 +50,7 @@ export default function CadastroPagina() {
                 placeholderTextColor={"#000000"}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                autoFocus={false}
+                autoFocus={true}
               />
 
               <TextInput
@@ -69,6 +69,13 @@ export default function CadastroPagina() {
                 style={styles.botao}
               >
                 <Text style={styles.botaoTexto}>Cadastrar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => router.replace("/(auth)/login")}
+                style={styles.botao}
+              >
+                <Text style={styles.botaoTexto}>Já tem uma conta?</Text>
               </TouchableOpacity>
             </View>
           </View>

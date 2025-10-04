@@ -1,6 +1,6 @@
 import { supabase } from "@/config/supabase-client";
 import { useUsuarioService } from "@/services/usuario";
-import { useUsuarioStore } from "@/store/usuario";
+import { useEspecialistaStore } from "@/store/especialista";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -13,7 +13,7 @@ import {
 
 export default function PaginaInicial() {
   const router = useRouter();
-  const { usuario, setUsuario } = useUsuarioStore();
+  const { especialista, setEspecialista } = useEspecialistaStore();
   const { sair } = useUsuarioService();
   const [carregando, setCarregando] = useState(true);
 
@@ -31,7 +31,7 @@ export default function PaginaInicial() {
         .eq("user_id", user.id)
         .single();
 
-      setUsuario(especialista);
+      setEspecialista(especialista);
     } catch (error) {
       console.error("erro ao verificar a existência do especialista:", error);
     } finally {
@@ -62,17 +62,10 @@ export default function PaginaInicial() {
       </Text>
 
       <Text style={{ paddingBottom: 20 }}>
-        Bem-vindo(a), {usuario?.nome} {usuario?.sobrenome}
+        Bem-vindo(a), {especialista?.nome} {especialista?.sobrenome}
       </Text>
 
-      {usuario ? (
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => router.replace("/avaliacao/cadastrar/pagina1")}
-        >
-          <Text style={styles.botaoTexto}>Cadastrar Avaliação</Text>
-        </TouchableOpacity>
-      ) : (
+      {!especialista && (
         <TouchableOpacity
           style={styles.botao}
           onPress={() => router.replace("/especialista/cadastrar")}
