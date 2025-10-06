@@ -37,7 +37,7 @@ export default function CadastroRelatorio() {
       Alert.alert(sucesso ? "Sucesso" : "Erro", mensagem);
 
       if (sucesso) {
-        router.back();
+        router.push(`/(tabs)/avaliacao/${avaliacao_id}/relatorios`);
       }
     } catch (error) {
       console.error("Falha ao salvar relatório:", error);

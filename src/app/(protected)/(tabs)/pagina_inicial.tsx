@@ -70,9 +70,30 @@ export default function PaginaInicial() {
           style={styles.botao}
           onPress={() => router.replace("/especialista/cadastrar")}
         >
-          <Text style={styles.botaoTexto}>Cadastrar Especialista</Text>
+          <Text style={styles.botaoTexto}>Crie seu perfil de especialista</Text>
         </TouchableOpacity>
       )}
+
+      <TouchableOpacity
+        style={styles.botao}
+        onPress={() => router.replace("/avaliacao/cadastrar")}
+      >
+        <Text style={styles.botaoTexto}>Nova Avaliação</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.botao}
+        onPress={() => router.replace("/pacientes/cadastrar")}
+      >
+        <Text style={styles.botaoTexto}>Cadastrar Paciente</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.botao}
+        onPress={() => router.replace("/pacientes")}
+      >
+        <Text style={styles.botaoTexto}>Ver Pacientes Cadastrados</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.botaoSair} onPress={() => sair()}>
         <Text style={styles.botaoTexto}>Sair</Text>
