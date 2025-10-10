@@ -1,4 +1,5 @@
 import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
+import { useEspecialistaStore } from "@/store/especialista";
 import { Link } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 type Paciente = { id: number; nome: string; sobrenome: string };
@@ -53,11 +55,17 @@ const TextoDetalhe = ({
 );
 
 export default function DetalheAvaliacao() {
-  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { especialista } = useEspecialistaStore();
   const avaliacaoService = useAvaliacaoService();
+
   const [avaliacao, setAvaliacao] = useState<AvaliacaoCompleta | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [excluindo, setExcluindo] = useState(false);
+
+  const especialistaCriador = especialista?.id === avaliacao?.ESPECIALISTAS?.id;
 
   useEffect(() => {
     if (!id) return;
@@ -75,6 +83,46 @@ export default function DetalheAvaliacao() {
 
     buscarAvaliacao();
   }, [id]);
+
+  const handleExcluirAvaliacao = async () => {
+    Alert.alert(
+      "Confirmar Exclusão",
+      "Você tem certeza de que deseja excluir esta avaliação? Esta ação não pode ser desfeita.",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            setExcluindo(true);
+            try {
+              const { sucesso, mensagem } = await avaliacaoService.excluir(
+                id as string
+              );
+
+              if (sucesso) {
+                Alert.alert("Sucesso", mensagem);
+                router.push("/(tabs)/avaliacao");
+              } else {
+                Alert.alert("Erro", mensagem);
+              }
+            } catch (error) {
+              console.error("Erro ao excluir avaliação:", error);
+              Alert.alert(
+                "Erro",
+                "Ocorreu uma falha inesperada ao tentar excluir."
+              );
+            } finally {
+              setExcluindo(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   if (carregando) {
     return (
@@ -130,6 +178,10 @@ export default function DetalheAvaliacao() {
           value={avaliacao.HABITOS?.nome}
         />
         <TextoDetalhe
+          label="Carga Tabágica(maços) / Etílica(ml)"
+          value={avaliacao.carga_tabagica_etilica}
+        />
+        <TextoDetalhe
           label="Localização Intraoral"
           value={avaliacao.LOCALIZACOES_INTRAORAIS?.nome}
         />
@@ -169,10 +221,10 @@ export default function DetalheAvaliacao() {
       </View>
 
       <View style={styles.botoesContainer}>
-        {/* 3. Navegação atualizada para a nova estrutura de rotas aninhada */}
         <TouchableOpacity
           style={styles.botao}
           onPress={() => router.push(`/avaliacao/${id}/relatorios/cadastrar`)}
+          disabled={excluindo}
         >
           <Text style={styles.botaoTexto}>Gerar Relatório</Text>
         </TouchableOpacity>
@@ -180,9 +232,52 @@ export default function DetalheAvaliacao() {
         <TouchableOpacity
           style={[styles.botao, styles.botaoSecundario]}
           onPress={() => router.push(`/avaliacao/${id}/relatorios`)}
+          disabled={excluindo}
         >
           <Text style={styles.botaoTexto}>Ver Relatórios</Text>
         </TouchableOpacity>
+
+        {especialistaCriador ? (
+          <>
+            <TouchableOpacity
+              style={[styles.botao, styles.botaoEditar]}
+              onPress={() => router.push(`/(tabs)/avaliacao/${id}/editar`)}
+            >
+              <Text style={styles.botaoTexto}>Editar Avaliação</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.botao,
+                styles.botaoExcluir,
+                excluindo && styles.botaoDesabilitado,
+              ]}
+              onPress={handleExcluirAvaliacao}
+              disabled={excluindo}
+            >
+              {excluindo ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botaoTexto}>Excluir Avaliação</Text>
+              )}
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Link
+            href={{
+              pathname: "/notificacoes/cadastrar",
+              params: {
+                avaliacaoId: avaliacao.id,
+                destinatarioId: avaliacao.ESPECIALISTAS?.id,
+              },
+            }}
+            asChild
+          >
+            <TouchableOpacity style={styles.botao}>
+              <Text style={styles.botaoTexto}>Gerar Notificação</Text>
+            </TouchableOpacity>
+          </Link>
+        )}
       </View>
     </ScrollView>
   );
@@ -232,7 +327,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   botaoSecundario: {
-    backgroundColor: "#0d9488", // Um tom de verde mais escuro
+    backgroundColor: "#0d9488",
+  },
+  botaoEditar: {
+    backgroundColor: "#f97316", // Laranja para edição
+  },
+  botaoExcluir: {
+    backgroundColor: "#e53e3e",
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#f8b4b4",
   },
   botaoTexto: {
     color: "#fff",

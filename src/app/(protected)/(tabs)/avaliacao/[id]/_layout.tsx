@@ -7,6 +7,7 @@ export default function DetalheLayout() {
         name="index"
         options={{ title: "Detalhes da Avaliação", headerShown: true }}
       />
+      <Stack.Screen name="editar" options={{ headerShown: false }} />
     </Stack>
   );
 }

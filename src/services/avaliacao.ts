@@ -94,20 +94,39 @@ const AvaliacaoService = {
 
   atualizar: async (
     id: string,
-    avaliacao: Avaliacao
-  ): Promise<{ sucesso: boolean }> => {
+    avaliacao: any
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase
       .from("AVALIACOES")
       .update(avaliacao)
       .eq("id", id);
 
     if (error) {
-      console.error("Erro ao atualizar a avaliação:", error.message);
-
-      return { sucesso: false };
+      return { sucesso: false, mensagem: "Erro ao atualizar a avaliação." };
     }
 
-    return { sucesso: true };
+    return {
+      sucesso: true,
+      mensagem: "Dados da avaliação alterados com sucesso!",
+    };
+  },
+
+  excluir: async (
+    id: string
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
+    const { error } = await supabase.from("AVALIACOES").delete().eq("id", id);
+
+    if (error) {
+      return {
+        sucesso: false,
+        mensagem: `Erro ao excluir a avaliação: ${error.message}`,
+      };
+    }
+
+    return {
+      sucesso: true,
+      mensagem: "Avaliação excluída com sucesso!",
+    };
   },
 };
 
