@@ -13,7 +13,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="pacientes" options={{ title: "Pacientes" }} />
       <Tabs.Screen name="avaliacao" options={{ title: "Avaliações" }} />
       <Tabs.Screen name="notificacoes" options={{ title: "Notificações" }} />
-      {/* <Tabs.Screen name="perfil" options={{ title: "Perfil" }} /> */}
+      <Tabs.Screen name="perfil" options={{ title: "Perfil" }} />
     </Tabs>
   );
 }

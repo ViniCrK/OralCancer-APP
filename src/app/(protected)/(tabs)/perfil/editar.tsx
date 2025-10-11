@@ -1,81 +1,131 @@
 import { supabase } from "@/config/supabase-client";
 import { useEspecialistaService } from "@/services/especialista";
+import { useEspecialistaStore } from "@/store/especialista";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
 import {
-  View,
-  StyleSheet,
+  ActivityIndicator,
+  Alert,
   Text,
   TextInput,
   TouchableOpacity,
+  View,
+  StyleSheet,
+  ScrollView,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { MaskedTextInput } from "react-native-mask-text";
 
-export default function CadastroEspecialista() {
+type Especialidade = { id: number; nome: string };
+
+export default function EditarPerfil() {
   const router = useRouter();
+  const { especialista } = useEspecialistaStore();
   const especialistaService = useEspecialistaService();
-  const [especialidades, setEspecialidades] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [mensagem, setMensagem] = useState<string | null>(null);
+
+  const [initialValues, setInitialValues] = useState<any | null>(null);
+
+  const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
+
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    const buscarEspecialidades = async () => {
+    if (!especialista?.id) return;
+
+    const carregarEspecialidades = async () => {
       const { data, error } = await supabase
         .from("ESPECIALIDADES")
         .select("id, nome");
 
       if (error) {
-        console.error(error.message);
+        console.error("Erro ao buscar as especialidades:", error.message);
       } else {
         setEspecialidades(data);
       }
     };
 
-    buscarEspecialidades();
-  }, []);
+    const carregarDadosPerfil = async () => {
+      setCarregando(true);
+      const dadosPerfil = await especialistaService.buscar(
+        especialista.id as string
+      );
 
-  const handleCadastrar = async (dados: any) => {
-    const { sucesso, mensagem } = await especialistaService.cadastrar(dados);
+      if (dadosPerfil) {
+        setInitialValues({
+          nome: dadosPerfil.nome || "",
+          sobrenome: dadosPerfil.sobrenome || "",
+          registro_profissional: dadosPerfil.registro_profissional || "",
+          especialidade_id: dadosPerfil.especialidade_id || null,
+        });
+      }
+      setCarregando(false);
+    };
 
-    setMensagem(mensagem);
+    carregarEspecialidades();
+    carregarDadosPerfil();
+  }, [especialista]);
 
-    if (sucesso) {
-      router.replace("/pagina_inicial");
+  const handleAlterarDados = async (dados: any) => {
+    setSalvando(true);
+
+    const dadosParaAtualizar = {
+      nome: dados.nome,
+      sobrenome: dados.sobrenome,
+      registro_profissional: dados.registro_profissional,
+      especialidade_id: dados.especialidade_id,
+    };
+
+    const { sucesso, mensagem } = await especialistaService.atualizar(
+      especialista?.id as string,
+      dadosParaAtualizar
+    );
+
+    if (!sucesso) {
+      Alert.alert("Erro", mensagem);
+    } else {
+      Alert.alert("Sucesso", mensagem);
+      router.replace("/(tabs)/perfil");
     }
+
+    setSalvando(false);
   };
 
+  if (carregando || !initialValues) {
+    return (
+      <ActivityIndicator size="large" color="#10B981" style={{ flex: 1 }} />
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Cadastro de Especialista</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.titulo}>Editar Perfil</Text>
 
       <Formik
-        initialValues={{
-          nome: "",
-          sobrenome: "",
-          registro_profissional: "",
-          especialidade_id: null,
-        }}
-        onSubmit={(dados) => handleCadastrar(dados)}
+        initialValues={initialValues}
+        onSubmit={(dados) => handleAlterarDados(dados)}
+        enableReinitialize
       >
         {({ handleChange, handleSubmit, setFieldValue, values }) => (
           <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Nome</Text>
+
               <TextInput
+                value={values.nome}
                 placeholder="Nome"
                 style={styles.input}
                 onChangeText={handleChange("nome")}
-                autoCapitalize="sentences"
               />
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Sobrenome</Text>
+
               <TextInput
+                value={values.sobrenome}
                 placeholder="Sobrenome"
                 style={styles.input}
                 onChangeText={handleChange("sobrenome")}
@@ -83,13 +133,15 @@ export default function CadastroEspecialista() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Registro Profisional</Text>
+              <Text style={styles.label}>Registro Profissional</Text>
+
               <MaskedTextInput
                 style={styles.input}
                 mask="AAA-AA 999999"
                 onChangeText={(registro_profissional) => {
                   setFieldValue("registro_profissional", registro_profissional);
                 }}
+                value={values.registro_profissional}
                 placeholder="EX.: CRM-AL 123456"
                 autoCapitalize="characters"
               />
@@ -119,15 +171,20 @@ export default function CadastroEspecialista() {
             </View>
 
             <TouchableOpacity
-              style={styles.botao}
+              style={[styles.botao, salvando && styles.botaoDesabilitado]}
               onPress={() => handleSubmit()}
+              disabled={salvando}
             >
-              <Text style={styles.botaoTexto}>Criar</Text>
+              {salvando ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botaoTexto}>Salvar Alterações</Text>
+              )}
             </TouchableOpacity>
           </View>
         )}
       </Formik>
-    </View>
+    </ScrollView>
   );
 }
 

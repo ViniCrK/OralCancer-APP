@@ -42,7 +42,12 @@ const EspecialistaService = {
   buscar: async (id: string) => {
     const { data, error } = await supabase
       .from("ESPECIALISTAS")
-      .select("*")
+      .select(
+        `
+        *,
+        ESPECIALIDADES ( id, nome )
+        `
+      )
       .eq("id", id)
       .single();
 
@@ -53,6 +58,30 @@ const EspecialistaService = {
     }
 
     return data;
+  },
+
+  atualizar: async (
+    id: string,
+    especialista: any
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
+    const { error } = await supabase
+      .from("ESPECIALISTAS")
+      .update(especialista)
+      .eq("id", id);
+
+    if (error) {
+      console.error(
+        "Erro ao atualizar os dados do especialista:",
+        error.message
+      );
+
+      return {
+        sucesso: false,
+        mensagem: "Erro ao atualizar os dados do especialista.",
+      };
+    }
+
+    return { sucesso: true, mensagem: "Os dados foram atualizados!" };
   },
 };
 
