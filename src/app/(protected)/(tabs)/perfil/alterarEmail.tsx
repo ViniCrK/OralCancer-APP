@@ -24,24 +24,39 @@ export default function AlterarEmail() {
   const [salvando, setSalvando] = useState(false);
 
   const handleAlterarEmail = async ({ novoEmail }: { novoEmail: string }) => {
-    setSalvando(true);
+    Alert.alert(
+      "Alterar E-mail",
+      "Você tem certeza de que deseja alterar o seu e-mail?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sim",
+          style: "default",
+          onPress: async () => {
+            setSalvando(true);
 
-    const { sucesso, mensagem } = await usuarioService.alterarEmail(novoEmail);
-    await especialistaService.atualizar(especialista?.id as string, {
-      email: novoEmail,
-    });
+            const { sucesso, mensagem } = await usuarioService.alterarEmail(
+              novoEmail
+            );
+            await especialistaService.atualizar(especialista?.id as string, {
+              email: novoEmail,
+            });
 
-    setSalvando(false);
+            setSalvando(false);
 
-    if (!sucesso) {
-      Alert.alert("Erro", mensagem);
-    } else {
-      Alert.alert(
-        "Confirmação Necessária",
-        `Enviamos um link de confirmação para o seu NOVO e-mail (${novoEmail}).`
-      );
-      router.replace("/perfil");
-    }
+            if (!sucesso) {
+              Alert.alert("Erro", mensagem);
+            } else {
+              Alert.alert(
+                "Confirmação Necessária",
+                `Enviamos um link de confirmação para o seu NOVO e-mail (${novoEmail}).`
+              );
+              router.replace("/perfil");
+            }
+          },
+        },
+      ]
+    );
   };
   return (
     <View style={styles.container}>

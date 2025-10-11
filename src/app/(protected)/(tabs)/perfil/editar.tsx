@@ -69,28 +69,41 @@ export default function EditarPerfil() {
   }, [especialista]);
 
   const handleAlterarDados = async (dados: any) => {
-    setSalvando(true);
+    Alert.alert(
+      "Alterar Dados",
+      "Você tem certeza de que deseja alterar os seus dados?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sim",
+          style: "default",
+          onPress: async () => {
+            setSalvando(true);
 
-    const dadosParaAtualizar = {
-      nome: dados.nome,
-      sobrenome: dados.sobrenome,
-      registro_profissional: dados.registro_profissional,
-      especialidade_id: dados.especialidade_id,
-    };
+            const dadosParaAtualizar = {
+              nome: dados.nome,
+              sobrenome: dados.sobrenome,
+              registro_profissional: dados.registro_profissional,
+              especialidade_id: dados.especialidade_id,
+            };
 
-    const { sucesso, mensagem } = await especialistaService.atualizar(
-      especialista?.id as string,
-      dadosParaAtualizar
+            const { sucesso, mensagem } = await especialistaService.atualizar(
+              especialista?.id as string,
+              dadosParaAtualizar
+            );
+
+            if (!sucesso) {
+              Alert.alert("Erro", mensagem);
+            } else {
+              Alert.alert("Sucesso", mensagem);
+              router.replace("/(tabs)/perfil");
+            }
+
+            setSalvando(false);
+          },
+        },
+      ]
     );
-
-    if (!sucesso) {
-      Alert.alert("Erro", mensagem);
-    } else {
-      Alert.alert("Sucesso", mensagem);
-      router.replace("/(tabs)/perfil");
-    }
-
-    setSalvando(false);
   };
 
   if (carregando || !initialValues) {

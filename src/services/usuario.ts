@@ -11,36 +11,46 @@ const UsuarioService = {
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { email, senha } = dados;
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password: senha,
     });
 
-    if (error || !data.user)
+    if (error) {
+      console.error("Erro ao cadastrar usuário:", error.message);
+
       return {
         sucesso: false,
-        mensagem: error?.message || "Erro desconhecido.",
+        mensagem: "Erro ao tentar cadastrar o seu usuário, tente novamente",
       };
+    }
 
     return {
       sucesso: true,
       mensagem:
-        "Usuário criado com sucesso! Verifique seu email para confirmar a conta.",
+        "Verifique seu e-mail para confirmar a conta antes de fazer o login.",
     };
   },
 
   entrar: async (
     email: string,
     senha: string
-  ): Promise<{ sucesso: boolean }> => {
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password: senha,
     });
 
-    if (error || !data.user) return { sucesso: false };
+    if (error) {
+      console.error("Erro ao tentar logar o usuário:", error.message);
 
-    return { sucesso: true };
+      return {
+        sucesso: false,
+        mensagem: "Erro ao tentar entrar com o seu usuário, tente novamente",
+      };
+    }
+
+    return { sucesso: true, mensagem: "Usuário logado com sucesso!" };
   },
 
   sair: async () => {
@@ -64,6 +74,47 @@ const UsuarioService = {
     }
 
     return { sucesso: true, mensagem: "Sua senha foi alterada com sucesso!" };
+  },
+
+  recuperarSenha: async (
+    email: string
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "exp+OralCancer://recuperar-senha",
+    });
+
+    if (error) {
+      console.error("Erro ao recuperar a senha do usuário:", error.message);
+
+      return {
+        sucesso: false,
+        mensagem: "Erro ao recuperar sua senha, tente novamente!",
+      };
+    }
+    return {
+      sucesso: true,
+      mensagem: "Enviamos um link ao seu e-mail para redefinir sua senha.",
+    };
+  },
+
+  redefinirSenha: async (
+    novaSenha: string
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+
+    if (error) {
+      console.error("Erro ao redefinir a senha do usuário:", error.message);
+
+      return {
+        sucesso: false,
+        mensagem: "Erro ao tentar redifinir sua senha, tente novamente.",
+      };
+    }
+
+    return {
+      sucesso: true,
+      mensagem: "Sua senha foi redefinida! Por favor, faça o login novamente.",
+    };
   },
 
   alterarEmail: async (

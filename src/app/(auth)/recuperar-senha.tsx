@@ -1,57 +1,72 @@
+import { supabase } from "@/config/supabase-client";
 import { useUsuarioService } from "@/services/usuario";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
-  TextInput,
   View,
   Text,
   StyleSheet,
-  Button,
+  TextInput,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 
-export default function AlterarSenha() {
+export default function RecuperarSenha() {
   const router = useRouter();
   const usuarioService = useUsuarioService();
-
+  const [sessaoValida, setSessaoValida] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
-  const hanldeAlterarSenha = async ({ novaSenha }: { novaSenha: string }) => {
-    Alert.alert(
-      "Alterar Senha",
-      "Você tem certeza de que deseja alterar a sua senha?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sim",
-          style: "default",
-          onPress: async () => {
-            setSalvando(true);
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setSessaoValida(true);
+      }
+    });
 
-            const { sucesso, mensagem } = await usuarioService.alterarSenha(
-              novaSenha
-            );
+    return () => subscription.unsubscribe();
+  }, []);
 
-            if (!sucesso) {
-              Alert.alert("Erro", mensagem);
-              return;
-            } else {
-              Alert.alert("Sucesso", mensagem);
-              router.replace("/perfil");
-            }
-          },
-        },
-      ]
+  const handleRedefinirSenha = async ({ novaSenha }: { novaSenha: string }) => {
+    setSalvando(true);
+
+    const { sucesso, mensagem } = await usuarioService.redefinirSenha(
+      novaSenha
     );
+
+    if (!sucesso) {
+      Alert.alert("Erro", mensagem);
+    } else {
+      Alert.alert("Sucesso", mensagem);
+      router.replace("/(auth)/login");
+    }
+
+    setSalvando(false);
   };
+
+  if (!sessaoValida) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: "center" }}>
+          Link inválido ou expirado. Por favor, solicite um novo link de
+          recuperação.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Alterar Senha</Text>
-      <Formik initialValues={{ novaSenha: "" }} onSubmit={hanldeAlterarSenha}>
+      <Text style={styles.titulo}>Crie sua Nova Senha</Text>
+
+      <Formik
+        initialValues={{ novaSenha: "" }}
+        onSubmit={(dados) => handleRedefinirSenha(dados)}
+      >
         {({ handleChange, handleSubmit, values }) => (
           <View style={styles.form}>
             <View style={styles.inputContainer}>
@@ -59,11 +74,9 @@ export default function AlterarSenha() {
 
               <TextInput
                 style={styles.input}
-                keyboardType="default"
-                autoCapitalize="none"
-                onChangeText={handleChange("novaSenha")}
+                placeholder="Digite a nova senha"
                 value={values.novaSenha}
-                autoFocus={true}
+                onChangeText={handleChange("novaSenha")}
                 secureTextEntry
               />
             </View>
@@ -76,7 +89,7 @@ export default function AlterarSenha() {
               {salvando ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.botaoTexto}>Salvar Alterações</Text>
+                <Text style={styles.botaoTexto}>Enviar Confirmação</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -87,12 +100,23 @@ export default function AlterarSenha() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0", paddingTop: 20 },
+  container: {
+    padding: 20,
+    justifyContent: "center",
+    flex: 1,
+    backgroundColor: "#f0f0f0",
+  },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 8,
     textAlign: "center",
-    marginBottom: 20,
+  },
+  subtitulo: {
+    fontSize: 16,
+    color: "gray",
+    textAlign: "center",
+    marginBottom: 30,
   },
   form: { padding: 20 },
   inputContainer: { marginBottom: 15 },

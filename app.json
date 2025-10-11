@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "OralCancer-APP",
-    "slug": "OralCancer-APP",
+    "name": "OralCancer",
+    "slug": "OralCancer",
     "scheme": "OralCancer",
     "version": "1.0.0",
     "orientation": "portrait",

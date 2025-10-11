@@ -1,70 +1,58 @@
 import { useUsuarioService } from "@/services/usuario";
-import { useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { Formik } from "formik";
 import { useState } from "react";
 import {
   Alert,
-  TextInput,
   View,
   Text,
   StyleSheet,
-  Button,
+  TextInput,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 
-export default function AlterarSenha() {
-  const router = useRouter();
+export default function EsqueciSenha() {
   const usuarioService = useUsuarioService();
-
   const [salvando, setSalvando] = useState(false);
 
-  const hanldeAlterarSenha = async ({ novaSenha }: { novaSenha: string }) => {
-    Alert.alert(
-      "Alterar Senha",
-      "Você tem certeza de que deseja alterar a sua senha?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sim",
-          style: "default",
-          onPress: async () => {
-            setSalvando(true);
+  const handleRecuperarSenha = async ({ email }: { email: string }) => {
+    setSalvando(true);
 
-            const { sucesso, mensagem } = await usuarioService.alterarSenha(
-              novaSenha
-            );
+    const { sucesso, mensagem } = await usuarioService.recuperarSenha(email);
 
-            if (!sucesso) {
-              Alert.alert("Erro", mensagem);
-              return;
-            } else {
-              Alert.alert("Sucesso", mensagem);
-              router.replace("/perfil");
-            }
-          },
-        },
-      ]
-    );
+    if (!sucesso) {
+      Alert.alert("Erro", mensagem);
+    } else {
+      Alert.alert("Verifique seu e-mail", mensagem);
+    }
+
+    setSalvando(false);
   };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Alterar Senha</Text>
-      <Formik initialValues={{ novaSenha: "" }} onSubmit={hanldeAlterarSenha}>
+      <Text style={styles.titulo}>Recuperar Senha</Text>
+      <Text style={styles.subtitulo}>
+        Digite seu e-mail para receber o link de recuperação.
+      </Text>
+
+      <Formik
+        initialValues={{ email: "" }}
+        onSubmit={(dados) => handleRecuperarSenha(dados)}
+      >
         {({ handleChange, handleSubmit, values }) => (
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nova Senha</Text>
+              <Text style={styles.label}>E-mail</Text>
 
               <TextInput
                 style={styles.input}
-                keyboardType="default"
+                placeholder="Digite seu e-mail"
+                value={values.email}
+                onChangeText={handleChange("email")}
                 autoCapitalize="none"
-                onChangeText={handleChange("novaSenha")}
-                value={values.novaSenha}
-                autoFocus={true}
-                secureTextEntry
+                keyboardType="email-address"
+                autoFocus
               />
             </View>
 
@@ -76,23 +64,42 @@ export default function AlterarSenha() {
               {salvando ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.botaoTexto}>Salvar Alterações</Text>
+                <Text style={styles.botaoTexto}>Enviar Confirmação</Text>
               )}
             </TouchableOpacity>
           </View>
         )}
       </Formik>
+
+      <Link href="/login" asChild>
+        <TouchableOpacity style={{ marginTop: 20 }}>
+          <Text style={{ textAlign: "center", color: "#10B981" }}>
+            Voltar para o Login
+          </Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0", paddingTop: 20 },
+  container: {
+    padding: 20,
+    justifyContent: "center",
+    flex: 1,
+    backgroundColor: "#f0f0f0",
+  },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 8,
     textAlign: "center",
-    marginBottom: 20,
+  },
+  subtitulo: {
+    fontSize: 16,
+    color: "gray",
+    textAlign: "center",
+    marginBottom: 30,
   },
   form: { padding: 20 },
   inputContainer: { marginBottom: 15 },
