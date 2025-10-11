@@ -7,6 +7,7 @@ export default function PerfilLayout() {
       <Stack.Screen name="editar" options={{ headerShown: false }} />
       <Stack.Screen name="alterarEmail" options={{ headerShown: false }} />
       <Stack.Screen name="alterarSenha" options={{ headerShown: false }} />
+      <Stack.Screen name="sobre" options={{ headerShown: false }} />
     </Stack>
   );
 }

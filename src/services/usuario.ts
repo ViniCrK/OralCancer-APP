@@ -46,7 +46,7 @@ const UsuarioService = {
 
       return {
         sucesso: false,
-        mensagem: "Erro ao tentar entrar com o seu usuário, tente novamente",
+        mensagem: "E-mai ou senha incorretos, tente novamente!",
       };
     }
 

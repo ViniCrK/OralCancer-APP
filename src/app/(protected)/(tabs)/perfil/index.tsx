@@ -43,6 +43,22 @@ const TextoInfo = ({
   </View>
 );
 
+const BotaoNavegacao = ({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity style={styles.navButton} onPress={onPress}>
+    <Ionicons name={icon} size={22} color="#555" style={styles.navButtonIcon} />
+    <Text style={styles.navButtonText}>{label}</Text>
+    <Ionicons name="chevron-forward-outline" size={22} color="#ccc" />
+  </TouchableOpacity>
+);
+
 export default function Perfil() {
   const router = useRouter();
   const { especialista } = useEspecialistaStore();
@@ -126,29 +142,38 @@ export default function Perfil() {
       </View>
 
       <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => router.push("/perfil/editar")}
-        >
-          <Ionicons name="pencil-outline" size={20} color="#fff" />
-          <Text style={styles.botaoTexto}>Editar Perfil</Text>
-        </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Conta</Text>
+          <BotaoNavegacao
+            icon="pencil-outline"
+            label="Editar Perfil"
+            onPress={() => router.push("/perfil/editar")}
+          />
+          <BotaoNavegacao
+            icon="mail-outline"
+            label="Alterar E-mail"
+            onPress={() => router.push("/perfil/alterarEmail")}
+          />
+          <BotaoNavegacao
+            icon="lock-closed-outline"
+            label="Alterar Senha"
+            onPress={() => router.push("/perfil/alterarSenha")}
+          />
+        </View>
 
-        <TouchableOpacity
-          style={[styles.botao, styles.botaoSecundario]}
-          onPress={() => router.push("/(tabs)/perfil/alterarEmail")}
-        >
-          <Ionicons name="mail-outline" size={20} color="#fff" />
-          <Text style={styles.botaoTexto}>Alterar E-mail</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.botao, styles.botaoSecundario]}
-          onPress={() => router.push("/(tabs)/perfil/alterarSenha")}
-        >
-          <Ionicons name="lock-closed-outline" size={20} color="#fff" />
-          <Text style={styles.botaoTexto}>Alterar Senha</Text>
-        </TouchableOpacity>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações</Text>
+          <BotaoNavegacao
+            icon="information-circle-outline"
+            label="Sobre o Aplicativo"
+            onPress={() => router.push("/perfil/sobre")}
+          />
+          <BotaoNavegacao
+            icon="document-text-outline"
+            label="Termos e Condições"
+            onPress={() => router.push("/perfil/termos")}
+          />
+        </View>
 
         <TouchableOpacity
           style={[styles.botao, styles.botaoSair]}
@@ -218,23 +243,49 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   actionsContainer: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  section: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
     marginTop: 20,
+    paddingHorizontal: 15,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "gray",
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    textTransform: "uppercase",
+  },
+  navButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  navButtonIcon: {
+    width: 30,
+  },
+  navButtonText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 10,
   },
   botao: {
-    backgroundColor: "#0d9488",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 12,
-  },
-  botaoSecundario: {
-    backgroundColor: "#374151", // Um cinza escuro para ações de conta
   },
   botaoSair: {
     backgroundColor: "#e53e3e",
+    marginTop: 30,
   },
   botaoTexto: {
     color: "#fff",
