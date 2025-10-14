@@ -7,7 +7,7 @@ export default function PacientesLayout() {
         name="index"
         options={{ title: "Pacientes", headerShown: false }}
       />
-      <Stack.Screen name="cadastrar/index" options={{ headerShown: false }} />
+      <Stack.Screen name="cadastrar" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ headerShown: false }} />
     </Stack>
   );

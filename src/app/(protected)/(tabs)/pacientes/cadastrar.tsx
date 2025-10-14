@@ -13,7 +13,7 @@ import {
   Alert,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import DatePickerInput from "../components/DatePickerInput";
+import DatePickerInput from "./components/DatePickerInput";
 
 export default function CadastroPaciente() {
   const router = useRouter();
