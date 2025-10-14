@@ -1,4 +1,5 @@
 import { usePacienteService } from "@/services/paciente";
+import calcularIdade from "@/utils/calcularIdade";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -95,14 +96,17 @@ export default function DetalhePaciente() {
           label="Data de Nascimento"
           value={new Date(paciente.data_nascimento).toLocaleDateString("pt-BR")}
         />
+        <TextoDetalhe
+          label="Idade"
+          value={`${calcularIdade(paciente.data_nascimento)} anos`}
+        />
         <TextoDetalhe label="Sexo" value={paciente.SEXOS?.nome} />
-        {/* Adicione mais campos aqui conforme necessário */}
       </View>
 
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={styles.botao}
-          onPress={() => router.push(`/pacientes/${paciente.id}/editar`)} // Rota para futura tela de edição
+          onPress={() => router.push(`/(tabs)/pacientes/${paciente_id}/editar`)}
         >
           <Text style={styles.botaoTexto}>Editar</Text>
         </TouchableOpacity>
@@ -124,7 +128,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#10B981",
     padding: 20,
-    paddingTop: 40, // Espaço para a status bar
+    paddingTop: 40,
   },
   headerName: {
     fontSize: 24,

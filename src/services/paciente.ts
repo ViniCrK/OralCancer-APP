@@ -57,19 +57,26 @@ const PacienteService = {
   atualizar: async (
     id: string,
     paciente: any
-  ): Promise<{ sucesso: boolean }> => {
+  ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase
       .from("PACIENTES")
-      .insert(paciente)
+      .update(paciente)
       .eq("id", id);
 
     if (error) {
       console.error("Erro ao atualizar os dados do paciente:", error.message);
 
-      return { sucesso: false };
+      return {
+        sucesso: false,
+        mensagem:
+          "Erro ao tentar atualizar os dados desse paciente, tente novamente!",
+      };
     }
 
-    return { sucesso: true };
+    return {
+      sucesso: true,
+      mensagem: "Os dados do paciente foram atualizados com sucesso!",
+    };
   },
 };
 

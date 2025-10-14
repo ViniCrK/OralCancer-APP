@@ -25,6 +25,8 @@ export default function DatePickerInput({
 }: DatePickerProps) {
   const [showPicker, setShowPicker] = useState(false);
 
+  const currentDate = value ? new Date(value) : new Date();
+
   const handleDateChange = (
     event: DateTimePickerEvent,
     selectedDate?: Date
@@ -45,7 +47,9 @@ export default function DatePickerInput({
         onPress={() => setShowPicker(true)}
       >
         <Text style={styles.textValue}>
-          {value ? value.toLocaleDateString("pt-BR") : "Selecione uma data"}
+          {value
+            ? currentDate.toLocaleDateString("pt-BR")
+            : "Selecione uma data"}
         </Text>
       </TouchableOpacity>
 
