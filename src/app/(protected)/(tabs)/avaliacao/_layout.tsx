@@ -5,7 +5,7 @@ export default function AvaliacaoLayout() {
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ title: "Avaliações", headerShown: true }}
+        options={{ title: "Avaliações", headerShown: false }}
       />
       <Stack.Screen name="cadastrar" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ headerShown: false }} />

@@ -1,5 +1,6 @@
 import { useNotificacaoService } from "@/services/notificacao";
 import { useEspecialistaStore } from "@/store/especialista";
+import { Notificacao } from "@/types/notificacao";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -11,25 +12,6 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
-
-type EspecialistaRemetente = {
-  id: number;
-  nome: string;
-  sobrenome: string;
-};
-type ClassificacaoRisco = { id: number; nome: string };
-type AvaliacaoInfo = {
-  id: number;
-  CLASSIFICACOES_RISCO: ClassificacaoRisco | null;
-};
-type Notificacao = {
-  id: number;
-  conteudo: string;
-  created_at: string;
-  lida: boolean;
-  remetente: EspecialistaRemetente | null;
-  AVALIACOES: AvaliacaoInfo | null;
-};
 
 export default function ListaNotificacoes() {
   const router = useRouter();

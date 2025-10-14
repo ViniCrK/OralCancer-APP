@@ -14,16 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useEffect, useState } from "react";
 import { useEspecialistaService } from "@/services/especialista";
-
-type Especialidade = { id: number; nome: string };
-type PerfilCompleto = {
-  id: number;
-  email: string;
-  nome: string;
-  sobrenome: string;
-  registro_profissional: string;
-  ESPECIALIDADES: Especialidade | null;
-};
+import { PerfilCompleto } from "@/types/especialista";
 
 const TextoInfo = ({
   icon,

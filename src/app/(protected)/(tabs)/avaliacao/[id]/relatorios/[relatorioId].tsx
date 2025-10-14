@@ -1,4 +1,5 @@
 import { useRelatorioService } from "@/services/relatorio";
+import { RelatorioCompleto } from "@/types/relatorio";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -8,18 +9,6 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-
-type Paciente = { id: number; nome: string; sobrenome: string };
-type Especialista = { id: number; nome: string; sobrenome: string };
-type Avaliacao = { PACIENTES: Paciente | null };
-
-type RelatorioCompleto = {
-  id: number;
-  conteudo: string;
-  created_at: string;
-  ESPECIALISTAS: Especialista | null;
-  AVALIACOES: Avaliacao | null;
-};
 
 export default function DetalheRelatorio() {
   const { relatorioId } = useLocalSearchParams<{ relatorioId: string }>();

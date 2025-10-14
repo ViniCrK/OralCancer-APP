@@ -1,4 +1,5 @@
 import { useRelatorioService } from "@/services/relatorio";
+import { RelatorioComEspecialista } from "@/types/relatorio";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -9,14 +10,6 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
-
-type Especialista = { id: number; nome: string; sobrenome: string };
-type RelatorioComEspecialista = {
-  id: number;
-  conteudo: string;
-  created_at: string;
-  ESPECIALISTAS: Especialista | null;
-};
 
 export default function ListaRelatorios() {
   const { id: avaliacao_id } = useLocalSearchParams<{ id: string }>();
@@ -62,7 +55,6 @@ export default function ListaRelatorios() {
         {relatorio.conteudo}
       </Text>
 
-      {/* 4. A navegação agora aponta para a rota de detalhe do relatório aninhada */}
       <TouchableOpacity
         style={styles.botaoVerMais}
         onPress={() =>
@@ -98,7 +90,6 @@ export default function ListaRelatorios() {
           </View>
         }
       />
-      {/* 5. Botão para criar um novo relatório para ESTA avaliação */}
       <TouchableOpacity
         style={styles.botaoFlutuante}
         onPress={() =>

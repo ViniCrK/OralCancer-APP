@@ -1,4 +1,5 @@
 import { usePacienteService } from "@/services/paciente";
+import { PacienteCompleto } from "@/types/paciente";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -10,20 +11,10 @@ import {
   FlatList,
 } from "react-native";
 
-type Sexo = { id: number; nome: string };
-type Paciente = {
-  id: number;
-  nome: string;
-  sobrenome: string;
-  data_nascimento: string;
-  registro_hospitalar: string;
-  SEXOS: Sexo | null;
-};
-
 export default function ListaPacientes() {
   const router = useRouter();
   const pacienteService = usePacienteService();
-  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [pacientes, setPacientes] = useState<PacienteCompleto[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
@@ -39,7 +30,7 @@ export default function ListaPacientes() {
     carregarPacientes();
   }, []);
 
-  const renderItem = ({ item: paciente }: { item: Paciente }) => (
+  const renderItem = ({ item: paciente }: { item: PacienteCompleto }) => (
     <TouchableOpacity
       style={styles.card}
       onPress={() => router.push(`/pacientes/${paciente.id}`)}

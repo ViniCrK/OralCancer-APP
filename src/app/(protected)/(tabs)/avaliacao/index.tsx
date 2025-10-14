@@ -1,4 +1,5 @@
 import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
+import { AvaliacaoBreve } from "@/types/avaliacao";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -10,21 +11,10 @@ import {
   StyleSheet,
 } from "react-native";
 
-type Paciente = { id: number; nome: string; sobrenome: string };
-type Especialista = { id: number; nome: string; sobrenome: string };
-
-type AvaliacaoComDetalhes = {
-  id: number;
-  observacoes: string | null;
-  created_at: string;
-  PACIENTES: Paciente | null;
-  ESPECIALISTAS: Especialista | null;
-};
-
 export default function ListaAvaliacoes() {
   const router = useRouter();
   const avaliacaoService = useAvaliacaoService();
-  const [avaliacoes, setAvaliacaoes] = useState<AvaliacaoComDetalhes[]>([]);
+  const [avaliacoes, setAvaliacaoes] = useState<AvaliacaoBreve[]>([]);
   const [carregando, setCarregando] = useState(true);
 
   const carregarAvaliacoes = async () => {
@@ -40,7 +30,7 @@ export default function ListaAvaliacoes() {
     carregarAvaliacoes();
   }, []);
 
-  const renderItem = ({ item: avaliacao }: { item: AvaliacaoComDetalhes }) => (
+  const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => (
     <View style={styles.card}>
       <View style={{ marginTop: 8 }}>
         <Text style={styles.cardLabel}>Paciente:</Text>

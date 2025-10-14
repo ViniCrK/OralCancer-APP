@@ -1,17 +1,9 @@
+import { EspecialistaCompleto } from "@/types/especialista";
 import { create } from "zustand";
 
-type Especialista = {
-  id: string | number;
-  email: string;
-  nome: string;
-  sobrenome: string;
-  registro_profissional: string;
-  especialidade_id: number;
-};
-
 type EspecialistaStore = {
-  especialista: Especialista | null;
-  setEspecialista: (espec: Especialista) => void;
+  especialista: EspecialistaCompleto | null;
+  setEspecialista: (espec: EspecialistaCompleto) => void;
 };
 
 export const useEspecialistaStore = create<EspecialistaStore>((set) => ({

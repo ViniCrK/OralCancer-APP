@@ -5,19 +5,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-type Info = {
-  id: number;
-  conteudo: string;
-  created_at: string;
-};
+import { SobreInfo } from "@/types/sobre";
 
 export default function Sobre() {
-  const [info, setInfo] = useState<Info | null>(null);
+  const [info, setInfo] = useState<SobreInfo | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {

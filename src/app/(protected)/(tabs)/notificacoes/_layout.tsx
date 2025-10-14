@@ -5,7 +5,7 @@ export default function NotificacaoLayout() {
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ title: "Notificações", headerShown: true }}
+        options={{ title: "Notificações", headerShown: false }}
       />
       <Stack.Screen name="cadastrar" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ headerShown: false }} />

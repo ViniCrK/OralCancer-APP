@@ -1,4 +1,5 @@
 import { usePacienteService } from "@/services/paciente";
+import { PacienteCompleto } from "@/types/paciente";
 import calcularIdade from "@/utils/calcularIdade";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -11,16 +12,6 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-
-type Sexo = { id: number; nome: string };
-type Paciente = {
-  id: number;
-  nome: string;
-  sobrenome: string;
-  data_nascimento: string;
-  registro_hospitalar: string;
-  SEXOS: Sexo | null;
-};
 
 const TextoDetalhe = ({
   label,
@@ -39,7 +30,7 @@ export default function DetalhePaciente() {
   const router = useRouter();
   const { id: paciente_id } = useLocalSearchParams<{ id: string }>();
   const pacienteService = usePacienteService();
-  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const [paciente, setPaciente] = useState<PacienteCompleto | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {

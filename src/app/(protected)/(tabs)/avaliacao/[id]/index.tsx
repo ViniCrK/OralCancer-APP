@@ -1,5 +1,6 @@
 import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
+import { AvaliacaoCompleta } from "@/types/avaliacao";
 import { Link } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
@@ -12,34 +13,6 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-
-type Paciente = { id: number; nome: string; sobrenome: string };
-type Especialista = { id: number; nome: string; sobrenome: string };
-type CampoSelect = { id: number; nome: string };
-
-type AvaliacaoCompleta = {
-  id: number;
-  queixa_principal: string;
-  tamanho_aproximado: number;
-  tempo_evolucao: number;
-  carga_tabagica_etilica: number;
-  historico_familiar_cancer: boolean;
-  observacoes: string | null;
-  rascunho: boolean;
-  created_at: string;
-  HABITOS: CampoSelect | null;
-  LOCALIZACOES_INTRAORAIS: CampoSelect | null;
-  ASPECTOS_LESAO: CampoSelect | null;
-  SUPERFICIES: CampoSelect | null;
-  SINTOMAS: CampoSelect | null;
-  BORDAS: CampoSelect | null;
-  LINFONODOS: CampoSelect | null;
-  CLASSIFICACOES_RISCO: CampoSelect | null;
-  CONDUTAS: CampoSelect | null;
-  AREAS_ENCAMINHAMENTO: CampoSelect | null;
-  ESPECIALISTAS: Especialista | null;
-  PACIENTES: Paciente | null;
-};
 
 const TextoDetalhe = ({
   label,

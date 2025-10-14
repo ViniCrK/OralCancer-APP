@@ -1,4 +1,5 @@
 import { useNotificacaoService } from "@/services/notificacao";
+import { NotificacaoCompleta } from "@/types/notificacao";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -9,24 +10,6 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-
-type Paciente = { id: number; nome: string; sobrenome: string };
-type Especialista = {
-  id: number;
-  nome: string;
-  sobrenome: string;
-  registro_profissional: string;
-};
-type Avaliacao = { PACIENTES: Paciente | null };
-
-type NotificacaoCompleta = {
-  id: number;
-  conteudo: string;
-  created_at: string;
-  remetente: Especialista | null;
-  destinatario: Especialista | null;
-  AVALIACOES: (Avaliacao & { id: number }) | null;
-};
 
 const TextoDetalhe = ({
   label,

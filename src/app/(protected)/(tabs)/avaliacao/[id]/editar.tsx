@@ -1,5 +1,6 @@
 import { supabase } from "@/config/supabase-client";
 import { useAvaliacaoService } from "@/services/avaliacao";
+import { DropdownItem } from "@/types/avaliacao";
 import Checkbox from "expo-checkbox";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -15,8 +16,6 @@ import {
   Alert,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-
-type DropdownItem = { id: number; nome: string };
 
 export default function EditarAvaliacao() {
   const router = useRouter();

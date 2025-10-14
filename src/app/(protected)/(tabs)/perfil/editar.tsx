@@ -1,7 +1,7 @@
 import { supabase } from "@/config/supabase-client";
 import { useEspecialistaService } from "@/services/especialista";
 import { useEspecialistaStore } from "@/store/especialista";
-import { Picker } from "@react-native-picker/picker";
+import { DropdownItem } from "@/types/avaliacao";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
@@ -18,8 +18,6 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import { MaskedTextInput } from "react-native-mask-text";
 
-type Especialidade = { id: number; nome: string };
-
 export default function EditarPerfil() {
   const router = useRouter();
   const { especialista } = useEspecialistaStore();
@@ -27,7 +25,7 @@ export default function EditarPerfil() {
 
   const [initialValues, setInitialValues] = useState<any | null>(null);
 
-  const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
+  const [especialidades, setEspecialidades] = useState<DropdownItem[]>([]);
 
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
