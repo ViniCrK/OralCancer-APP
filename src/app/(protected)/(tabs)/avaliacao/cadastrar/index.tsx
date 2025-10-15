@@ -1,6 +1,8 @@
 import { supabase } from "@/config/supabase-client";
-import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
+import { useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
+import { DropdownItem } from "@/types/avaliacao";
+import { PacienteItem } from "@/types/paciente";
 import Checkbox from "expo-checkbox";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -12,52 +14,44 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 
+import "react-native-get-random-values"; // Importante para o Supabase gerar UUIDs
+import { v4 as uuidv4 } from "uuid";
+import SeletorImagem, { Imagem } from "../components/SeletorImagem";
+
 export default function CadastroAvaliacao() {
   const router = useRouter();
-  const avaliacaoService = useAvaliacaoService();
   const { especialista } = useEspecialistaStore();
-  const [mensagem, setMensagem] = useState("");
-  const [habitos, setHabitos] = useState<{ id: number; nome: string }[]>([]);
+  const avaliacaoService = useAvaliacaoService();
+
+  const [habitos, setHabitos] = useState<DropdownItem[]>([]);
   const [localizacoesIntraorais, setLocalizacoesIntraorais] = useState<
-    { id: number; nome: string }[]
+    DropdownItem[]
   >([]);
-  const [aspectosLesao, setAspectosLesao] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [superficies, setSuperficies] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [sintomasAssociados, setSintomasAssociados] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [bordas, setBordas] = useState<{ id: number; nome: string }[]>([]);
+  const [aspectosLesao, setAspectosLesao] = useState<DropdownItem[]>([]);
+  const [superficies, setSuperficies] = useState<DropdownItem[]>([]);
+  const [sintomasAssociados, setSintomasAssociados] = useState<DropdownItem[]>(
+    []
+  );
+  const [bordas, setBordas] = useState<DropdownItem[]>([]);
   const [linfonodosRegionais, setLinfonodosRegionais] = useState<
-    { id: number; nome: string }[]
+    DropdownItem[]
   >([]);
   const [classificacoesRisco, setClassificacoesRisco] = useState<
-    { id: number; nome: string }[]
+    DropdownItem[]
   >([]);
   const [condutasRecomendadas, setCondutasRecomendadas] = useState<
-    { id: number; nome: string }[]
+    DropdownItem[]
   >([]);
   const [areasEncaminhamento, setAreasEncaminhamento] = useState<
-    { id: number; nome: string }[]
+    DropdownItem[]
   >([]);
-  const [fatoresRisco, setFatoresRisco] = useState<
-    { id: number; nome: string }[]
-  >([]);
-  const [pacientes, setPacientes] = useState<
-    {
-      id: number;
-      nome: string;
-      sobrenome: string;
-      registro_hospitalar: string;
-      data_nascimento: string;
-    }[]
-  >([]);
+  const [fatoresRisco, setFatoresRisco] = useState<DropdownItem[]>([]);
+  const [pacientes, setPacientes] = useState<PacienteItem[]>([]);
 
   const pacientesFormatados = pacientes.map((paciente) => ({
     ...paciente,
@@ -65,168 +59,158 @@ export default function CadastroAvaliacao() {
   }));
 
   useEffect(() => {
-    const buscarHabitos = async () => {
-      const { data, error } = await supabase.from("HABITOS").select("id, nome");
+    const carregarDados = async () => {
+      try {
+        const [
+          habitosData,
+          localizacoesIntraoraisData,
+          aspectosLesaoData,
+          superficiesData,
+          sintomasAssociadosData,
+          bordasData,
+          linfonodosRegionaisData,
+          classificacoesRiscoData,
+          condutasRecomendadasData,
+          areasEncaminhamentoData,
+          fatoresRiscoData,
+          pacientesData,
+        ] = await Promise.all([
+          supabase.from("HABITOS").select("id, nome"),
+          supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
+          supabase.from("ASPECTOS_LESAO").select("id, nome"),
+          supabase.from("SUPERFICIES").select("id, nome"),
+          supabase.from("SINTOMAS").select("id, nome"),
+          supabase.from("BORDAS").select("id, nome"),
+          supabase.from("LINFONODOS").select("id, nome"),
+          supabase.from("CLASSIFICACOES_RISCO").select("id, nome"),
+          supabase.from("CONDUTAS").select("id, nome"),
+          supabase.from("AREAS_ENCAMINHAMENTO").select("id, nome"),
+          supabase.from("FATORES_RISCO").select("id, nome"),
+          supabase.from("PACIENTES").select("*"),
+        ]);
 
-      if (error) {
-        console.error(error.message);
-      } else {
-        setHabitos(data);
+        setAreasEncaminhamento(areasEncaminhamentoData.data || []);
+        setAspectosLesao(aspectosLesaoData.data || []);
+        setBordas(bordasData.data || []);
+        setClassificacoesRisco(classificacoesRiscoData.data || []);
+        setCondutasRecomendadas(condutasRecomendadasData.data || []);
+        setFatoresRisco(fatoresRiscoData.data || []);
+        setHabitos(habitosData.data || []);
+        setLinfonodosRegionais(linfonodosRegionaisData.data || []);
+        setLocalizacoesIntraorais(localizacoesIntraoraisData.data || []);
+        setSintomasAssociados(sintomasAssociadosData.data || []);
+        setSuperficies(superficiesData.data || []);
+        setPacientes(pacientesData.data || []);
+      } catch (error) {
+        console.error("Erro ao carregar dados para edição:", error);
+        Alert.alert("Erro", "Não foi possível carregar os dados da avaliação.");
       }
     };
 
-    const buscarLocalizacoesIntraorais = async () => {
-      const { data, error } = await supabase
-        .from("LOCALIZACOES_INTRAORAIS")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setLocalizacoesIntraorais(data);
-      }
-    };
-
-    const buscarAspectosLesao = async () => {
-      const { data, error } = await supabase
-        .from("ASPECTOS_LESAO")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setAspectosLesao(data);
-      }
-    };
-
-    const buscarSuperficies = async () => {
-      const { data, error } = await supabase
-        .from("SUPERFICIES")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setSuperficies(data);
-      }
-    };
-
-    const buscarSintomasAssociados = async () => {
-      const { data, error } = await supabase
-        .from("SINTOMAS")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setSintomasAssociados(data);
-      }
-    };
-
-    const buscarBordas = async () => {
-      const { data, error } = await supabase.from("BORDAS").select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setBordas(data);
-      }
-    };
-
-    const buscarLinfonodosRegionais = async () => {
-      const { data, error } = await supabase
-        .from("LINFONODOS")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setLinfonodosRegionais(data);
-      }
-    };
-
-    const buscarClassificacoesRisco = async () => {
-      const { data, error } = await supabase
-        .from("CLASSIFICACOES_RISCO")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setClassificacoesRisco(data);
-      }
-    };
-
-    const buscarCondutasRecomendadas = async () => {
-      const { data, error } = await supabase
-        .from("CONDUTAS")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setCondutasRecomendadas(data);
-      }
-    };
-
-    const buscarAreasEncaminhamento = async () => {
-      const { data, error } = await supabase
-        .from("AREAS_ENCAMINHAMENTO")
-        .select("id, nome");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setAreasEncaminhamento(data);
-      }
-    };
-
-    const buscaraPacientes = async () => {
-      const { data, error } = await supabase.from("PACIENTES").select("*");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setPacientes(data);
-      }
-    };
-
-    const buscarFatoresRisco = async () => {
-      const { data, error } = await supabase.from("FATORES_RISCO").select("*");
-
-      if (error) {
-        console.error(error.message);
-      } else {
-        setFatoresRisco(data);
-      }
-    };
-
-    buscarAreasEncaminhamento();
-    buscarAspectosLesao();
-    buscarBordas();
-    buscarClassificacoesRisco();
-    buscarCondutasRecomendadas();
-    buscarFatoresRisco();
-    buscarHabitos();
-    buscarLinfonodosRegionais();
-    buscarLocalizacoesIntraorais();
-    buscarSintomasAssociados();
-    buscarSuperficies();
-    buscaraPacientes();
+    carregarDados();
   }, []);
 
-  const handleSalvarAvaliacao = async (dados: any) => {
-    if (!especialista) return;
+  const enviarImagem = async (uri: string) => {
+    const nomeArquivo = uri.split("/").pop();
+    const tipoArquivoMatch = /\.(\w+)$/.exec(nomeArquivo!);
+    const tipoArquivo = tipoArquivoMatch
+      ? `image/${tipoArquivoMatch[1]}`
+      : `image`;
 
-    const { sucesso, mensagem } = await avaliacaoService.cadastrar({
-      ...dados,
-      especialista_id: especialista.id,
-    });
+    const formData = new FormData();
 
-    setMensagem(mensagem);
+    formData.append("file", {
+      uri,
+      name: nomeArquivo,
+      type: tipoArquivo,
+    } as any);
 
-    if (sucesso) {
+    const extensaoArquivo = uri.split(".").pop();
+    const caminhoArquivo = `${uuidv4()}-${Date.now()}.${extensaoArquivo}`;
+
+    const { error } = await supabase.storage
+      .from("imagens-avaliacoes")
+      .upload(caminhoArquivo, formData);
+
+    if (error) {
+      throw new Error(`Falha no upload da imagem: ${error.message}`);
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("imagens-avaliacoes")
+      .getPublicUrl(caminhoArquivo);
+
+    return publicUrl;
+  };
+
+  const handleSalvarAvaliacao = async (
+    values: any,
+    {
+      setSubmitting,
+    }: {
+      setSubmitting: (isSubmitting: boolean) => void;
+    }
+  ) => {
+    if (!especialista) {
+      Alert.alert(
+        "Erro",
+        "Especialista não identificado. Por favor, faça o login novamente."
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const { imagens, ...dadosAvaliacao } = values;
+
+      // SALVANDO NOVA AVALIACAO
+      const { data: novaAvaliacao, error: erroAvaliacao } = await supabase
+        .from("AVALIACOES")
+        .insert({
+          ...dadosAvaliacao,
+          especialista_id: especialista.id,
+        })
+        .select()
+        .single();
+
+      if (erroAvaliacao) throw erroAvaliacao;
+
+      const novaAvaliacaoId = novaAvaliacao.id;
+
+      if (imagens && imagens.length > 0) {
+        // SALVANDO IMAGENS NO STORAGE
+        const uploadPromises = imagens.map((imagem: Imagem) =>
+          enviarImagem(imagem.uri)
+        );
+        const urlsPublicas = await Promise.all(uploadPromises);
+
+        // SALVANDO AS URLS NA BANCO
+        const dadosDasImagens = urlsPublicas.map((url) => ({
+          url: url,
+          avaliacao_id: novaAvaliacaoId,
+        }));
+
+        const { error: erroImagens } = await supabase
+          .from("AVALIACAO_IMAGENS_URL")
+          .insert(dadosDasImagens);
+
+        if (erroImagens) throw erroImagens;
+      }
+
+      Alert.alert("Sucesso", "Avaliacão salva com sucesso!");
       router.push("/(tabs)/avaliacao");
+    } catch (error) {
+      console.error("Erro no processo de salvamento:", error);
+      Alert.alert(
+        "Erro",
+        `Não foi possível salvar a avaliação. Detalhes: ${error}`
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -242,6 +226,7 @@ export default function CadastroAvaliacao() {
           observacoes: "",
           rascunho: true,
           // fatores_risco_ids: [],
+          imagens: [],
           habito_id: 0,
           localizacao_intraoral_id: 0,
           aspecto_lesao_id: 0,
@@ -254,13 +239,29 @@ export default function CadastroAvaliacao() {
           area_encaminhamento_id: 0,
           paciente_id: 0,
         }}
-        onSubmit={(dados) => handleSalvarAvaliacao(dados)}
+        onSubmit={(values, { setSubmitting }) =>
+          handleSalvarAvaliacao(values, { setSubmitting })
+        }
       >
-        {({ handleSubmit, handleChange, setFieldValue, values }) => (
+        {({
+          handleSubmit,
+          handleChange,
+          setFieldValue,
+          values,
+          isSubmitting,
+        }) => (
           <View style={styles.container}>
             <Text style={styles.titulo}>Formulário de Triagem</Text>
 
             <View style={styles.form}>
+              <SeletorImagem
+                imagens={values.imagens}
+                onImagensAlteradas={(novasImagens) => {
+                  setFieldValue("imagens", novasImagens);
+                }}
+                desabilitada={isSubmitting}
+              />
+
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Paciente</Text>
 
@@ -626,26 +627,34 @@ export default function CadastroAvaliacao() {
                 />
               </View>
 
-              <Text style={{ fontSize: 32 }}>{mensagem}</Text>
-
               <TouchableOpacity
-                style={styles.botao}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => {
                   setFieldValue("rascunho", false);
                   handleSubmit();
                 }}
+                disabled={isSubmitting}
               >
-                <Text style={styles.botaoTexto}>Salvar</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Salvar Avaliação</Text>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.botao}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => {
                   setFieldValue("rascunho", true);
                   handleSubmit();
                 }}
+                disabled={isSubmitting}
               >
-                <Text style={styles.botaoTexto}>Salvar como rascunho</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Salvar Rascunho</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -741,5 +750,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ccc",
   },
 });

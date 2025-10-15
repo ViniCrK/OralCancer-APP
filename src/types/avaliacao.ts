@@ -25,6 +25,7 @@ type AvaliacaoCompleta = {
   AREAS_ENCAMINHAMENTO: DropdownItem | null;
   ESPECIALISTAS: Especialista | null;
   PACIENTES: Paciente | null;
+  AVALIACAO_IMAGENS_URL: ImagemUrl[] | null;
 };
 
 type AvaliacaoBreve = {
@@ -42,10 +43,13 @@ type AvaliacaoClassificacaoRisco = {
 
 type DropdownItem = { id: number; nome: string };
 
+type ImagemUrl = { id: number; url: string };
+
 export {
   Avaliacao,
   AvaliacaoBreve,
   AvaliacaoClassificacaoRisco,
   AvaliacaoCompleta,
   DropdownItem,
+  ImagemUrl,
 };

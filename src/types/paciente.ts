@@ -2,6 +2,14 @@ import { DropdownItem } from "./avaliacao";
 
 type Paciente = { id: number; nome: string; sobrenome: string };
 
+type PacienteItem = {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  registro_hospitalar: string;
+  data_nascimento: string;
+};
+
 type PacienteCompleto = {
   id: number;
   nome: string;
@@ -11,4 +19,4 @@ type PacienteCompleto = {
   SEXOS: DropdownItem | null;
 };
 
-export { Paciente, PacienteCompleto };
+export { Paciente, PacienteItem, PacienteCompleto };

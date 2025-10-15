@@ -79,7 +79,8 @@ const AvaliacaoService = {
         CONDUTAS ( id, nome ),
         AREAS_ENCAMINHAMENTO ( id, nome ),
         PACIENTES ( id, nome, sobrenome ),
-        ESPECIALISTAS ( id, nome, sobrenome )
+        ESPECIALISTAS ( id, nome, sobrenome ),
+        AVALIACAO_IMAGENS_URL ( id, url )
         `
       )
       .eq("id", id)

@@ -12,7 +12,11 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  FlatList,
+  Image,
+  Modal,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const TextoDetalhe = ({
   label,
@@ -38,6 +42,11 @@ export default function DetalheAvaliacao() {
   const [carregando, setCarregando] = useState(true);
   const [excluindo, setExcluindo] = useState(false);
 
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(
+    null
+  );
+
   const especialistaCriador = especialista?.id === avaliacao?.ESPECIALISTAS?.id;
 
   useEffect(() => {
@@ -56,6 +65,16 @@ export default function DetalheAvaliacao() {
 
     buscarAvaliacao();
   }, [id]);
+
+  const abrirImagem = (url: string) => {
+    setImagemSelecionada(url);
+    setModalVisivel(true);
+  };
+
+  const fecharImagem = () => {
+    setModalVisivel(false);
+    setImagemSelecionada(null);
+  };
 
   const handleExcluirAvaliacao = async () => {
     Alert.alert(
@@ -115,6 +134,26 @@ export default function DetalheAvaliacao() {
 
   return (
     <ScrollView style={styles.container}>
+      {avaliacao?.AVALIACAO_IMAGENS_URL &&
+        avaliacao.AVALIACAO_IMAGENS_URL.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Imagens da Lesão</Text>
+            <FlatList
+              data={avaliacao.AVALIACAO_IMAGENS_URL}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => abrirImagem(item.url)}>
+                  <Image
+                    source={{ uri: item.url }}
+                    style={styles.imagemThumbnail}
+                  />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Detalhes da Avaliação</Text>
 
@@ -252,6 +291,26 @@ export default function DetalheAvaliacao() {
           </Link>
         )}
       </View>
+
+      <Modal
+        visible={modalVisivel}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={fecharImagem}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity style={styles.botaoFechar} onPress={fecharImagem}>
+            <Ionicons name="close-circle" size={40} color="white" />
+          </TouchableOpacity>
+          {imagemSelecionada && (
+            <Image
+              source={{ uri: imagemSelecionada }}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -315,5 +374,34 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 15,
+  },
+  imagemThumbnail: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: "#e0e0e0", // Placeholder color
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalImage: {
+    width: "90%",
+    height: "80%",
+  },
+  botaoFechar: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    zIndex: 1,
   },
 });
