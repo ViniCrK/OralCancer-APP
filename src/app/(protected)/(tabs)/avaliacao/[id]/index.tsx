@@ -3,7 +3,7 @@ import { useEspecialistaStore } from "@/store/especialista";
 import { AvaliacaoCompleta } from "@/types/avaliacao";
 import { Link } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -17,6 +17,19 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
+const GridItem = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null | undefined;
+}) => (
+  <View style={styles.gridItem}>
+    <Text style={styles.detailLabel}>{label}</Text>
+    <Text style={styles.detailValue}>{value || "Não informado"}</Text>
+  </View>
+);
 
 const TextoDetalhe = ({
   label,
@@ -65,6 +78,14 @@ export default function DetalheAvaliacao() {
 
     buscarAvaliacao();
   }, [id]);
+
+  const fatoresDeRisco = useMemo(() => {
+    if (!avaliacao?.AVALIACAO_FATORES_RISCO) return [];
+
+    return avaliacao.AVALIACAO_FATORES_RISCO.map(
+      (rel) => rel.FATORES_RISCO
+    ).filter(Boolean);
+  }, [avaliacao]);
 
   const abrirImagem = (url: string) => {
     setImagemSelecionada(url);
@@ -134,6 +155,86 @@ export default function DetalheAvaliacao() {
 
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          Detalhes da Avaliação #{avaliacao.id}
+        </Text>
+
+        <TextoDetalhe
+          label="Paciente"
+          value={`${avaliacao.PACIENTES?.nome ?? ""} ${
+            avaliacao.PACIENTES?.sobrenome ?? ""
+          }`}
+        />
+        <TextoDetalhe
+          label="Especialista"
+          value={`${avaliacao.ESPECIALISTAS?.nome ?? ""} ${
+            avaliacao.ESPECIALISTAS?.sobrenome ?? ""
+          }`}
+        />
+        <TextoDetalhe
+          label="Data da Avaliação"
+          value={new Date(avaliacao.created_at).toLocaleDateString("pt-BR")}
+        />
+
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Características da Lesão</Text>
+          <View style={styles.gridContainer}>
+            <GridItem
+              label="Tamanho"
+              value={`${avaliacao.tamanho_aproximado} cm`}
+            />
+            <GridItem
+              label="Evolução"
+              value={`${avaliacao.tempo_evolucao} meses`}
+            />
+            <GridItem label="Aspecto" value={avaliacao.ASPECTOS_LESAO?.nome} />
+            <GridItem label="Superfície" value={avaliacao.SUPERFICIES?.nome} />
+            <GridItem label="Bordas" value={avaliacao.BORDAS?.nome} />
+            <GridItem label="Sintomas" value={avaliacao.SINTOMAS?.nome} />
+          </View>
+        </View>
+
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Fatores Associados</Text>
+          <View style={styles.gridContainer}>
+            <GridItem
+              label="Hábito Principal"
+              value={avaliacao.HABITOS?.nome}
+            />
+            <GridItem
+              label="Carga Tabágica/Etílica"
+              value={avaliacao.carga_tabagica_etilica}
+            />
+          </View>
+        </View>
+
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Avaliação Clínica</Text>
+          <View style={styles.gridContainer}>
+            <GridItem label="Linfonodos" value={avaliacao.LINFONODOS?.nome} />
+            <GridItem
+              label="Classificação de Risco"
+              value={avaliacao.CLASSIFICACOES_RISCO?.nome}
+            />
+          </View>
+          <TextoDetalhe
+            label="Conduta Recomendada"
+            value={avaliacao.CONDUTAS?.nome}
+          />
+          <TextoDetalhe
+            label="Área de Encaminhamento"
+            value={avaliacao.AREAS_ENCAMINHAMENTO?.nome}
+          />
+        </View>
+
+        {avaliacao.observacoes && (
+          <View style={styles.sectionContainer}>
+            <TextoDetalhe label="Observações" value={avaliacao.observacoes} />
+          </View>
+        )}
+      </View>
+
       {avaliacao?.AVALIACAO_IMAGENS_URL &&
         avaliacao.AVALIACAO_IMAGENS_URL.length > 0 && (
           <View style={styles.card}>
@@ -154,82 +255,16 @@ export default function DetalheAvaliacao() {
             />
           </View>
         )}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Detalhes da Avaliação</Text>
 
-        <TextoDetalhe
-          label="Paciente"
-          value={`${avaliacao.PACIENTES?.nome ?? ""} ${
-            avaliacao.PACIENTES?.sobrenome ?? ""
-          }`}
-        />
-        <TextoDetalhe
-          label="Especialista"
-          value={`${avaliacao.ESPECIALISTAS?.nome ?? ""} ${
-            avaliacao.ESPECIALISTAS?.sobrenome ?? ""
-          }`}
-        />
-        <TextoDetalhe
-          label="Data da Avaliação"
-          value={new Date(avaliacao.created_at).toLocaleDateString("pt-BR")}
-        />
-        <TextoDetalhe
-          label="Queixa Principal"
-          value={avaliacao.queixa_principal}
-        />
-        <TextoDetalhe
-          label="Tamanho da Lesão"
-          value={`${avaliacao.tamanho_aproximado} cm`}
-        />
-        <TextoDetalhe
-          label="Tempo de Evolução"
-          value={`${avaliacao.tempo_evolucao} meses`}
-        />
-        <TextoDetalhe
-          label="Hábito Principal"
-          value={avaliacao.HABITOS?.nome}
-        />
-        <TextoDetalhe
-          label="Carga Tabágica(maços) / Etílica(ml)"
-          value={avaliacao.carga_tabagica_etilica}
-        />
-        <TextoDetalhe
-          label="Localização Intraoral"
-          value={avaliacao.LOCALIZACOES_INTRAORAIS?.nome}
-        />
-        <TextoDetalhe
-          label="Aspecto da lesão"
-          value={avaliacao.ASPECTOS_LESAO?.nome}
-        />
-        <TextoDetalhe
-          label="Característa da superfície da lesão"
-          value={avaliacao.SUPERFICIES?.nome}
-        />
-        <TextoDetalhe
-          label="Sintomas associados"
-          value={avaliacao.SINTOMAS?.nome}
-        />
-        <TextoDetalhe
-          label="Característica das bordas da lesão"
-          value={avaliacao.BORDAS?.nome}
-        />
-        <TextoDetalhe
-          label="Linfonodos Regionais"
-          value={avaliacao.LINFONODOS?.nome}
-        />
-        <TextoDetalhe
-          label="Classificação de Risco"
-          value={avaliacao.CLASSIFICACOES_RISCO?.nome}
-        />
-        <TextoDetalhe
-          label="Conduta Recomendada"
-          value={avaliacao.CONDUTAS?.nome}
-        />
-        <TextoDetalhe
-          label="Área de Encaminhamento"
-          value={avaliacao.AREAS_ENCAMINHAMENTO?.nome}
-        />
-        <TextoDetalhe label="Observações" value={avaliacao.observacoes} />
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Fatores de Risco Associados</Text>
+        <View style={styles.chipContainer}>
+          {fatoresDeRisco.map((fator) => (
+            <View key={fator!.id} style={styles.chip}>
+              <Text style={styles.chipText}>{fator!.nome}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       <View style={styles.botoesContainer}>
@@ -336,6 +371,16 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
     paddingBottom: 10,
   },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginHorizontal: -5, // Compensa o padding dos itens
+  },
+  gridItem: {
+    width: "50%", // Cria a grade de duas colunas
+    paddingHorizontal: 5,
+    marginBottom: 15,
+  },
   detailRow: {
     marginBottom: 12,
   },
@@ -375,12 +420,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 15,
-  },
   imagemThumbnail: {
     width: 100,
     height: 100,
@@ -403,5 +442,34 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     zIndex: 1,
+  },
+  sectionContainer: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#10B981",
+    marginBottom: 10,
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  chip: {
+    backgroundColor: "#e0f2f1", // Verde claro, consistente com o tema
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  chipText: {
+    color: "#0d9488", // Verde escuro
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

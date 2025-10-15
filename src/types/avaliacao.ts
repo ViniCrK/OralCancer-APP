@@ -26,6 +26,7 @@ type AvaliacaoCompleta = {
   ESPECIALISTAS: Especialista | null;
   PACIENTES: Paciente | null;
   AVALIACAO_IMAGENS_URL: ImagemUrl[] | null;
+  AVALIACAO_FATORES_RISCO: RelacaoFatorRisco[] | null;
 };
 
 type AvaliacaoBreve = {
@@ -45,6 +46,10 @@ type DropdownItem = { id: number; nome: string };
 
 type ImagemUrl = { id: number; url: string };
 
+type FatorRisco = { id: number; nome: string };
+
+type RelacaoFatorRisco = { FATORES_RISCO: FatorRisco | null };
+
 export {
   Avaliacao,
   AvaliacaoBreve,
@@ -52,4 +57,6 @@ export {
   AvaliacaoCompleta,
   DropdownItem,
   ImagemUrl,
+  FatorRisco,
+  RelacaoFatorRisco,
 };

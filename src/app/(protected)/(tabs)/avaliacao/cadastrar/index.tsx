@@ -165,7 +165,7 @@ export default function CadastroAvaliacao() {
     setSubmitting(true);
 
     try {
-      const { imagens, ...dadosAvaliacao } = values;
+      const { imagens, fatores_risco_ids, ...dadosAvaliacao } = values;
 
       // SALVANDO NOVA AVALIACAO
       const { data: novaAvaliacao, error: erroAvaliacao } = await supabase
@@ -180,6 +180,20 @@ export default function CadastroAvaliacao() {
       if (erroAvaliacao) throw erroAvaliacao;
 
       const novaAvaliacaoId = novaAvaliacao.id;
+
+      // SALVAR FATORES DE RISCO
+      if (fatores_risco_ids && fatores_risco_ids.length > 0) {
+        const fatoresDeRisco = fatores_risco_ids.map((fatorId: number) => ({
+          avaliacao_id: novaAvaliacaoId,
+          fator_risco_id: fatorId,
+        }));
+
+        const { error: erroFatorRisco } = await supabase
+          .from("AVALIACAO_FATORES_RISCO")
+          .insert(fatoresDeRisco);
+
+        if (erroFatorRisco) throw erroFatorRisco;
+      }
 
       if (imagens && imagens.length > 0) {
         // SALVANDO IMAGENS NO STORAGE
@@ -225,7 +239,7 @@ export default function CadastroAvaliacao() {
           historico_familiar_cancer: false,
           observacoes: "",
           rascunho: true,
-          // fatores_risco_ids: [],
+          fatores_risco_ids: [],
           imagens: [],
           habito_id: 0,
           localizacao_intraoral_id: 0,
@@ -397,17 +411,21 @@ export default function CadastroAvaliacao() {
                 </Text>
               </View>
 
-              {/* <View style={styles.inputContainer}>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Fatores de Risco</Text>
 
                 <MultiSelect
+                  mode="modal"
                   style={styles.dropdown}
                   containerStyle={styles.dropdownContainer}
-                  dropdownPosition="top"
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  activeColor="gray"
-                  selectedTextStyle={{ color: "black" }}
-                  selectedStyle={{ backgroundColor: "lightgray" }}
+                  activeColor="#e0f2f1"
+                  selectedTextStyle={{
+                    fontWeight: "bold",
+                    color: "black",
+                    fontSize: 14,
+                  }}
+                  selectedStyle={styles.selectedChip}
                   data={fatoresRisco}
                   valueField={"id"}
                   labelField={"nome"}
@@ -420,7 +438,7 @@ export default function CadastroAvaliacao() {
                     setFieldValue("fatores_risco_ids", fator)
                   }
                 />
-              </View> */}
+              </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Localização Intraoral</Text>
@@ -712,6 +730,11 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     borderStartEndRadius: 10,
     borderEndEndRadius: 10,
+  },
+  selectedChip: {
+    backgroundColor: "#d1fae5", // Um verde bem claro para os chips
+    borderRadius: 10,
+    padding: 8,
   },
   checkboxContainer: {
     flexDirection: "row",
