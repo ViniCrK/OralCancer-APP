@@ -70,7 +70,7 @@ export default function ListaPacientes() {
         data={pacientes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
         ListHeaderComponent={<Text style={styles.titulo}>Pacientes</Text>}
         ListEmptyComponent={
           <View style={styles.botaoFlutuante}>
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 25,
     color: "#333",
   },
   card: {

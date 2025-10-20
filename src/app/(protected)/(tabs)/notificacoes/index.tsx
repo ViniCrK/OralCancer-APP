@@ -103,7 +103,7 @@ export default function ListaNotificacoes() {
         data={notificacoes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
         ListHeaderComponent={<Text style={styles.titulo}>Notificações</Text>}
         ListEmptyComponent={
           <View style={styles.containerCentralizado}>

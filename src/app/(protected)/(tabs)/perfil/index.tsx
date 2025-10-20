@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#10B981",
     alignItems: "center",
     padding: 30,
+    paddingTop: 50,
     paddingBottom: 70,
   },
   avatar: {
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   },
   botaoSair: {
     backgroundColor: "#e53e3e",
-    marginTop: 30,
+    marginTop: 20,
   },
   botaoTexto: {
     color: "#fff",

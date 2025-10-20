@@ -320,7 +320,7 @@ export default function DetalheAvaliacao() {
             }}
             asChild
           >
-            <TouchableOpacity style={styles.botao}>
+            <TouchableOpacity style={styles.botaoEditar}>
               <Text style={styles.botaoTexto}>Gerar Notificação</Text>
             </TouchableOpacity>
           </Link>
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   botoesContainer: {
-    marginTop: 10,
+    margin: 10,
   },
   botao: {
     backgroundColor: "#10B981",
@@ -408,6 +408,10 @@ const styles = StyleSheet.create({
   },
   botaoEditar: {
     backgroundColor: "#f97316", // Laranja para edição
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 12,
   },
   botaoExcluir: {
     backgroundColor: "#e53e3e",

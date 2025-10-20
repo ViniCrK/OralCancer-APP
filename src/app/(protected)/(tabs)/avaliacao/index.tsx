@@ -80,7 +80,7 @@ export default function ListaAvaliacoes() {
         data={avaliacoes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
         ListHeaderComponent={
           <Text style={styles.titulo}>Minhas Avaliações</Text>
         }

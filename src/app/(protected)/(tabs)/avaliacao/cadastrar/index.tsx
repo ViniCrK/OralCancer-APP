@@ -397,7 +397,7 @@ export default function CadastroAvaliacao() {
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Observações Clínicas</Text>
                 <TextInput
-                  style={[styles.input, styles.observacoesTexto]}
+                  style={styles.observacoesTexto}
                   multiline
                   numberOfLines={4}
                   maxLength={200}
@@ -686,11 +686,11 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingTop: 20,
+    paddingTop: 30,
   },
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 20,
     backgroundColor: "#f0f0f0",
   },
   titulo: {
@@ -715,14 +715,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#212020",
     borderRadius: 5,
-    padding: 10,
+    paddingLeft: 8,
+    paddingVertical: 15,
     fontSize: 16,
   },
   dropdown: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#212020",
     borderRadius: 5,
     paddingVertical: 16,
     paddingHorizontal: 8,
@@ -753,6 +754,12 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   observacoesTexto: {
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 5,
+    paddingLeft: 8,
+    paddingBottom: 15,
+    fontSize: 16,
     height: 80,
     textAlignVertical: "top",
   },
