@@ -2,7 +2,7 @@
   "expo": {
     "name": "OralCancer",
     "slug": "OralCancer",
-    "scheme": "OralCancer",
+    "scheme": "oralcancer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,19 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vinicrk.OralCancer",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.vinicrk.OralCancer"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,6 +42,18 @@
           "microphonePermission": false
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fb93177a-e4a5-4e70-afe7-4e046451e9f0"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/fb93177a-e4a5-4e70-afe7-4e046451e9f0"
+    }
   }
 }

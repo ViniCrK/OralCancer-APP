@@ -80,7 +80,7 @@ const UsuarioService = {
     email: string
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "exp+OralCancer://recuperar-senha",
+      redirectTo: "oralcancer://recuperar-senha",
     });
 
     if (error) {
