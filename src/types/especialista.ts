@@ -10,7 +10,7 @@ type EspecialistaBreve = {
 };
 
 type EspecialistaCompleto = {
-  id: string | number;
+  id: number;
   email: string;
   nome: string;
   sobrenome: string;

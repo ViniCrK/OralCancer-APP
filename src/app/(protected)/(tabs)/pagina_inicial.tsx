@@ -100,22 +100,28 @@ export default function PaginaInicial() {
             onPress={() => router.push("/avaliacao/cadastrar")}
           />
           <ActionCard
-            icon="documents-outline"
-            title="Ver Avaliações"
-            subtitle="Consulte a lista de avaliações"
-            onPress={() => router.push("/avaliacao")}
-          />
-          <ActionCard
             icon="person-add-outline"
             title="Novo Paciente"
             subtitle="Cadastre um novo paciente"
             onPress={() => router.push("/pacientes/cadastrar")}
           />
           <ActionCard
+            icon="documents"
+            title="Ver Avaliações"
+            subtitle="Consulte a lista de avaliações"
+            onPress={() => router.push("/avaliacao")}
+          />
+          <ActionCard
             icon="people-outline"
             title="Ver Pacientes"
             subtitle="Consulte a lista de pacientes"
             onPress={() => router.push("/pacientes")}
+          />
+          <ActionCard
+            icon="documents-outline"
+            title="Reabrir rascunhos"
+            subtitle="Finalize suas avaliações"
+            onPress={() => router.push("/avaliacao/rascunhos")}
           />
           <ActionCard
             icon="notifications-outline"

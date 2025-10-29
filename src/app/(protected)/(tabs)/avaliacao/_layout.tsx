@@ -6,6 +6,7 @@ export default function AvaliacaoLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="cadastrar" options={{ headerShown: false }} />
       <Stack.Screen name="[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="rascunhos" options={{ headerShown: false }} />
     </Stack>
   );
 }

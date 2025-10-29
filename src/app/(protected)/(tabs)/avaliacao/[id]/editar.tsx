@@ -1,6 +1,7 @@
 import { supabase } from "@/config/supabase-client";
 import { useAvaliacaoService } from "@/services/avaliacao";
 import { DropdownItem } from "@/types/avaliacao";
+import { PacienteItem } from "@/types/paciente";
 import Checkbox from "expo-checkbox";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
@@ -108,24 +109,24 @@ export default function EditarAvaliacao() {
       if (avaliacao) {
         setInitialValues({
           queixa_principal: avaliacao.queixa_principal || "",
-          tamanho_aproximado: avaliacao.tamanho_aproximado || "",
-          tempo_evolucao: avaliacao.tempo_evolucao || "",
-          carga_tabagica_etilica: avaliacao.carga_tabagica_etilica || "",
+          tamanho_aproximado: avaliacao.tamanho_aproximado || null,
+          tempo_evolucao: avaliacao.tempo_evolucao || null,
+          carga_tabagica_etilica: avaliacao.carga_tabagica_etilica || null,
           historico_familiar_cancer:
             avaliacao.historico_familiar_cancer || false,
           observacoes: avaliacao.observacoes || "",
           rascunho: avaliacao.rascunho || true,
           // fatores_risco_ids: [],
-          habito_id: avaliacao.habito_id || "",
-          localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || "",
-          aspecto_lesao_id: avaliacao.aspecto_lesao_id || "",
-          superficie_id: avaliacao.superficie_id || "",
-          sintoma_associado_id: avaliacao.sintoma_associado_id || "",
-          bordas_id: avaliacao.bordas_id || "",
-          linfonodo_regional_id: avaliacao.linfonodo_regional_id || "",
-          classificacao_risco_id: avaliacao.classificacao_risco_id || "",
-          conduta_recomendada_id: avaliacao.conduta_recomendada_id || "",
-          area_encaminhamento_id: avaliacao.area_encaminhamento_id || "",
+          habito_id: avaliacao.habito_id || null,
+          localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || null,
+          aspecto_lesao_id: avaliacao.aspecto_lesao_id || null,
+          superficie_id: avaliacao.superficie_id || null,
+          sintoma_associado_id: avaliacao.sintoma_associado_id || null,
+          bordas_id: avaliacao.bordas_id || null,
+          linfonodo_regional_id: avaliacao.linfonodo_regional_id || null,
+          classificacao_risco_id: avaliacao.classificacao_risco_id || null,
+          conduta_recomendada_id: avaliacao.conduta_recomendada_id || null,
+          area_encaminhamento_id: avaliacao.area_encaminhamento_id || null,
         });
       }
     };
@@ -140,7 +141,14 @@ export default function EditarAvaliacao() {
       dados
     );
 
-    Alert.alert(sucesso ? "Sucesso" : "Erro", mensagem);
+    if (dados.rascunho == true) {
+      Alert.alert(
+        "Atenção",
+        "Não esqueça de finalizar sua avaliação posteriormente!"
+      );
+    } else {
+      Alert.alert("Sucesso", mensagem);
+    }
 
     if (sucesso) {
       router.push("/(tabs)/avaliacao");

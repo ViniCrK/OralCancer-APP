@@ -215,7 +215,15 @@ export default function CadastroAvaliacao() {
         if (erroImagens) throw erroImagens;
       }
 
-      Alert.alert("Sucesso", "Avaliacão salva com sucesso!");
+      if (novaAvaliacao.rascunho == true) {
+        Alert.alert(
+          "Atenção",
+          "Não esqueça de finalizar sua avaliação posteriormente!"
+        );
+      } else {
+        Alert.alert("Sucesso", "Avaliação salva com sucesso!");
+      }
+
       router.push("/(tabs)/avaliacao");
     } catch (error) {
       console.error("Erro no processo de salvamento:", error);
@@ -233,25 +241,25 @@ export default function CadastroAvaliacao() {
       <Formik
         initialValues={{
           queixa_principal: "",
-          tamanho_aproximado: 0,
-          tempo_evolucao: 0,
-          carga_tabagica_etilica: 0,
+          tamanho_aproximado: null,
+          tempo_evolucao: null,
+          carga_tabagica_etilica: null,
           historico_familiar_cancer: false,
           observacoes: "",
           rascunho: true,
           fatores_risco_ids: [],
           imagens: [],
-          habito_id: 0,
-          localizacao_intraoral_id: 0,
-          aspecto_lesao_id: 0,
-          superficie_id: 0,
-          sintoma_associado_id: 0,
-          bordas_id: 0,
-          linfonodo_regional_id: 0,
-          classificacao_risco_id: 0,
-          conduta_recomendada_id: 0,
-          area_encaminhamento_id: 0,
-          paciente_id: 0,
+          habito_id: null,
+          localizacao_intraoral_id: null,
+          aspecto_lesao_id: null,
+          superficie_id: null,
+          sintoma_associado_id: null,
+          bordas_id: null,
+          linfonodo_regional_id: null,
+          classificacao_risco_id: null,
+          conduta_recomendada_id: null,
+          area_encaminhamento_id: null,
+          paciente_id: null,
         }}
         onSubmit={(values, { setSubmitting }) =>
           handleSalvarAvaliacao(values, { setSubmitting })
@@ -656,12 +664,15 @@ export default function CadastroAvaliacao() {
                 {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.botaoTexto}>Salvar Avaliação</Text>
+                  <Text style={styles.botaoTexto}>Finalizar Avaliação</Text>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
+                style={[
+                  styles.botaoRascunho,
+                  isSubmitting && styles.botaoDesabilitado,
+                ]}
                 onPress={() => {
                   setFieldValue("rascunho", true);
                   handleSubmit();
@@ -671,7 +682,7 @@ export default function CadastroAvaliacao() {
                 {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.botaoTexto}>Salvar Rascunho</Text>
+                  <Text style={styles.botaoTexto}>Finalizar depois</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -771,6 +782,13 @@ const styles = StyleSheet.create({
   },
   botao: {
     backgroundColor: "#10B981",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  botaoRascunho: {
+    backgroundColor: "#ffa500",
     padding: 15,
     borderRadius: 5,
     marginTop: 10,

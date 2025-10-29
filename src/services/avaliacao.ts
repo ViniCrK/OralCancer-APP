@@ -62,6 +62,30 @@ const AvaliacaoService = {
     return data || [];
   },
 
+  listarRascunhos: async (especialistaId: number): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from("AVALIACOES")
+      .select(
+        `
+        id,
+        observacoes,
+        created_at,
+        PACIENTES ( id, nome, sobrenome ),
+        ESPECIALISTAS ( id, nome, sobrenome )
+        `
+      )
+      .eq("rascunho", true)
+      .eq("especialista_id", especialistaId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Erro ao listar os rascunhos:", error.message);
+      return [];
+    }
+
+    return data || [];
+  },
+
   buscar: async (id: string) => {
     const { data, error } = await supabase
       .from("AVALIACOES")
@@ -104,7 +128,10 @@ const AvaliacaoService = {
       .eq("id", id);
 
     if (error) {
-      return { sucesso: false, mensagem: "Erro ao atualizar a avaliação." };
+      return {
+        sucesso: false,
+        mensagem: `Erro ao atualizar a avaliação:${error.message}`,
+      };
     }
 
     return {
