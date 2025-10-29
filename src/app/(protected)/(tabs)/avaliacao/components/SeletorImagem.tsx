@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
 export type Imagem = {
+  id?: number;
   uri: string;
 };
 

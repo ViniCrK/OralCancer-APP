@@ -16,7 +16,9 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
+import { Dropdown, MultiSelect } from "react-native-element-dropdown";
+import SeletorImagem, { Imagem } from "../components/SeletorImagem";
+import { v4 as uuidv4 } from "uuid";
 
 export default function EditarAvaliacao() {
   const router = useRouter();
@@ -50,6 +52,7 @@ export default function EditarAvaliacao() {
   const [fatoresRisco, setFatoresRisco] = useState<DropdownItem[]>([]);
 
   const [initialValues, setInitialValues] = useState<any | null>(null);
+  const [imagens, setImagens] = useState<Imagem[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -107,6 +110,19 @@ export default function EditarAvaliacao() {
       const avaliacao = await avaliacaoService.buscar(id as string);
 
       if (avaliacao) {
+        const fatoresRiscoIds =
+          avaliacao.AVALIACAO_FATORES_RISCO?.map(
+            (rel: any) => rel.FATORES_RISCO?.id
+          ).filter(Boolean) || [];
+
+        const imagensIniciaisFormatadas: Imagem[] =
+          avaliacao.AVALIACAO_IMAGENS_URL?.map((img: any) => ({
+            id: img.id,
+            uri: img.url,
+          })) || [];
+
+        setImagens(imagensIniciaisFormatadas);
+
         setInitialValues({
           queixa_principal: avaliacao.queixa_principal || "",
           tamanho_aproximado: avaliacao.tamanho_aproximado || null,
@@ -116,7 +132,8 @@ export default function EditarAvaliacao() {
             avaliacao.historico_familiar_cancer || false,
           observacoes: avaliacao.observacoes || "",
           rascunho: avaliacao.rascunho || true,
-          // fatores_risco_ids: [],
+          fatores_risco_ids: fatoresRiscoIds,
+          imagens: imagensIniciaisFormatadas,
           habito_id: avaliacao.habito_id || null,
           localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || null,
           aspecto_lesao_id: avaliacao.aspecto_lesao_id || null,
@@ -135,23 +152,141 @@ export default function EditarAvaliacao() {
     carregarDados();
   }, []);
 
-  const handleSalvarAlteracoes = async (dados: any) => {
-    const { sucesso, mensagem } = await avaliacaoService.atualizar(
-      id as string,
-      dados
-    );
+  const enviarImagem = async (uri: string) => {
+    const nomeArquivo = uri.split("/").pop();
+    const tipoArquivoMatch = /\.(\w+)$/.exec(nomeArquivo!);
+    const tipoArquivo = tipoArquivoMatch
+      ? `image/${tipoArquivoMatch[1]}`
+      : `image`;
 
-    if (dados.rascunho == true) {
-      Alert.alert(
-        "Atenção",
-        "Não esqueça de finalizar sua avaliação posteriormente!"
-      );
-    } else {
-      Alert.alert("Sucesso", mensagem);
+    const formData = new FormData();
+
+    formData.append("file", {
+      uri,
+      name: nomeArquivo,
+      type: tipoArquivo,
+    } as any);
+
+    const extensaoArquivo = uri.split(".").pop();
+    const caminhoArquivo = `${uuidv4()}-${Date.now()}.${extensaoArquivo}`;
+
+    const { error } = await supabase.storage
+      .from("imagens-avaliacoes")
+      .upload(caminhoArquivo, formData);
+
+    if (error) {
+      throw new Error(`Falha no upload da imagem: ${error.message}`);
     }
 
-    if (sucesso) {
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("imagens-avaliacoes")
+      .getPublicUrl(caminhoArquivo);
+
+    return publicUrl;
+  };
+
+  const handleSalvarAlteracoes = async (
+    values: any,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    setSubmitting(true);
+
+    try {
+      const {
+        imagens: currentImages,
+        fatores_risco_ids,
+        ...dadosAvaliacao
+      } = values;
+
+      const originalImageUris = imagens.map((img) => img.uri);
+      const currentImageUris = currentImages.map((img: Imagem) => img.uri);
+      const imagensParaAdicionar = currentImages.filter(
+        (img: Imagem) => !img.id && img.uri.startsWith("file://")
+      );
+      const imagensParaExcluir = imagens.filter(
+        (origImg: Imagem) => !currentImageUris.includes(origImg.uri)
+      );
+
+      if (imagensParaExcluir.length > 0) {
+        const deletingIds = imagensParaExcluir
+          .map((img) => img.id)
+          .filter(Boolean); // Pega IDs válidos
+
+        // Deleta apenas do Banco de Dados pelos IDs
+        if (deletingIds.length > 0) {
+          const { error: deleteDbError } = await supabase
+            .from("AVALIACAO_IMAGENS_URL")
+            .delete()
+            .in("id", deletingIds);
+          if (deleteDbError)
+            throw new Error(
+              `Erro ao excluir referências de imagens do banco: ${deleteDbError.message}`
+            );
+        }
+      }
+
+      let urlsPublicasNovas: string[] = [];
+      if (imagensParaAdicionar.length > 0) {
+        const uploadPromises = imagensParaAdicionar.map((img: Imagem) =>
+          enviarImagem(img.uri)
+        );
+        urlsPublicasNovas = await Promise.all(uploadPromises);
+      }
+
+      const { sucesso: sucessoAtualizar, mensagem: mensagemAtualizar } =
+        await avaliacaoService.atualizar(id as string, dadosAvaliacao);
+
+      if (!sucessoAtualizar) {
+        Alert.alert("Erro", mensagemAtualizar);
+        return;
+      }
+
+      const { error: deleteError } = await supabase
+        .from("AVALIACAO_FATORES_RISCO")
+        .delete()
+        .eq("avaliacao_id", id);
+
+      if (deleteError) throw deleteError;
+
+      if (fatores_risco_ids && fatores_risco_ids.length > 0) {
+        const novosFatores = fatores_risco_ids.map((fatorId: number) => ({
+          avaliacao_id: id,
+          fator_risco_id: fatorId,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("AVALIACAO_FATORES_RISCO")
+          .insert(novosFatores);
+
+        if (insertError) throw insertError;
+      }
+
+      if (urlsPublicasNovas.length > 0) {
+        const dadosNovasImagens = urlsPublicasNovas.map((url) => ({
+          url: url,
+          avaliacao_id: Number(id),
+        }));
+        const { error: insertError } = await supabase
+          .from("AVALIACAO_IMAGENS_URL")
+          .insert(dadosNovasImagens);
+        if (insertError)
+          throw new Error(
+            `Erro ao salvar novas imagens no banco: ${insertError.message}`
+          );
+      }
+
+      Alert.alert("Sucesso", "Avaliação atualizada com sucesso!");
       router.push("/(tabs)/avaliacao");
+    } catch (error) {
+      console.error("Erro ao atualizar fatores de risco:", error);
+      Alert.alert(
+        "Erro Parcial",
+        "Os dados principais da avaliação foram salvos, mas houve um erro ao atualizar os fatores de risco. Por favor, tente editar novamente."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -168,13 +303,28 @@ export default function EditarAvaliacao() {
       <Formik
         initialValues={initialValues}
         enableReinitialize
-        onSubmit={(dados) => handleSalvarAlteracoes(dados)}
+        onSubmit={(values, { setSubmitting }) =>
+          handleSalvarAlteracoes(values, { setSubmitting })
+        }
       >
-        {({ handleSubmit, handleChange, setFieldValue, values }) => (
+        {({
+          handleSubmit,
+          handleChange,
+          setFieldValue,
+          values,
+          isSubmitting,
+        }) => (
           <View style={styles.container}>
             <Text style={styles.titulo}>Editar Avaliação</Text>
 
             <View style={styles.form}>
+              <SeletorImagem
+                imagens={values.imagens}
+                onImagensAlteradas={(novasImagens) =>
+                  setFieldValue("imagens", novasImagens)
+                }
+                desabilitada={isSubmitting}
+              />
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Queixa Principal</Text>
                 <TextInput
@@ -329,7 +479,7 @@ export default function EditarAvaliacao() {
                 </Text>
               </View>
 
-              {/* <View style={styles.inputContainer}>
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Fatores de Risco</Text>
 
                 <MultiSelect
@@ -337,9 +487,9 @@ export default function EditarAvaliacao() {
                   containerStyle={styles.dropdownContainer}
                   dropdownPosition="top"
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  activeColor="gray"
-                  selectedTextStyle={{ color: "black" }}
-                  selectedStyle={{ backgroundColor: "lightgray" }}
+                  activeColor="#e0f2f1"
+                  selectedTextStyle={{ color: "black", fontSize: 14 }}
+                  selectedStyle={styles.selectedChip}
                   data={fatoresRisco}
                   valueField={"id"}
                   labelField={"nome"}
@@ -347,12 +497,12 @@ export default function EditarAvaliacao() {
                   value={values.fatores_risco_ids}
                   search
                   searchField={"nome"}
-                  searchPlaceholder="Nome do Fator"
-                  onChange={(fator) =>
-                    setFieldValue("fatores_risco_ids", fator)
+                  searchPlaceholder="Buscar Fator..."
+                  onChange={(fatores) =>
+                    setFieldValue("fatores_risco_ids", fatores)
                   }
                 />
-              </View> */}
+              </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Localização Intraoral</Text>
@@ -560,23 +710,36 @@ export default function EditarAvaliacao() {
               </View>
 
               <TouchableOpacity
-                style={styles.botao}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => {
                   setFieldValue("rascunho", false);
                   handleSubmit();
                 }}
+                disabled={isSubmitting}
               >
-                <Text style={styles.botaoTexto}>Salvar</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Finalizar Avaliação</Text>
+                )}
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.botao}
+                style={[
+                  styles.botaoRascunho,
+                  isSubmitting && styles.botaoDesabilitado,
+                ]}
                 onPress={() => {
                   setFieldValue("rascunho", true);
                   handleSubmit();
                 }}
+                disabled={isSubmitting}
               >
-                <Text style={styles.botaoTexto}>Salvar como rascunho</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Finalizar depois</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -677,5 +840,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  botaoRascunho: {
+    backgroundColor: "#ffa500",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ccc",
+  },
+  selectedChip: {
+    backgroundColor: "#d1fae5", // Um verde bem claro para os chips
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 5,
+    marginBottom: 5,
   },
 });
