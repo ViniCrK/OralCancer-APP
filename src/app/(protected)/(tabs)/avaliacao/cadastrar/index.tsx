@@ -4,9 +4,9 @@ import { useEspecialistaStore } from "@/store/especialista";
 import { DropdownItem } from "@/types/avaliacao";
 import { PacienteItem } from "@/types/paciente";
 import Checkbox from "expo-checkbox";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,14 +19,13 @@ import {
 } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 
-import "react-native-get-random-values"; // Importante para o Supabase gerar UUIDs
+import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import SeletorImagem, { Imagem } from "../components/SeletorImagem";
 
 export default function CadastroAvaliacao() {
   const router = useRouter();
   const { especialista } = useEspecialistaStore();
-  const avaliacaoService = useAvaliacaoService();
 
   const [habitos, setHabitos] = useState<DropdownItem[]>([]);
   const [localizacoesIntraorais, setLocalizacoesIntraorais] = useState<
@@ -58,57 +57,76 @@ export default function CadastroAvaliacao() {
     label: `${paciente.nome} ${paciente.sobrenome} - ${paciente.registro_hospitalar}`,
   }));
 
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        const [
-          habitosData,
-          localizacoesIntraoraisData,
-          aspectosLesaoData,
-          superficiesData,
-          sintomasAssociadosData,
-          bordasData,
-          linfonodosRegionaisData,
-          classificacoesRiscoData,
-          condutasRecomendadasData,
-          areasEncaminhamentoData,
-          fatoresRiscoData,
-          pacientesData,
-        ] = await Promise.all([
-          supabase.from("HABITOS").select("id, nome"),
-          supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
-          supabase.from("ASPECTOS_LESAO").select("id, nome"),
-          supabase.from("SUPERFICIES").select("id, nome"),
-          supabase.from("SINTOMAS").select("id, nome"),
-          supabase.from("BORDAS").select("id, nome"),
-          supabase.from("LINFONODOS").select("id, nome"),
-          supabase.from("CLASSIFICACOES_RISCO").select("id, nome"),
-          supabase.from("CONDUTAS").select("id, nome"),
-          supabase.from("AREAS_ENCAMINHAMENTO").select("id, nome"),
-          supabase.from("FATORES_RISCO").select("id, nome"),
-          supabase.from("PACIENTES").select("*"),
-        ]);
+  const carregarDados = useCallback(async () => {
+    try {
+      const [
+        habitosData,
+        localizacoesIntraoraisData,
+        aspectosLesaoData,
+        superficiesData,
+        sintomasAssociadosData,
+        bordasData,
+        linfonodosRegionaisData,
+        classificacoesRiscoData,
+        condutasRecomendadasData,
+        areasEncaminhamentoData,
+        fatoresRiscoData,
+      ] = await Promise.all([
+        supabase.from("HABITOS").select("id, nome"),
+        supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
+        supabase.from("ASPECTOS_LESAO").select("id, nome"),
+        supabase.from("SUPERFICIES").select("id, nome"),
+        supabase.from("SINTOMAS").select("id, nome"),
+        supabase.from("BORDAS").select("id, nome"),
+        supabase.from("LINFONODOS").select("id, nome"),
+        supabase.from("CLASSIFICACOES_RISCO").select("id, nome"),
+        supabase.from("CONDUTAS").select("id, nome"),
+        supabase.from("AREAS_ENCAMINHAMENTO").select("id, nome"),
+        supabase.from("FATORES_RISCO").select("id, nome"),
+      ]);
 
-        setAreasEncaminhamento(areasEncaminhamentoData.data || []);
-        setAspectosLesao(aspectosLesaoData.data || []);
-        setBordas(bordasData.data || []);
-        setClassificacoesRisco(classificacoesRiscoData.data || []);
-        setCondutasRecomendadas(condutasRecomendadasData.data || []);
-        setFatoresRisco(fatoresRiscoData.data || []);
-        setHabitos(habitosData.data || []);
-        setLinfonodosRegionais(linfonodosRegionaisData.data || []);
-        setLocalizacoesIntraorais(localizacoesIntraoraisData.data || []);
-        setSintomasAssociados(sintomasAssociadosData.data || []);
-        setSuperficies(superficiesData.data || []);
-        setPacientes(pacientesData.data || []);
-      } catch (error) {
-        console.error("Erro ao carregar dados para edição:", error);
-        Alert.alert("Erro", "Não foi possível carregar os dados da avaliação.");
-      }
-    };
-
-    carregarDados();
+      setAreasEncaminhamento(areasEncaminhamentoData.data || []);
+      setAspectosLesao(aspectosLesaoData.data || []);
+      setBordas(bordasData.data || []);
+      setClassificacoesRisco(classificacoesRiscoData.data || []);
+      setCondutasRecomendadas(condutasRecomendadasData.data || []);
+      setFatoresRisco(fatoresRiscoData.data || []);
+      setHabitos(habitosData.data || []);
+      setLinfonodosRegionais(linfonodosRegionaisData.data || []);
+      setLocalizacoesIntraorais(localizacoesIntraoraisData.data || []);
+      setSintomasAssociados(sintomasAssociadosData.data || []);
+      setSuperficies(superficiesData.data || []);
+    } catch (error) {
+      console.error("Erro ao carregar dados para edição:", error);
+      Alert.alert("Erro", "Não foi possível carregar os dados da avaliação.");
+    }
   }, []);
+
+  const carregarPacientes = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("PACIENTES")
+        .select("*")
+        .order("nome");
+
+      if (error) throw error;
+
+      setPacientes(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar pacientes:", error);
+      Alert.alert("Erro", "Não foi possível carregar a lista de pacientes.");
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarPacientes();
+    }, [carregarPacientes])
+  );
+
+  useEffect(() => {
+    carregarDados();
+  }, [carregarDados]);
 
   const enviarImagem = async (uri: string) => {
     const nomeArquivo = uri.split("/").pop();
@@ -305,6 +323,15 @@ export default function CadastroAvaliacao() {
                     setFieldValue("paciente_id", paciente.id)
                   }
                 />
+
+                <TouchableOpacity
+                  style={styles.linkNovoPaciente}
+                  onPress={() => router.push("/pacientes/cadastrar")} // Navega para a tela
+                >
+                  <Text style={styles.linkNovoPacienteTexto}>
+                    Não encontrou o paciente? Cadastre um novo
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               <View style={styles.inputContainer}>
@@ -802,5 +829,15 @@ const styles = StyleSheet.create({
   botaoDesabilitado: {
     backgroundColor: "#f0f0f0",
     borderColor: "#ccc",
+  },
+  linkNovoPaciente: {
+    marginTop: 10,
+    alignItems: "flex-end",
+  },
+  linkNovoPacienteTexto: {
+    color: "#10B981",
+    fontWeight: "500",
+    fontSize: 14,
+    textDecorationLine: "underline",
   },
 });

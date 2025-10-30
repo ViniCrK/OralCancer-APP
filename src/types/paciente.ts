@@ -1,4 +1,4 @@
-import { DropdownItem } from "./avaliacao";
+import { AvaliacaoSimples, DropdownItem } from "./avaliacao";
 
 type Paciente = { id: number; nome: string; sobrenome: string };
 
@@ -17,6 +17,7 @@ type PacienteCompleto = {
   data_nascimento: string;
   registro_hospitalar: string;
   SEXOS: DropdownItem | null;
+  AVALIACOES: AvaliacaoSimples[] | null;
 };
 
 export { Paciente, PacienteItem, PacienteCompleto };

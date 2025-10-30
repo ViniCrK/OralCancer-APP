@@ -1,37 +1,12 @@
-import { supabase } from "@/config/supabase-client";
-import { Slot, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
+import { GlobalProvider, useGlobalContext } from "../context/GlobalProvider";
 
-export default function RootLayout() {
-  const [autenticado, setAutenticado] = useState<boolean | null>(null);
-  const [usuarioCarregado, setUsuarioCarregado] = useState(false);
-  const router = useRouter();
+// Componente interno que decide se mostra o App ou o Loading
+function RootLayout() {
+  const { isLoading } = useGlobalContext();
 
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAutenticado(!!session);
-      setUsuarioCarregado(true);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (usuarioCarregado) {
-      if (autenticado) {
-        router.replace("/(protected)/(tabs)/pagina_inicial");
-      } else {
-        router.replace("/(auth)/login");
-      }
-    }
-  }, [autenticado]);
-
-  if (!usuarioCarregado) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
@@ -40,4 +15,13 @@ export default function RootLayout() {
   }
 
   return <Slot />;
+}
+
+// A exportação padrão envolve o App com o Provider
+export default function AppLayout() {
+  return (
+    <GlobalProvider>
+      <RootLayout />
+    </GlobalProvider>
+  );
 }

@@ -3,6 +3,8 @@ import { Paciente } from "./paciente";
 
 type Avaliacao = { PACIENTES: Paciente | null };
 
+type AvaliacaoSimples = { id: number; created_at: string };
+
 type AvaliacaoCompleta = {
   id: number;
   queixa_principal: string;
@@ -52,6 +54,7 @@ type RelacaoFatorRisco = { FATORES_RISCO: FatorRisco | null };
 
 export {
   Avaliacao,
+  AvaliacaoSimples,
   AvaliacaoBreve,
   AvaliacaoClassificacaoRisco,
   AvaliacaoCompleta,

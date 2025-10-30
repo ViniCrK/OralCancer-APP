@@ -17,6 +17,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="pagina_inicial"
         options={{
+          href: "/pagina_inicial",
           tabBarLabel: "INÍCIO",
           tabBarIcon: ({ focused }) => {
             return (
@@ -34,6 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="pacientes"
         options={{
+          href: "/pacientes",
           tabBarLabel: "PACIENTES",
           tabBarIcon: ({ focused }) => {
             return (
@@ -51,6 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="avaliacao"
         options={{
+          href: "/avaliacao",
           tabBarLabel: "AVALIAÇÕES",
           tabBarIcon: ({ focused }) => {
             return (
@@ -68,6 +71,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="notificacoes"
         options={{
+          href: "/notificacoes",
           tabBarLabel: "NOTIFICAÇÕES",
           tabBarIcon: ({ focused }) => {
             return (
@@ -85,6 +89,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="perfil"
         options={{
+          href: "/perfil",
           tabBarLabel: "PERFIL",
           tabBarIcon: ({ focused }) => {
             return (

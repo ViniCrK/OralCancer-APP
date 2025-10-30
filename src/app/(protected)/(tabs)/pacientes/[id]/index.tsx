@@ -1,7 +1,8 @@
 import { usePacienteService } from "@/services/paciente";
 import { PacienteCompleto } from "@/types/paciente";
 import calcularIdade from "@/utils/calcularIdade";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -94,6 +95,43 @@ export default function DetalhePaciente() {
         <TextoDetalhe label="Sexo" value={paciente.SEXOS?.nome} />
       </View>
 
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Histórico de Avaliações</Text>
+
+        {!paciente.AVALIACOES || paciente.AVALIACOES.length === 0 ? (
+          <Text style={styles.listaVazia}>
+            Nenhuma avaliação encontrada para este paciente.
+          </Text>
+        ) : (
+          paciente.AVALIACOES.map((avaliacao) => (
+            <Link
+              href={`/avaliacao/${avaliacao.id}`} // Navega para o detalhe da avaliação
+              key={avaliacao.id}
+              asChild
+            >
+              <TouchableOpacity style={styles.linkItem}>
+                <Ionicons
+                  name="document-text-outline"
+                  size={20}
+                  color="#10B981"
+                />
+                <Text style={styles.linkItemText}>
+                  Avaliação #{avaliacao.id}
+                </Text>
+                <Text style={styles.linkItemData}>
+                  {new Date(avaliacao.created_at).toLocaleDateString("pt-BR")}
+                </Text>
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={20}
+                  color="#ccc"
+                />
+              </TouchableOpacity>
+            </Link>
+          ))
+        )}
+      </View>
+
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={styles.botao}
@@ -177,5 +215,30 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  listaVazia: {
+    fontSize: 14,
+    color: "gray",
+    textAlign: "center",
+    paddingVertical: 10,
+  },
+  linkItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  linkItemText: {
+    flex: 1, // Faz o texto ocupar o espaço e empurrar o resto
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  linkItemData: {
+    fontSize: 14,
+    color: "gray",
+    marginHorizontal: 10,
   },
 });

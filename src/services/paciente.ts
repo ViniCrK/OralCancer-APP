@@ -41,7 +41,8 @@ const PacienteService = {
       .select(
         `
         *,
-        SEXOS ( id, nome )
+        SEXOS ( id, nome ),
+        AVALIACOES ( id, created_at )
         `
       )
       .eq("id", id)
