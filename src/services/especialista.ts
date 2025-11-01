@@ -39,7 +39,7 @@ const EspecialistaService = {
     return { sucesso: true, mensagem: "Especialista cadastrado com sucesso!" };
   },
 
-  buscar: async (id: string) => {
+  buscar: async (id: number) => {
     const { data, error } = await supabase
       .from("ESPECIALISTAS")
       .select(
@@ -61,7 +61,7 @@ const EspecialistaService = {
   },
 
   atualizar: async (
-    id: string,
+    id: number,
     especialista: any
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase

@@ -16,84 +16,96 @@ import {
 import { Dropdown } from "react-native-element-dropdown";
 import DatePickerInput from "../components/DatePickerInput";
 import { MaskedTextInput } from "react-native-mask-text";
+import { PacienteDados } from "@/types/paciente";
+import PacienteSchema from "@/schemas/PacienteSchema";
 
 export default function EditarPaciente() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const pacienteService = usePacienteService();
 
-  const [initialValues, setInitialValues] = useState<any | null>(null);
-
+  const [initialValues, setInitialValues] = useState<PacienteDados | null>(
+    null
+  );
   const [sexos, setSexos] = useState<{ id: number; nome: string }[]>([]);
 
   const [carregando, setCarregando] = useState(true);
-  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    const buscarSexos = async () => {
-      const { data, error } = await supabase.from("SEXOS").select("id, nome");
+    if (!id) return;
 
-      if (error) {
-        console.error("Erro ao buscar sexos cadastrados:", error.message);
-      } else {
-        setSexos(data);
-      }
-    };
-
-    const carregarPaciente = async () => {
+    const carregarDados = async () => {
       setCarregando(true);
 
-      const paciente = await pacienteService.buscar(id as string);
+      try {
+        const [dadosPaciente, sexosData] = await Promise.all([
+          pacienteService.buscar(id),
+          supabase.from("SEXOS").select("id, nome"),
+        ]);
 
-      if (paciente) {
-        setInitialValues({
-          ...paciente,
-          data_nascimento: paciente.data_nascimento
-            ? new Date(paciente.data_nascimento)
-            : new Date(),
-        });
+        if (sexosData.error) {
+          console.error("Erro ao buscar os dados:", sexosData.error.message);
+        } else {
+          setSexos(sexosData.data);
+        }
+
+        if (dadosPaciente) {
+          setInitialValues({
+            nome: dadosPaciente.nome || "",
+            sobrenome: dadosPaciente.sobrenome || "",
+            data_nascimento: dadosPaciente.data_nascimento
+              ? new Date(dadosPaciente.data_nascimento)
+              : new Date(),
+            registro_hospitalar: dadosPaciente.registro_hospitalar || "",
+            sexo_id: dadosPaciente.SEXOS?.id || null,
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        Alert.alert("Erro", "Não foi possível carregar os dados para edição.");
+      } finally {
+        setCarregando(false);
       }
-
-      setCarregando(false);
     };
 
-    buscarSexos();
-    carregarPaciente();
+    carregarDados();
   }, [id]);
 
-  const handleAlterarDados = async (dados: any) => {
+  const handleAlterarDados = async (
+    dados: PacienteDados,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     Alert.alert(
       "Alterar dados",
       "Você tem certeza de que deseja alterar os dados do paciente?",
       [
-        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Cancelar",
+          style: "cancel",
+          onPress: () => setSubmitting(false),
+        },
         {
           text: "Sim",
           style: "default",
           onPress: async () => {
-            setSalvando(true);
+            try {
+              const { sucesso, mensagem } = await pacienteService.atualizar(
+                id as string,
+                dados
+              );
 
-            const dadosParaAtualizar = {
-              nome: dados.nome,
-              sobrenome: dados.sobrenome,
-              data_nascimento: dados.data_nascimento,
-              registro_hospitalar: dados.registro_hospitalar,
-              sexo_id: dados.sexo_id,
-            };
-
-            const { sucesso, mensagem } = await pacienteService.atualizar(
-              id as string,
-              dadosParaAtualizar
-            );
-
-            if (!sucesso) {
-              Alert.alert("Erro", mensagem);
-            } else {
-              Alert.alert("Sucesso", mensagem);
-              router.replace("/pacientes");
+              if (!sucesso) {
+                Alert.alert("Erro", mensagem);
+              } else {
+                Alert.alert("Sucesso", mensagem);
+                router.replace("/(tabs)/pacientes");
+              }
+            } catch (error) {
+              console.error("Erro ao atualizar paciente:", error);
+              Alert.alert("Erro", "Ocorreu uma falha ao salvar as alterações.");
+            } finally {
+              setSubmitting(false);
             }
-
-            setSalvando(false);
           },
         },
       ]
@@ -107,41 +119,69 @@ export default function EditarPaciente() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>Editar Paciente</Text>
-
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Formik
         initialValues={initialValues}
-        onSubmit={(dados) => handleAlterarDados(dados)}
+        validationSchema={PacienteSchema}
+        onSubmit={handleAlterarDados}
         enableReinitialize
       >
-        {({ handleChange, handleSubmit, setFieldValue, values }) => (
+        {({
+          handleChange,
+          handleSubmit,
+          setFieldValue,
+          values,
+          errors,
+          touched,
+          handleBlur,
+          isSubmitting,
+        }) => (
           <View style={styles.container}>
+            <Text style={styles.titulo}>Editar Paciente</Text>
+
             <View style={styles.form}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Nome</Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.nome && errors.nome ? styles.inputError : null,
+                  ]}
                   onChangeText={handleChange("nome")}
+                  onBlur={handleBlur("nome")}
                   value={values.nome}
                   placeholder="Digite o nome do paciente"
                   keyboardType="default"
                   autoCapitalize="words"
                 />
+
+                {touched.nome && errors.nome && (
+                  <Text style={styles.errorText}>{errors.nome}</Text>
+                )}
               </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Sobrenome</Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.sobrenome && errors.sobrenome
+                      ? styles.inputError
+                      : null,
+                  ]}
                   onChangeText={handleChange("sobrenome")}
+                  onBlur={handleBlur("sobrenome")}
                   value={values.sobrenome}
                   placeholder="Digite o sobrenome do paciente"
                   keyboardType="default"
                   autoCapitalize="sentences"
                 />
+
+                {touched.sobrenome && errors.sobrenome && (
+                  <Text style={styles.errorText}>{errors.sobrenome}</Text>
+                )}
               </View>
 
               <DatePickerInput
@@ -156,44 +196,62 @@ export default function EditarPaciente() {
                 <Text style={styles.label}>Sexo</Text>
 
                 <Dropdown
-                  style={styles.dropdown}
+                  style={[
+                    styles.dropdown,
+                    touched.sexo_id && errors.sexo_id
+                      ? styles.inputError
+                      : null,
+                  ]}
                   containerStyle={styles.dropdownContainer}
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
                   data={sexos}
                   search
                   searchPlaceholder="Sexo"
-                  searchField={"nome"}
+                  searchField={"label"}
                   maxHeight={280}
                   valueField={"id"}
                   labelField={"nome"}
                   placeholder="Selecione o sexo do paciente"
                   value={values.sexo_id}
-                  onChange={(sexo) => setFieldValue("sexo_id", sexo.id)}
+                  onChange={(sexo) => setFieldValue("sexo_id", sexo.value)}
+                  onBlur={() => handleBlur("sexo_id")}
                 />
+
+                {touched.sexo_id && errors.sexo_id && (
+                  <Text style={styles.errorText}>{errors.sexo_id}</Text>
+                )}
               </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Registro Hospitalar</Text>
 
-                <MaskedTextInput
-                  style={styles.input}
-                  mask="999999999"
-                  onChangeText={(registro_hospitalar) => {
-                    setFieldValue("registro_hospitalar", registro_hospitalar);
-                  }}
+                <TextInput
+                  style={[
+                    styles.input,
+                    touched.registro_hospitalar && errors.registro_hospitalar
+                      ? styles.inputError
+                      : null,
+                  ]}
+                  onChangeText={handleChange("registro_hospitalar")}
+                  onBlur={handleBlur("registro_hospitalar")}
                   value={values.registro_hospitalar}
-                  placeholder="EX.: 123456789"
+                  placeholder="Digite o registro hospitalar do paciente"
                   keyboardType="numeric"
                 />
+                {touched.registro_hospitalar && errors.registro_hospitalar && (
+                  <Text style={styles.errorText}>
+                    {errors.registro_hospitalar}
+                  </Text>
+                )}
               </View>
 
               <TouchableOpacity
-                style={[styles.botao, salvando && styles.botaoDesabilitado]}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => handleSubmit()}
-                disabled={salvando}
+                disabled={isSubmitting}
               >
-                {salvando ? (
+                {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.botaoTexto}>Salvar Alterações</Text>
@@ -208,42 +266,54 @@ export default function EditarPaciente() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0", paddingTop: 20 },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingTop: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: "#f0f0f0" },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
   },
-  form: { padding: 20 },
+  form: { backgroundColor: "#fff", padding: 20, borderRadius: 10 },
   inputContainer: { marginBottom: 15 },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-  },
   label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
-  dropdown: {
-    backgroundColor: "#fff",
+  input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: "#f9fafb",
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#f9fafb",
+    height: 50,
   },
   dropdownContainer: {
-    borderStartEndRadius: 10,
-    borderEndEndRadius: 10,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    borderColor: "#ccc",
   },
-  errorText: { color: "red", fontSize: 12, marginTop: 4 },
+  inputError: {
+    borderColor: "#ef4444",
+    borderWidth: 2,
+  },
+  errorText: {
+    color: "#ef4444",
+    fontSize: 12,
+    marginTop: 4,
+  },
   botao: {
     backgroundColor: "#10B981",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   botaoDesabilitado: { backgroundColor: "#a0d8c5" },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },

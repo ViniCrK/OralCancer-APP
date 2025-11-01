@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   Alert,
@@ -11,18 +10,18 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import { useUsuarioService } from "@/services/usuario";
-import { useState } from "react";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import LoginSchema from "@/schemas/LoginSchema";
+import PasswordInput from "@/components/SenhaInput";
 
 export default function LoginPagina() {
-  const router = useRouter();
   const usuarioService = useUsuarioService();
-  const [salvando, setSalvando] = useState(false);
 
-  const handleLogin = async ({ email, password: senha }: any) => {
-    setSalvando(true);
-
+  const handleLogin = async (
+    { email, password: senha }: any,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     const { sucesso, mensagem } = await usuarioService.entrar(email, senha);
 
     if (!sucesso) {
@@ -31,7 +30,7 @@ export default function LoginPagina() {
       Alert.alert("Sucesso", mensagem);
     }
 
-    setSalvando(false);
+    setSubmitting(false);
   };
 
   return (
@@ -45,15 +44,28 @@ export default function LoginPagina() {
 
         <Formik
           initialValues={{ email: "", password: "" }}
+          validationSchema={LoginSchema}
           onSubmit={handleLogin}
         >
-          {({ handleChange, handleSubmit, values }) => (
+          {({
+            handleBlur,
+            handleChange,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
             <View style={styles.formCard}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>E-mail</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.email && errors.email ? styles.inputError : null,
+                  ]}
                   onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
                   value={values.email}
                   placeholder="seu.email@exemplo.com"
                   placeholderTextColor={"#9ca3af"}
@@ -61,18 +73,24 @@ export default function LoginPagina() {
                   autoCapitalize="none"
                   autoFocus={true}
                 />
+
+                {touched.email && errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Senha</Text>
-                <TextInput
-                  style={styles.input}
+                <PasswordInput
+                  label="Nova Senha"
                   onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
                   value={values.password}
                   placeholder="••••••••"
-                  placeholderTextColor={"#9ca3af"}
-                  autoCapitalize="none"
-                  secureTextEntry
+                  errorMessage={
+                    touched.password && errors.password
+                      ? errors.password
+                      : undefined
+                  }
                 />
               </View>
 
@@ -86,10 +104,9 @@ export default function LoginPagina() {
 
               <TouchableOpacity
                 onPress={() => handleSubmit()}
-                style={[styles.botao, salvando && styles.botaoDesabilitado]}
-                disabled={salvando}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
               >
-                {salvando ? (
+                {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
                   <Text style={styles.botaoTexto}>Entrar</Text>
@@ -113,19 +130,14 @@ export default function LoginPagina() {
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-  },
+  scrollContainer: { flexGrow: 1 },
   container: {
     flex: 1,
     justifyContent: "center",
     padding: 20,
     backgroundColor: "#f0f2f5",
   },
-  header: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
+  header: { alignItems: "center", marginBottom: 30 },
   titulo: {
     fontSize: 28,
     fontWeight: "bold",
@@ -133,12 +145,7 @@ const styles = StyleSheet.create({
     color: "#1f2937",
     marginTop: 10,
   },
-  subtitulo: {
-    fontSize: 16,
-    color: "gray",
-    textAlign: "center",
-    marginTop: 5,
-  },
+  subtitulo: { fontSize: 16, color: "gray", textAlign: "center", marginTop: 5 },
   formCard: {
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -149,15 +156,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    color: "#374151",
-    marginBottom: 5,
-    fontWeight: "500",
-  },
+  inputContainer: { marginBottom: 15 },
+  label: { fontSize: 16, color: "#374151", marginBottom: 5, fontWeight: "500" },
   input: {
     borderWidth: 1,
     borderColor: "#d1d5db",
@@ -166,7 +166,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#f9fafb",
   },
+  inputError: {
+    // Estilo para o campo com erro
+    borderColor: "#ef4444",
+    borderWidth: 2,
+  },
   errorText: {
+    // Estilo para a mensagem de erro
     color: "#ef4444",
     fontSize: 12,
     marginTop: 4,
@@ -183,25 +189,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-  botaoDesabilitado: {
-    backgroundColor: "#a0d8c5",
-  },
+  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
   botaoTexto: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 16,
   },
-  linkContainer: {
-    marginTop: 25,
-    alignItems: "center",
-  },
-  linkTexto: {
-    fontSize: 14,
-    color: "gray",
-  },
-  linkTextoBold: {
-    fontWeight: "bold",
-    color: "#10B981",
-  },
+  linkContainer: { marginTop: 25, alignItems: "center" },
+  linkTexto: { fontSize: 14, color: "gray" },
+  linkTextoBold: { fontWeight: "bold", color: "#10B981" },
 });

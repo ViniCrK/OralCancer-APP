@@ -1,3 +1,4 @@
+import CadastroNotificacaoSchema from "@/schemas/NotificacaoSchema";
 import { useNotificacaoService } from "@/services/notificacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -9,6 +10,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 
 export default function CadastroNotificacao() {
@@ -20,12 +23,26 @@ export default function CadastroNotificacao() {
   const { especialista } = useEspecialistaStore();
   const notificacaoService = useNotificacaoService();
 
-  const handleSalvarNotificacao = async (dados: any) => {
+  const handleSalvarNotificacao = async (
+    dados: { conteudo: string },
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     if (!especialista) {
       Alert.alert(
         "Erro",
-        "Não foi possível identificar o especialista ou a avaliação."
+        "Não foi possível identificar o especialista remetente."
       );
+
+      setSubmitting(false);
+      return;
+    }
+
+    if (!avaliacaoId || !destinatarioId) {
+      Alert.alert(
+        "Erro",
+        "Não foi possível identificar a avaliação ou o destinatário."
+      );
+      setSubmitting(false);
       return;
     }
 
@@ -33,8 +50,8 @@ export default function CadastroNotificacao() {
       const { sucesso, mensagem } = await notificacaoService.cadastrar({
         ...dados,
         remetente_id: especialista.id,
-        destinatario_id: destinatarioId,
-        avaliacao_id: avaliacaoId,
+        destinatario_id: Number(destinatarioId),
+        avaliacao_id: Number(avaliacaoId),
       });
 
       Alert.alert(sucesso ? "Sucesso" : "Erro", mensagem);
@@ -48,49 +65,86 @@ export default function CadastroNotificacao() {
         "Erro inesperado",
         "Ocorreu uma falha ao tentar salvar a notificação"
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Formik
-        initialValues={{
-          conteudo: "",
-        }}
-        onSubmit={(dados) => handleSalvarNotificacao(dados)}
-      >
-        {({ handleSubmit, handleChange }) => (
-          <View style={styles.container}>
-            <Text style={styles.titulo}>Gerar Notificação</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Formik
+          initialValues={{ conteudo: "" }}
+          validationSchema={CadastroNotificacaoSchema} // 7. Aplicar o schema
+          onSubmit={handleSalvarNotificacao}
+        >
+          {({
+            handleSubmit,
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
+            <>
+              <Text style={styles.titulo}>Gerar Notificação</Text>
 
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Conteúdo</Text>
+              <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Conteúdo da Mensagem</Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      styles.textArea, // Aplicar estilo de área de texto
+                      touched.conteudo && errors.conteudo
+                        ? styles.inputError
+                        : null,
+                    ]}
+                    onChangeText={handleChange("conteudo")}
+                    onBlur={handleBlur("conteudo")}
+                    value={values.conteudo}
+                    placeholder="Descreva o conteúdo da notificação..."
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    multiline={true} // 9. Tornar o campo multiline
+                    numberOfLines={6}
+                    maxLength={250}
+                  />
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange("conteudo")}
-                  placeholder="Descreva o conteúdo da notificação"
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                />
+                  {touched.conteudo && errors.conteudo && (
+                    <Text style={styles.errorText}>{errors.conteudo}</Text>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.botao,
+                    isSubmitting && styles.botaoDesabilitado,
+                  ]} // 11. Usar isSubmitting
+                  onPress={() => handleSubmit()}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.botaoTexto}>Enviar Notificação</Text>
+                  )}
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={styles.botao}
-                onPress={() => handleSubmit()}
-              >
-                <Text style={styles.botaoTexto}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      </Formik>
-    </View>
+            </>
+          )}
+        </Formik>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -119,53 +173,33 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
+    backgroundColor: "#f9fafb",
   },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  dropdownContainer: {
-    borderStartEndRadius: 10,
-    borderEndEndRadius: 10,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  checkbox: {
-    marginRight: 12,
-    width: 24,
-    height: 24,
-    borderWidth: 1.5,
-    borderColor: "#ccc",
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: "#333",
-  },
-  observacoesTexto: {
-    height: 80,
+  textArea: {
+    height: 150, // Altura maior
     textAlignVertical: "top",
   },
-  contador: {
-    textAlign: "right",
-    color: "#6c757d",
+  inputError: {
+    borderColor: "#ef4444",
+    borderWidth: 2,
+  },
+  errorText: {
+    color: "#ef4444",
     fontSize: 12,
     marginTop: 4,
   },
   botao: {
     backgroundColor: "#10B981",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
     marginTop: 10,
     alignItems: "center",
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#a0d8c5",
   },
   botaoTexto: {
     color: "#fff",

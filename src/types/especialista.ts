@@ -18,6 +18,23 @@ type EspecialistaCompleto = {
   especialidade_id: number;
 };
 
+type DadosPerfil = {
+  nome: string;
+  sobrenome: string;
+  registro_profissional: string;
+  especialidade_id: number | null;
+};
+
+type AlterarEmailDados = {
+  novoEmail: string;
+  confirmarEmail: string;
+};
+
+type AlterarSenhaDados = {
+  novaSenha: string;
+  confirmarSenha: string;
+};
+
 type PerfilCompleto = {
   id: number;
   email: string;
@@ -31,5 +48,8 @@ export {
   Especialista,
   EspecialistaBreve,
   EspecialistaCompleto,
+  DadosPerfil,
+  AlterarEmailDados,
+  AlterarSenhaDados,
   PerfilCompleto,
 };

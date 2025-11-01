@@ -1,8 +1,8 @@
+import CadastroRelatorioSchema from "@/schemas/RelatorioSchema";
 import { useRelatorioService } from "@/services/relatorio";
 import { useEspecialistaStore } from "@/store/especialista";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
-import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,20 +10,27 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 
 export default function CadastroRelatorio() {
   const router = useRouter();
-  const { id: avaliacao_id } = useLocalSearchParams();
+  const { id: avaliacao_id } = useLocalSearchParams<{ id: string }>();
   const { especialista } = useEspecialistaStore();
   const relatorioService = useRelatorioService();
 
-  const handleSalvarRelatorio = async (dados: { conteudo: string }) => {
+  const handleSalvarRelatorio = async (
+    dados: { conteudo: string },
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     if (!especialista || !avaliacao_id) {
       Alert.alert(
         "Erro",
         "Não foi possível identificar o especialista ou a avaliação."
       );
+
+      setSubmitting(false);
       return;
     }
 
@@ -37,7 +44,7 @@ export default function CadastroRelatorio() {
       Alert.alert(sucesso ? "Sucesso" : "Erro", mensagem);
 
       if (sucesso) {
-        router.push(`/(tabs)/avaliacao/${avaliacao_id}/relatorios`);
+        router.back();
       }
     } catch (error) {
       console.error("Falha ao salvar relatório:", error);
@@ -45,49 +52,85 @@ export default function CadastroRelatorio() {
         "Erro inesperado",
         "Ocorreu uma falha ao tentar salvar o relatório"
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Formik
-        initialValues={{
-          conteudo: "",
-        }}
-        onSubmit={(dados) => handleSalvarRelatorio(dados)}
-      >
-        {({ handleSubmit, handleChange }) => (
-          <View style={styles.container}>
-            <Text style={styles.titulo}>Geração de Relatório</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Formik
+          initialValues={{ conteudo: "" }}
+          validationSchema={CadastroRelatorioSchema}
+          onSubmit={handleSalvarRelatorio}
+        >
+          {({
+            handleSubmit,
+            handleChange,
+            handleBlur,
+            values,
+            errors,
+            touched,
+            isSubmitting,
+          }) => (
+            <>
+              <Text style={styles.titulo}>Geração de Relatório</Text>
 
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Conteúdo</Text>
+              <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Conteúdo do Relatório</Text>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      styles.textArea, // Aplicar estilo de área de texto
+                      touched.conteudo && errors.conteudo
+                        ? styles.inputError
+                        : null,
+                    ]}
+                    onChangeText={handleChange("conteudo")}
+                    onBlur={handleBlur("conteudo")} // Adicionar onBlur
+                    value={values.conteudo} // Adicionar value
+                    placeholder="Descreva o conteúdo do relatório"
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    multiline={true} // 10. Tornar o campo multiline
+                    numberOfLines={10} // Sugestão de altura
+                  />
 
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange("conteudo")}
-                  placeholder="Descreva o conteúdo do relatório"
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                />
+                  {touched.conteudo && errors.conteudo && (
+                    <Text style={styles.errorText}>{errors.conteudo}</Text>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.botao,
+                    isSubmitting && styles.botaoDesabilitado,
+                  ]} // 12. Usar isSubmitting
+                  onPress={() => handleSubmit()}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.botaoTexto}>Salvar Relatório</Text>
+                  )}
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={styles.botao}
-                onPress={() => handleSubmit()}
-              >
-                <Text style={styles.botaoTexto}>Salvar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-      </Formik>
-    </View>
+            </>
+          )}
+        </Formik>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -116,53 +159,33 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
+    backgroundColor: "#f9fafb",
   },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+  textArea: {
+    height: 200, // Altura maior para o conteúdo do relatório
+    textAlignVertical: "top", // Começa a digitar do topo
   },
-  dropdownContainer: {
-    borderStartEndRadius: 10,
-    borderEndEndRadius: 10,
+  inputError: {
+    borderColor: "#ef4444",
+    borderWidth: 2,
   },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  checkbox: {
-    marginRight: 12,
-    width: 24,
-    height: 24,
-    borderWidth: 1.5,
-    borderColor: "#ccc",
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: "#333",
-  },
-  observacoesTexto: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  contador: {
-    textAlign: "right",
-    color: "#6c757d",
+  errorText: {
+    color: "#ef4444",
     fontSize: 12,
     marginTop: 4,
   },
   botao: {
     backgroundColor: "#10B981",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
     marginTop: 10,
     alignItems: "center",
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#a0d8c5",
   },
   botaoTexto: {
     color: "#fff",

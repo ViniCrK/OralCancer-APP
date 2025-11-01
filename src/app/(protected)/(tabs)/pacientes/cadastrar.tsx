@@ -1,7 +1,7 @@
 import { supabase } from "@/config/supabase-client";
 import { usePacienteService } from "@/services/paciente";
 import { useRouter } from "expo-router";
-import { Field, Formik } from "formik";
+import { Formik } from "formik";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -11,9 +11,11 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePickerInput from "./components/DatePickerInput";
+import PacienteSchema from "@/schemas/PacienteSchema";
 
 export default function CadastroPaciente() {
   const router = useRouter();
@@ -34,7 +36,10 @@ export default function CadastroPaciente() {
     buscarSexos();
   }, []);
 
-  const handleSalvarPaciente = async (dados: any) => {
+  const handleSalvarPaciente = async (
+    dados: any,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     try {
       const { sucesso, mensagem } = await pacienteService.cadastrar(dados);
 
@@ -49,6 +54,8 @@ export default function CadastroPaciente() {
         "Erro inesperado",
         "Ocorreu um erro ao cadastrar o paciente."
       );
+    } finally {
+      setSubmitting(false); // Garante que o estado de submissão é resetado
     }
   };
 
@@ -58,13 +65,23 @@ export default function CadastroPaciente() {
         initialValues={{
           nome: "",
           sobrenome: "",
-          sexo_id: 0,
+          sexo_id: null,
           registro_hospitalar: "",
           data_nascimento: new Date(),
         }}
-        onSubmit={(dados) => handleSalvarPaciente(dados)}
+        validationSchema={PacienteSchema}
+        onSubmit={handleSalvarPaciente}
       >
-        {({ handleSubmit, handleChange, setFieldValue, values }) => (
+        {({
+          handleSubmit,
+          handleChange,
+          setFieldValue,
+          values,
+          errors,
+          touched,
+          handleBlur,
+          isSubmitting,
+        }) => (
           <View style={styles.container}>
             <Text style={styles.titulo}>Cadastrar Paciente</Text>
 
@@ -73,24 +90,44 @@ export default function CadastroPaciente() {
                 <Text style={styles.label}>Nome</Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.nome && errors.nome ? styles.inputError : null,
+                  ]}
                   onChangeText={handleChange("nome")}
+                  onBlur={handleBlur("nome")}
+                  value={values.nome}
                   placeholder="Digite o nome do paciente"
                   keyboardType="default"
                   autoCapitalize="words"
                 />
+
+                {touched.nome && errors.nome && (
+                  <Text style={styles.errorText}>{errors.nome}</Text>
+                )}
               </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Sobrenome</Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.sobrenome && errors.sobrenome
+                      ? styles.inputError
+                      : null,
+                  ]}
                   onChangeText={handleChange("sobrenome")}
+                  onBlur={handleBlur("sobrenome")}
+                  value={values.sobrenome}
                   placeholder="Digite o sobrenome do paciente"
                   keyboardType="default"
                   autoCapitalize="sentences"
                 />
+
+                {touched.sobrenome && errors.sobrenome && (
+                  <Text style={styles.errorText}>{errors.sobrenome}</Text>
+                )}
               </View>
 
               <DatePickerInput
@@ -105,39 +142,66 @@ export default function CadastroPaciente() {
                 <Text style={styles.label}>Sexo</Text>
 
                 <Dropdown
-                  style={styles.dropdown}
+                  style={[
+                    styles.dropdown,
+                    touched.sexo_id && errors.sexo_id
+                      ? styles.inputError
+                      : null,
+                  ]}
                   containerStyle={styles.dropdownContainer}
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
                   data={sexos}
                   search
                   searchPlaceholder="Sexo"
-                  searchField={"nome"}
+                  searchField={"label"}
                   maxHeight={280}
                   valueField={"id"}
                   labelField={"nome"}
                   placeholder="Selecione o sexo do paciente"
                   value={values.sexo_id}
-                  onChange={(sexo) => setFieldValue("sexo_id", sexo.id)}
+                  onChange={(sexo) => setFieldValue("sexo_id", sexo.value)}
+                  onBlur={() => handleBlur("sexo_id")}
                 />
+
+                {touched.sexo_id && errors.sexo_id && (
+                  <Text style={styles.errorText}>{errors.sexo_id}</Text>
+                )}
               </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Registro Hospitalar</Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    touched.registro_hospitalar && errors.registro_hospitalar
+                      ? styles.inputError
+                      : null,
+                  ]}
                   onChangeText={handleChange("registro_hospitalar")}
+                  onBlur={handleBlur("registro_hospitalar")}
+                  value={values.registro_hospitalar}
                   placeholder="Digite o registro hospitalar do paciente"
                   keyboardType="numeric"
                 />
+                {touched.registro_hospitalar && errors.registro_hospitalar && (
+                  <Text style={styles.errorText}>
+                    {errors.registro_hospitalar}
+                  </Text>
+                )}
               </View>
 
               <TouchableOpacity
-                style={styles.botao}
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]} // 9. Usar isSubmitting
                 onPress={() => handleSubmit()}
+                disabled={isSubmitting}
               >
-                <Text style={styles.botaoTexto}>Salvar</Text>
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Salvar Paciente</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -148,90 +212,55 @@ export default function CadastroPaciente() {
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingTop: 20,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f0f0f0",
-  },
+  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingTop: 20 },
+  container: { flex: 1, padding: 20, backgroundColor: "#f0f0f0" },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
   },
-  form: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 5,
-    fontWeight: "500",
-  },
+  form: { backgroundColor: "#fff", padding: 20, borderRadius: 10 },
+  inputContainer: { marginBottom: 15 },
+  label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
+    borderRadius: 8,
+    padding: 12,
     fontSize: 16,
+    backgroundColor: "#f9fafb",
   },
   dropdown: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#f9fafb",
+    height: 50,
   },
   dropdownContainer: {
-    borderStartEndRadius: 10,
-    borderEndEndRadius: 10,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  checkbox: {
-    marginRight: 12,
-    width: 24,
-    height: 24,
-    borderWidth: 1.5,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
     borderColor: "#ccc",
   },
-  checkboxLabel: {
-    fontSize: 16,
-    color: "#333",
+  inputError: {
+    borderColor: "#ef4444",
+    borderWidth: 2,
   },
-  observacoesTexto: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  contador: {
-    textAlign: "right",
-    color: "#6c757d",
+  errorText: {
+    color: "#ef4444",
     fontSize: 12,
     marginTop: 4,
   },
   botao: {
     backgroundColor: "#10B981",
     padding: 15,
-    borderRadius: 5,
-    marginTop: 10,
+    borderRadius: 8,
     alignItems: "center",
+    marginTop: 10,
   },
-  botaoTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
+  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
