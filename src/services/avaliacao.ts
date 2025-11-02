@@ -8,7 +8,6 @@ export interface Avaliacao {
   historico_familiar_cancer: boolean;
   observacoes: string;
   rascunho: boolean;
-  // fatores_risco_ids: [];
   habito_id: number;
   localizacao_intraoral_id: number;
   aspecto_lesao_id: number;

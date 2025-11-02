@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 10,
     padding: 20,
-    marginTop: -20, // Efeito flutuante
+    marginTop: -20,
   },
   sectionTitle: {
     fontSize: 18,
@@ -116,6 +116,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 5,
-    overflow: "hidden", // para o borderRadius funcionar no iOS
+    overflow: "hidden",
   },
 });

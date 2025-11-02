@@ -17,7 +17,7 @@ const NotificacaoService = {
     return { sucesso: true, mensagem: "Notificação criada com sucesso!" };
   },
 
-  listar: async (destinatarioId: string): Promise<any[]> => {
+  listar: async (destinatarioId: number): Promise<any[]> => {
     const { data, error } = await supabase
       .from("NOTIFICACOES")
       .select(

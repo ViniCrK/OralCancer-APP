@@ -185,7 +185,6 @@ export default function CadastroAvaliacao() {
     try {
       const { imagens, fatores_risco_ids, ...dadosAvaliacao } = values;
 
-      // SALVANDO NOVA AVALIACAO
       const { data: novaAvaliacao, error: erroAvaliacao } = await supabase
         .from("AVALIACOES")
         .insert({
@@ -199,7 +198,6 @@ export default function CadastroAvaliacao() {
 
       const novaAvaliacaoId = novaAvaliacao.id;
 
-      // SALVAR FATORES DE RISCO
       if (fatores_risco_ids && fatores_risco_ids.length > 0) {
         const fatoresDeRisco = fatores_risco_ids.map((fatorId: number) => ({
           avaliacao_id: novaAvaliacaoId,
@@ -214,13 +212,11 @@ export default function CadastroAvaliacao() {
       }
 
       if (imagens && imagens.length > 0) {
-        // SALVANDO IMAGENS NO STORAGE
         const uploadPromises = imagens.map((imagem: Imagem) =>
           enviarImagem(imagem.uri)
         );
         const urlsPublicas = await Promise.all(uploadPromises);
 
-        // SALVANDO AS URLS NA BANCO
         const dadosDasImagens = urlsPublicas.map((url) => ({
           url: url,
           avaliacao_id: novaAvaliacaoId,
@@ -326,7 +322,7 @@ export default function CadastroAvaliacao() {
 
                 <TouchableOpacity
                   style={styles.linkNovoPaciente}
-                  onPress={() => router.push("/pacientes/cadastrar")} // Navega para a tela
+                  onPress={() => router.push("/pacientes/cadastrar")}
                 >
                   <Text style={styles.linkNovoPacienteTexto}>
                     Não encontrou o paciente? Cadastre um novo
@@ -771,7 +767,7 @@ const styles = StyleSheet.create({
     borderEndEndRadius: 10,
   },
   selectedChip: {
-    backgroundColor: "#d1fae5", // Um verde bem claro para os chips
+    backgroundColor: "#d1fae5",
     borderRadius: 10,
     padding: 8,
   },

@@ -6,7 +6,7 @@ const EdicaoPerfilSchema = Yup.object().shape({
     .required("O nome é obrigatório."),
   sobrenome: Yup.string().required("O sobrenome é obrigatório."),
   registro_profissional: Yup.string()
-    .min(12, "O registro profissional parece estar incompleto.")
+    .min(9, "O registro profissional parece estar incompleto.")
     .required("O registro profissional é obrigatório."),
   especialidade_id: Yup.number()
     .nullable()

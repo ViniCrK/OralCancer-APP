@@ -20,7 +20,7 @@ import PacienteSchema from "@/schemas/PacienteSchema";
 export default function CadastroPaciente() {
   const router = useRouter();
   const pacienteService = usePacienteService();
-  const [sexos, setSexos] = useState<{ id: number; nome: string }[]>([]);
+  const [sexos, setSexos] = useState<{ value: number; label: string }[]>([]);
 
   useEffect(() => {
     const buscarSexos = async () => {
@@ -29,7 +29,12 @@ export default function CadastroPaciente() {
       if (error) {
         console.error("Erro ao buscar sexos cadastrados:", error.message);
       } else {
-        setSexos(data);
+        const dadosFormatados = data.map((item) => ({
+          value: item.id,
+          label: item.nome,
+        }));
+
+        setSexos(dadosFormatados);
       }
     };
 
@@ -55,7 +60,7 @@ export default function CadastroPaciente() {
         "Ocorreu um erro ao cadastrar o paciente."
       );
     } finally {
-      setSubmitting(false); // Garante que o estado de submissão é resetado
+      setSubmitting(false);
     }
   };
 
@@ -144,21 +149,19 @@ export default function CadastroPaciente() {
                 <Dropdown
                   style={[
                     styles.dropdown,
-                    touched.sexo_id && errors.sexo_id
-                      ? styles.inputError
-                      : null,
+                    touched.sexo_id && errors.sexo_id && styles.inputError,
                   ]}
                   containerStyle={styles.dropdownContainer}
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
                   data={sexos}
+                  maxHeight={280}
+                  valueField={"value"}
+                  labelField={"label"}
+                  placeholder="Selecione o sexo do paciente"
                   search
                   searchPlaceholder="Sexo"
                   searchField={"label"}
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o sexo do paciente"
                   value={values.sexo_id}
                   onChange={(sexo) => setFieldValue("sexo_id", sexo.value)}
                   onBlur={() => handleBlur("sexo_id")}
@@ -193,7 +196,7 @@ export default function CadastroPaciente() {
               </View>
 
               <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]} // 9. Usar isSubmitting
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => handleSubmit()}
                 disabled={isSubmitting}
               >

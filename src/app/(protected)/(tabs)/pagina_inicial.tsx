@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 15,
     padding: 20,
-    width: "46%", // Para criar duas colunas com espaço
+    width: "46%",
     marginBottom: 16,
     alignItems: "center",
     elevation: 3,

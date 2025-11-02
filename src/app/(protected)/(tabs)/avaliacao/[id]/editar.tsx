@@ -212,9 +212,8 @@ export default function EditarAvaliacao() {
       if (imagensParaExcluir.length > 0) {
         const deletingIds = imagensParaExcluir
           .map((img) => img.id)
-          .filter(Boolean); // Pega IDs válidos
+          .filter(Boolean);
 
-        // Deleta apenas do Banco de Dados pelos IDs
         if (deletingIds.length > 0) {
           const { error: deleteDbError } = await supabase
             .from("AVALIACAO_IMAGENS_URL")
@@ -853,7 +852,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
   selectedChip: {
-    backgroundColor: "#d1fae5", // Um verde bem claro para os chips
+    backgroundColor: "#d1fae5",
     borderRadius: 12,
     paddingVertical: 6,
     paddingHorizontal: 12,

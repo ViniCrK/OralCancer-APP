@@ -15,8 +15,8 @@ const PacienteSchema = Yup.object().shape({
     .positive("Por favor, selecione o sexo.")
     .required("O sexo é obrigatório."),
   registro_hospitalar: Yup.string()
-    .required("O registro hospitalar é obrigatório.")
-    .min(9, "O registro hospitalar deve ter 9 dígitos."),
+    .min(9, "O registro hospitalar deve ter 9 dígitos.")
+    .required("O registro hospitalar é obrigatório."),
 });
 
 export default PacienteSchema;

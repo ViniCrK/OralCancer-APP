@@ -75,7 +75,7 @@ export default function CadastroNotificacao() {
       <View style={styles.container}>
         <Formik
           initialValues={{ conteudo: "" }}
-          validationSchema={CadastroNotificacaoSchema} // 7. Aplicar o schema
+          validationSchema={CadastroNotificacaoSchema}
           onSubmit={handleSalvarNotificacao}
         >
           {({
@@ -96,7 +96,7 @@ export default function CadastroNotificacao() {
                   <TextInput
                     style={[
                       styles.input,
-                      styles.textArea, // Aplicar estilo de área de texto
+                      styles.textArea,
                       touched.conteudo && errors.conteudo
                         ? styles.inputError
                         : null,
@@ -107,7 +107,7 @@ export default function CadastroNotificacao() {
                     placeholder="Descreva o conteúdo da notificação..."
                     keyboardType="default"
                     autoCapitalize="sentences"
-                    multiline={true} // 9. Tornar o campo multiline
+                    multiline={true}
                     numberOfLines={6}
                     maxLength={250}
                   />
@@ -121,7 +121,7 @@ export default function CadastroNotificacao() {
                   style={[
                     styles.botao,
                     isSubmitting && styles.botaoDesabilitado,
-                  ]} // 11. Usar isSubmitting
+                  ]}
                   onPress={() => handleSubmit()}
                   disabled={isSubmitting}
                 >
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   textArea: {
-    height: 150, // Altura maior
+    height: 150,
     textAlignVertical: "top",
   },
   inputError: {

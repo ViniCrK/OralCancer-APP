@@ -181,12 +181,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   inputError: {
-    // Estilo para o campo com erro
     borderColor: "#ef4444",
     borderWidth: 2,
   },
   errorText: {
-    // Estilo para a mensagem de erro
     color: "#ef4444",
     fontSize: 12,
     marginTop: 4,

@@ -50,6 +50,8 @@ const PacienteService = {
 
     if (error) {
       console.error("Erro ao buscar o paciente:", error.message);
+
+      return null;
     }
 
     return data;

@@ -2,7 +2,6 @@ import { Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { GlobalProvider, useGlobalContext } from "../context/GlobalProvider";
 
-// Componente interno que decide se mostra o App ou o Loading
 function RootLayout() {
   const { isLoading } = useGlobalContext();
 
@@ -17,7 +16,6 @@ function RootLayout() {
   return <Slot />;
 }
 
-// A exportação padrão envolve o App com o Provider
 export default function AppLayout() {
   return (
     <GlobalProvider>

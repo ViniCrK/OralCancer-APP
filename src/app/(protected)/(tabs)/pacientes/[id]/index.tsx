@@ -105,7 +105,7 @@ export default function DetalhePaciente() {
         ) : (
           paciente.AVALIACOES.map((avaliacao) => (
             <Link
-              href={`/avaliacao/${avaliacao.id}`} // Navega para o detalhe da avaliação
+              href={`/avaliacao/${avaliacao.id}`}
               key={avaliacao.id}
               asChild
             >
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0f0",
   },
   linkItemText: {
-    flex: 1, // Faz o texto ocupar o espaço e empurrar o resto
+    flex: 1,
     fontSize: 16,
     color: "#333",
     marginLeft: 10,

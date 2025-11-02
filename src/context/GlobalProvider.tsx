@@ -3,17 +3,15 @@ import { supabase } from "@/config/supabase-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSegments } from "expo-router";
 
-// 1. Definir o tipo do Contexto
 type GlobalContextType = {
   isAuthenticated: boolean | null;
   onboardingComplete: boolean;
   isLoading: boolean;
-  finishOnboarding: () => Promise<void>; // Função para o onboarding chamar
+  finishOnboarding: () => Promise<void>;
 };
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
-// 2. Hook customizado para usar o contexto
 export const useGlobalContext = () => {
   const context = useContext(GlobalContext);
   if (!context) {
@@ -22,7 +20,6 @@ export const useGlobalContext = () => {
   return context;
 };
 
-// 3. O Provedor
 export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [onboardingComplete, setOnboardingComplete] = useState(false);
@@ -33,9 +30,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
   const segments = useSegments();
   const isLoading = !authLoaded || !onboardingLoaded;
 
-  // 4. Lógica de verificação (a mesma do seu _layout antigo)
   useEffect(() => {
-    // a. Verifica o status do onboarding
     const checkOnboarding = async () => {
       try {
         const value = await AsyncStorage.getItem("hasCompletedOnboarding");
@@ -47,7 +42,6 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // b. Verifica o status da autenticação
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -62,9 +56,8 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // 5. Lógica de redirecionamento (a mesma do seu _layout antigo)
   useEffect(() => {
-    if (isLoading) return; // Não faz nada se ainda estiver carregando
+    if (isLoading) return;
 
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(protected)";
@@ -79,12 +72,10 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isLoading, onboardingComplete, isAuthenticated, segments, router]);
 
-  // 6. Função que será chamada pelo onboarding
   const finishOnboarding = async () => {
     try {
       await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-      setOnboardingComplete(true); // Atualiza o estado
-      // Não precisa mais de router.replace() aqui!
+      setOnboardingComplete(true);
     } catch (e) {
       console.error("Failed to save onboarding status", e);
     }

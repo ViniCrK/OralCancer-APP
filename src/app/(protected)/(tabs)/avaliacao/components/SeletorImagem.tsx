@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     position: "relative",
     overflow: "hidden",
-    backgroundColor: "#f0f0f0", // Cor de fundo para o placeholder
+    backgroundColor: "#f0f0f0",
   },
   image: { width: "100%", height: "100%" },
   loadingOverlay: {

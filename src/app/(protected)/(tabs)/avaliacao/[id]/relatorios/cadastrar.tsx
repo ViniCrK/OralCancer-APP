@@ -83,19 +83,19 @@ export default function CadastroRelatorio() {
                   <TextInput
                     style={[
                       styles.input,
-                      styles.textArea, // Aplicar estilo de área de texto
+                      styles.textArea,
                       touched.conteudo && errors.conteudo
                         ? styles.inputError
                         : null,
                     ]}
                     onChangeText={handleChange("conteudo")}
-                    onBlur={handleBlur("conteudo")} // Adicionar onBlur
-                    value={values.conteudo} // Adicionar value
+                    onBlur={handleBlur("conteudo")}
+                    value={values.conteudo}
                     placeholder="Descreva o conteúdo do relatório"
                     keyboardType="default"
                     autoCapitalize="sentences"
-                    multiline={true} // 10. Tornar o campo multiline
-                    numberOfLines={10} // Sugestão de altura
+                    multiline={true}
+                    numberOfLines={10}
                   />
 
                   {touched.conteudo && errors.conteudo && (
@@ -107,7 +107,7 @@ export default function CadastroRelatorio() {
                   style={[
                     styles.botao,
                     isSubmitting && styles.botaoDesabilitado,
-                  ]} // 12. Usar isSubmitting
+                  ]}
                   onPress={() => handleSubmit()}
                   disabled={isSubmitting}
                 >
@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   textArea: {
-    height: 200, // Altura maior para o conteúdo do relatório
-    textAlignVertical: "top", // Começa a digitar do topo
+    height: 200,
+    textAlignVertical: "top",
   },
   inputError: {
     borderColor: "#ef4444",

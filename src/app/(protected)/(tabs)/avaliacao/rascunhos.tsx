@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     marginBottom: 16,
-    elevation: 3, // Sombra para Android
-    shadowColor: "#000", // Sombra para iOS
+    elevation: 3,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -143,8 +143,7 @@ const styles = StyleSheet.create({
   },
   botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   botaoContinuar: {
-    // Estilo específico para o botão de rascunho
-    backgroundColor: "#f97316", // Laranja para indicar edição/continuação
+    backgroundColor: "#f97316",
     padding: 12,
     borderRadius: 5,
     marginTop: 16,

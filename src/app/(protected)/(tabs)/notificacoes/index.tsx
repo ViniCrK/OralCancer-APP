@@ -28,7 +28,7 @@ export default function ListaNotificacoes() {
     try {
       setCarregando(true);
 
-      const dados = await notificacaoService.listar(especialista.id as string);
+      const dados = await notificacaoService.listar(especialista.id);
 
       setNotificacoes(dados || []);
     } catch (error) {
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   cardNaoLida: {
-    backgroundColor: "#e0f2f1", // Um tom de verde bem claro
+    backgroundColor: "#e0f2f1",
     borderLeftWidth: 5,
     borderLeftColor: "#10B981",
     paddingLeft: 15,

@@ -21,7 +21,7 @@ export default function CadastroEspecialista() {
   const router = useRouter();
   const especialistaService = useEspecialistaService();
   const [especialidades, setEspecialidades] = useState<
-    { id: number; nome: string }[]
+    { value: number; label: string }[]
   >([]);
 
   useEffect(() => {
@@ -33,7 +33,12 @@ export default function CadastroEspecialista() {
       if (error) {
         console.error(error.message);
       } else {
-        setEspecialidades(data);
+        const dadosFormatados = data.map((item) => ({
+          value: item.id,
+          label: item.nome,
+        }));
+
+        setEspecialidades(dadosFormatados);
       }
     };
 
@@ -68,10 +73,9 @@ export default function CadastroEspecialista() {
             registro_profissional: "",
             especialidade_id: null,
           }}
-          validationSchema={CadastroEspecialistaSchema} // 8. Aplicar o schema
+          validationSchema={CadastroEspecialistaSchema}
           onSubmit={handleCadastrar}
         >
-          {/* 9. Obter 'errors', 'touched', 'handleBlur' e 'isSubmitting' */}
           {({
             handleChange,
             handleSubmit,
@@ -92,8 +96,8 @@ export default function CadastroEspecialista() {
                     touched.nome && errors.nome ? styles.inputError : null,
                   ]}
                   onChangeText={handleChange("nome")}
-                  onBlur={handleBlur("nome")} // Adicionar onBlur
-                  value={values.nome} // Adicionar value
+                  onBlur={handleBlur("nome")}
+                  value={values.nome}
                   autoCapitalize="words"
                 />
                 {touched.nome && errors.nome && (
@@ -112,8 +116,8 @@ export default function CadastroEspecialista() {
                       : null,
                   ]}
                   onChangeText={handleChange("sobrenome")}
-                  onBlur={handleBlur("sobrenome")} // Adicionar onBlur
-                  value={values.sobrenome} // Adicionar value
+                  onBlur={handleBlur("sobrenome")}
+                  value={values.sobrenome}
                   autoCapitalize="sentences"
                 />
                 {touched.sobrenome && errors.sobrenome && (
@@ -133,10 +137,9 @@ export default function CadastroEspecialista() {
                   ]}
                   mask="AAA-AA 999999"
                   onChangeText={(text, rawText) => {
-                    // 'text' é o valor formatado
                     setFieldValue("registro_profissional", text);
                   }}
-                  onBlur={handleBlur("registro_profissional")} // Adicionar onBlur
+                  onBlur={handleBlur("registro_profissional")}
                   value={values.registro_profissional}
                   placeholder="EX.: CRM-AL 123456"
                   autoCapitalize="characters"
@@ -161,22 +164,18 @@ export default function CadastroEspecialista() {
                   containerStyle={styles.dropdownContainer}
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
-                  data={especialidades.map((e) => ({
-                    label: e.nome,
-                    value: e.id,
-                  }))} // Formata os dados
-                  search
-                  searchPlaceholder="Nome da Especialidade"
-                  searchField={"label"} // Busca pelo label formatado
+                  data={especialidades}
                   maxHeight={280}
                   valueField={"value"}
                   labelField={"label"}
                   placeholder="Selecione a especialidade"
+                  search
+                  searchPlaceholder="Nome da Especialidade"
+                  searchField={"label"}
                   value={values.especialidade_id}
                   onChange={(item) =>
                     setFieldValue("especialidade_id", item.value)
                   }
-                  // Adicionar onBlur para o Dropdown
                   onBlur={() => handleBlur("especialidade_id")}
                 />
                 {touched.especialidade_id && errors.especialidade_id && (
@@ -187,7 +186,7 @@ export default function CadastroEspecialista() {
               </View>
 
               <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]} // 10. Usar isSubmitting
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
                 onPress={() => handleSubmit()}
                 disabled={isSubmitting}
               >
@@ -207,7 +206,6 @@ export default function CadastroEspecialista() {
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    // Para o ScrollView
     flexGrow: 1,
     justifyContent: "center",
   },
@@ -215,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f0f0f0",
     paddingTop: 20,
-    paddingHorizontal: 20, // Adicionado padding horizontal
+    paddingHorizontal: 20,
   },
   titulo: {
     fontSize: 24,
@@ -225,15 +223,15 @@ const styles = StyleSheet.create({
   },
   form: {
     padding: 20,
-    backgroundColor: "#fff", // Adicionado fundo branco ao formulário
+    backgroundColor: "#fff",
     borderRadius: 10,
   },
   inputContainer: { marginBottom: 15 },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 12, // Aumentado padding
-    borderRadius: 8, // Bordas mais suaves
+    padding: 12,
+    borderRadius: 8,
     fontSize: 16,
     backgroundColor: "#f9fafb",
   },
@@ -241,11 +239,11 @@ const styles = StyleSheet.create({
   dropdown: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 8, // Bordas mais suaves
-    paddingVertical: 12, // Ajustado padding
+    borderRadius: 8,
+    paddingVertical: 12,
     paddingHorizontal: 12,
     backgroundColor: "#f9fafb",
-    height: 50, // Altura fixa para alinhar com inputs
+    height: 50,
   },
   dropdownContainer: {
     borderBottomLeftRadius: 8,
@@ -253,7 +251,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
   inputError: {
-    // Estilo para campos com erro
     borderColor: "#ef4444",
     borderWidth: 2,
   },

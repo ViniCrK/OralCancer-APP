@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   conteudoTexto: {
     fontSize: 16,
-    lineHeight: 24, // Melhora a legibilidade
+    lineHeight: 24,
     color: "#444",
   },
 });

@@ -26,7 +26,9 @@ export default function EditarPerfil() {
   const especialistaService = useEspecialistaService();
 
   const [initialValues, setInitialValues] = useState<DadosPerfil | null>(null);
-  const [especialidades, setEspecialidades] = useState<DropdownItem[]>([]);
+  const [especialidades, setEspecialidades] = useState<
+    { value: number; label: string }[]
+  >([]);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
@@ -47,7 +49,12 @@ export default function EditarPerfil() {
             especialidadesData.error.message
           );
         } else {
-          setEspecialidades(especialidadesData.data);
+          const dadosFormatados = especialidadesData.data.map((item) => ({
+            value: item.id,
+            label: item.nome,
+          }));
+
+          setEspecialidades(dadosFormatados);
         }
 
         if (dadosPerfil) {
@@ -226,13 +233,12 @@ export default function EditarPerfil() {
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
                   data={especialidades}
-                  search
-                  searchPlaceholder="Nome da Especialidade"
-                  searchField={"label"}
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
+                  valueField={"value"}
+                  labelField={"label"}
                   placeholder="Selecione a especialidade"
+                  search
+                  searchPlaceholder="Especialidade"
+                  searchField={"label"}
                   value={values.especialidade_id}
                   onChange={(item) =>
                     setFieldValue("especialidade_id", item.value)

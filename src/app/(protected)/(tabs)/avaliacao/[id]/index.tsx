@@ -374,10 +374,10 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginHorizontal: -5, // Compensa o padding dos itens
+    marginHorizontal: -5,
   },
   gridItem: {
-    width: "50%", // Cria a grade de duas colunas
+    width: "50%",
     paddingHorizontal: 5,
     marginBottom: 15,
   },
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0d9488",
   },
   botaoEditar: {
-    backgroundColor: "#f97316", // Laranja para edição
+    backgroundColor: "#f97316",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 8,
     marginRight: 10,
-    backgroundColor: "#e0e0e0", // Placeholder color
+    backgroundColor: "#e0e0e0",
   },
   modalContainer: {
     flex: 1,
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   chip: {
-    backgroundColor: "#e0f2f1", // Verde claro, consistente com o tema
+    backgroundColor: "#e0f2f1",
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   chipText: {
-    color: "#0d9488", // Verde escuro
+    color: "#0d9488",
     fontSize: 14,
     fontWeight: "500",
   },

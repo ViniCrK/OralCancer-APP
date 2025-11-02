@@ -15,7 +15,6 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePickerInput from "../components/DatePickerInput";
-import { MaskedTextInput } from "react-native-mask-text";
 import { PacienteDados } from "@/types/paciente";
 import PacienteSchema from "@/schemas/PacienteSchema";
 
@@ -27,7 +26,7 @@ export default function EditarPaciente() {
   const [initialValues, setInitialValues] = useState<PacienteDados | null>(
     null
   );
-  const [sexos, setSexos] = useState<{ id: number; nome: string }[]>([]);
+  const [sexos, setSexos] = useState<{ value: number; label: string }[]>([]);
 
   const [carregando, setCarregando] = useState(true);
 
@@ -46,7 +45,12 @@ export default function EditarPaciente() {
         if (sexosData.error) {
           console.error("Erro ao buscar os dados:", sexosData.error.message);
         } else {
-          setSexos(sexosData.data);
+          const dadosFormatados = sexosData.data.map((item) => ({
+            value: item.id,
+            label: item.nome,
+          }));
+
+          setSexos(dadosFormatados);
         }
 
         if (dadosPaciente) {
@@ -206,13 +210,12 @@ export default function EditarPaciente() {
                   placeholderStyle={{ fontSize: 16, color: "gray" }}
                   selectedTextStyle={{ color: "black" }}
                   data={sexos}
+                  valueField={"value"}
+                  labelField={"label"}
+                  placeholder="Selecione o sexo do paciente"
                   search
                   searchPlaceholder="Sexo"
                   searchField={"label"}
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o sexo do paciente"
                   value={values.sexo_id}
                   onChange={(sexo) => setFieldValue("sexo_id", sexo.value)}
                   onBlur={() => handleBlur("sexo_id")}
