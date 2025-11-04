@@ -1,6 +1,7 @@
 import { supabase } from "@/config/supabase-client";
 import CadastroEspecialistaSchema from "@/schemas/EspecialistaSchema";
 import { useEspecialistaService } from "@/services/especialista";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
@@ -89,6 +90,7 @@ export default function CadastroEspecialista() {
             <View style={styles.form}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Nome</Text>
+
                 <TextInput
                   placeholder="Nome"
                   style={[
@@ -100,6 +102,7 @@ export default function CadastroEspecialista() {
                   value={values.nome}
                   autoCapitalize="words"
                 />
+
                 {touched.nome && errors.nome && (
                   <Text style={styles.errorText}>{errors.nome}</Text>
                 )}
@@ -107,6 +110,7 @@ export default function CadastroEspecialista() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Sobrenome</Text>
+
                 <TextInput
                   placeholder="Sobrenome"
                   style={[
@@ -120,6 +124,7 @@ export default function CadastroEspecialista() {
                   value={values.sobrenome}
                   autoCapitalize="sentences"
                 />
+
                 {touched.sobrenome && errors.sobrenome && (
                   <Text style={styles.errorText}>{errors.sobrenome}</Text>
                 )}
@@ -127,6 +132,7 @@ export default function CadastroEspecialista() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Registro Profissional</Text>
+
                 <MaskedTextInput
                   style={[
                     styles.input,
@@ -144,6 +150,7 @@ export default function CadastroEspecialista() {
                   placeholder="EX.: CRM-AL 123456"
                   autoCapitalize="characters"
                 />
+
                 {touched.registro_profissional &&
                   errors.registro_profissional && (
                     <Text style={styles.errorText}>
@@ -177,7 +184,28 @@ export default function CadastroEspecialista() {
                     setFieldValue("especialidade_id", item.value)
                   }
                   onBlur={() => handleBlur("especialidade_id")}
+                  renderRightIcon={() => {
+                    if (values.especialidade_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("especialidade_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
+
                 {touched.especialidade_id && errors.especialidade_id && (
                   <Text style={styles.errorText}>
                     {errors.especialidade_id}

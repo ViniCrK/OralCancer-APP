@@ -4,6 +4,7 @@ import { useEspecialistaService } from "@/services/especialista";
 import { useEspecialistaStore } from "@/store/especialista";
 import { DropdownItem } from "@/types/avaliacao";
 import { DadosPerfil } from "@/types/especialista";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Formik } from "formik";
 import { useEffect, useState } from "react";
@@ -244,7 +245,28 @@ export default function EditarPerfil() {
                     setFieldValue("especialidade_id", item.value)
                   }
                   onBlur={() => handleBlur("especialidade_id")}
+                  renderRightIcon={() => {
+                    if (values.especialidade_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("especialidade_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
+
                 {touched.especialidade_id && errors.especialidade_id && (
                   <Text style={styles.errorText}>
                     {errors.especialidade_id}

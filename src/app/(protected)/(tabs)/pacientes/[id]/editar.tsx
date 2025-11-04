@@ -17,6 +17,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import DatePickerInput from "../components/DatePickerInput";
 import { PacienteDados } from "@/types/paciente";
 import PacienteSchema from "@/schemas/PacienteSchema";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function EditarPaciente() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -219,6 +220,24 @@ export default function EditarPaciente() {
                   value={values.sexo_id}
                   onChange={(sexo) => setFieldValue("sexo_id", sexo.value)}
                   onBlur={() => handleBlur("sexo_id")}
+                  renderRightIcon={() => {
+                    if (values.sexo_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => setFieldValue("sexo_id", null)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
 
                 {touched.sexo_id && errors.sexo_id && (

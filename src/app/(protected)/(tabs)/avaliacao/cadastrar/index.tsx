@@ -1,5 +1,4 @@
 import { supabase } from "@/config/supabase-client";
-import { useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { DropdownItem } from "@/types/avaliacao";
 import { PacienteItem } from "@/types/paciente";
@@ -22,6 +21,7 @@ import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import SeletorImagem, { Imagem } from "../components/SeletorImagem";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function CadastroAvaliacao() {
   const router = useRouter();
@@ -318,6 +318,24 @@ export default function CadastroAvaliacao() {
                   onChange={(paciente) =>
                     setFieldValue("paciente_id", paciente.id)
                   }
+                  renderRightIcon={() => {
+                    if (values.paciente_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => setFieldValue("paciente_id", null)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
 
                 <TouchableOpacity
@@ -386,11 +404,30 @@ export default function CadastroAvaliacao() {
                   placeholder="Selecione o hábito"
                   value={values.habito_id}
                   onChange={(habito) => setFieldValue("habito_id", habito.id)}
+                  renderRightIcon={() => {
+                    if (values.habito_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => setFieldValue("habito_id", null)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Carga Tabágica/Etílica</Text>
+
                 <TextInput
                   style={styles.input}
                   onChangeText={(valorTexto) =>
@@ -406,6 +443,7 @@ export default function CadastroAvaliacao() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Histórico Familiar de Câncer</Text>
+
                 <TouchableOpacity
                   style={styles.checkboxContainer}
                   onPress={() =>
@@ -427,6 +465,7 @@ export default function CadastroAvaliacao() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Observações Clínicas</Text>
+
                 <TextInput
                   style={styles.observacoesTexto}
                   multiline
@@ -468,6 +507,30 @@ export default function CadastroAvaliacao() {
                   onChange={(fator) =>
                     setFieldValue("fatores_risco_ids", fator)
                   }
+                  renderRightIcon={() => {
+                    if (
+                      values.fatores_risco_ids &&
+                      values.fatores_risco_ids.length > 0 &&
+                      !isSubmitting
+                    ) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setFieldValue("fatores_risco_ids", []);
+                          }}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -493,6 +556,29 @@ export default function CadastroAvaliacao() {
                       localizacaoIntraoral.id
                     )
                   }
+                  renderRightIcon={() => {
+                    if (
+                      values.localizacao_intraoral_id != null &&
+                      !isSubmitting
+                    ) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("localizacao_intraoral_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -515,6 +601,26 @@ export default function CadastroAvaliacao() {
                   onChange={(aspectoLesao) =>
                     setFieldValue("aspecto_lesao_id", aspectoLesao.id)
                   }
+                  renderRightIcon={() => {
+                    if (values.aspecto_lesao_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("aspecto_lesao_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -537,6 +643,24 @@ export default function CadastroAvaliacao() {
                   onChange={(superficie) =>
                     setFieldValue("superficie_id", superficie.id)
                   }
+                  renderRightIcon={() => {
+                    if (values.superficie_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => setFieldValue("superficie_id", null)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -559,6 +683,26 @@ export default function CadastroAvaliacao() {
                   onChange={(sintoma) =>
                     setFieldValue("sintoma_associado_id", sintoma.id)
                   }
+                  renderRightIcon={() => {
+                    if (values.sintoma_associado_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("sintoma_associado_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -579,6 +723,24 @@ export default function CadastroAvaliacao() {
                   placeholder="Selecione a borda"
                   value={values.bordas_id}
                   onChange={(borda) => setFieldValue("bordas_id", borda.id)}
+                  renderRightIcon={() => {
+                    if (values.bordas_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() => setFieldValue("bordas_id", null)}
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -601,6 +763,26 @@ export default function CadastroAvaliacao() {
                   onChange={(linfonodoRegional) =>
                     setFieldValue("linfonodo_regional_id", linfonodoRegional.id)
                   }
+                  renderRightIcon={() => {
+                    if (values.linfonodo_regional_id != null && !isSubmitting) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("linfonodo_regional_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -626,6 +808,29 @@ export default function CadastroAvaliacao() {
                       classificacaoRisco.id
                     )
                   }
+                  renderRightIcon={() => {
+                    if (
+                      values.classificacao_risco_id != null &&
+                      !isSubmitting
+                    ) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("classificacao_risco_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -648,6 +853,29 @@ export default function CadastroAvaliacao() {
                   onChange={(conduta) =>
                     setFieldValue("conduta_recomendada_id", conduta.id)
                   }
+                  renderRightIcon={() => {
+                    if (
+                      values.conduta_recomendada_id != null &&
+                      !isSubmitting
+                    ) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("conduta_recomendada_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
@@ -673,6 +901,29 @@ export default function CadastroAvaliacao() {
                       areaEncaminhamento.id
                     )
                   }
+                  renderRightIcon={() => {
+                    if (
+                      values.area_encaminhamento_id != null &&
+                      !isSubmitting
+                    ) {
+                      return (
+                        <TouchableOpacity
+                          onPress={() =>
+                            setFieldValue("area_encaminhamento_id", null)
+                          }
+                        >
+                          <Ionicons
+                            name="close-circle"
+                            size={22}
+                            color="#9ca3af"
+                          />
+                        </TouchableOpacity>
+                      );
+                    }
+                    return (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    );
+                  }}
                 />
               </View>
 
