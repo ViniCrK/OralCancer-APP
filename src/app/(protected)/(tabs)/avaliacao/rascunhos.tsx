@@ -1,8 +1,8 @@
 import { useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { AvaliacaoBreve } from "@/types/avaliacao";
-import { Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 
 export default function ListaRascunhos() {
@@ -19,21 +20,34 @@ export default function ListaRascunhos() {
 
   const [rascunhos, setRascunhos] = useState<AvaliacaoBreve[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [recarregando, setRecarregando] = useState(false);
 
-  const carregarRascunhos = async () => {
+  const carregarRascunhos = useCallback(async () => {
     if (!especialista?.id) return;
 
-    setCarregando(true);
+    try {
+      setCarregando(true);
 
-    const dados = await avaliacaoService.listarRascunhos(especialista.id);
+      const dados = await avaliacaoService.listarRascunhos(especialista.id);
 
-    setRascunhos(dados);
-    setCarregando(false);
-  };
+      setRascunhos(dados);
+    } catch (error) {
+      console.error("Erro ao listar as avaliaçãoes em rascunho:", error);
+    } finally {
+      setCarregando(false);
+      setRecarregando(false);
+    }
+  }, [especialista]);
 
   useEffect(() => {
+    setCarregando(true);
     carregarRascunhos();
-  }, [especialista]);
+  }, [carregarRascunhos]);
+
+  const handleRecarregar = () => {
+    setRecarregando(true);
+    carregarRascunhos();
+  };
 
   const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => (
     <View style={styles.cardRascunho}>
@@ -94,6 +108,12 @@ export default function ListaRascunhos() {
           <View style={styles.containerCentralizado}>
             <Text>Nenhuma rascunho encontrado.</Text>
           </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={recarregando}
+            onRefresh={handleRecarregar}
+          />
         }
       />
 

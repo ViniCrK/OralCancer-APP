@@ -1,7 +1,7 @@
 import { useRelatorioService } from "@/services/relatorio";
 import { RelatorioComEspecialista } from "@/types/relatorio";
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,29 +9,47 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 
 export default function ListaRelatorios() {
   const { id: avaliacao_id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const relatorioService = useRelatorioService();
+
   const [relatorios, setRelatorios] = useState<RelatorioComEspecialista[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [recarregando, setRecarregando] = useState(false);
 
-  useEffect(() => {
+  const carregarRelatorios = useCallback(async () => {
     if (!avaliacao_id) return;
 
-    const carregarRelatorios = async () => {
+    try {
       setCarregando(true);
 
       const dados = await relatorioService.listar(avaliacao_id);
 
       setRelatorios(dados);
+    } catch (error) {
+      console.error(
+        "Erro ao listar os relatórios da avaliação:",
+        error + avaliacao_id
+      );
+    } finally {
       setCarregando(false);
-    };
+      setRecarregando(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    setCarregando(true);
     carregarRelatorios();
-  }, [avaliacao_id]);
+  }, [carregarRelatorios]);
+
+  const handleRecarregar = () => {
+    setRecarregando(true);
+    carregarRelatorios();
+  };
 
   const renderItem = ({
     item: relatorio,
@@ -88,6 +106,12 @@ export default function ListaRelatorios() {
           <View style={styles.containerCentralizado}>
             <Text>Nenhum relatório cadastrado para esta avaliação.</Text>
           </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={recarregando}
+            onRefresh={handleRecarregar}
+          />
         }
       />
       <TouchableOpacity

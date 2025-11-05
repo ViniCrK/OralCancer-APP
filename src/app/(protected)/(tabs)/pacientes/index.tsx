@@ -1,7 +1,7 @@
 import { usePacienteService } from "@/services/paciente";
 import { PacienteCompleto } from "@/types/paciente";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -9,26 +9,41 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  RefreshControl,
 } from "react-native";
 
 export default function ListaPacientes() {
   const router = useRouter();
   const pacienteService = usePacienteService();
+
   const [pacientes, setPacientes] = useState<PacienteCompleto[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [recarregando, setRecarregando] = useState(false);
 
-  useEffect(() => {
-    const carregarPacientes = async () => {
+  const carregarPacientes = useCallback(async () => {
+    try {
       setCarregando(true);
 
       const dados = await pacienteService.listar();
 
       setPacientes(dados);
+    } catch (error) {
+      console.error("Erro ao listar os pacientes:", error);
+    } finally {
       setCarregando(false);
-    };
-
-    carregarPacientes();
+      setRecarregando(false);
+    }
   }, []);
+
+  useEffect(() => {
+    setCarregando(true);
+    carregarPacientes();
+  }, [carregarPacientes]);
+
+  const handleRecarregar = () => {
+    setRecarregando(true);
+    carregarPacientes();
+  };
 
   const renderItem = ({ item: paciente }: { item: PacienteCompleto }) => (
     <TouchableOpacity
@@ -76,6 +91,12 @@ export default function ListaPacientes() {
           <View style={styles.botaoFlutuante}>
             <Text>Nenhum paciente cadastrado.</Text>
           </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={recarregando}
+            onRefresh={handleRecarregar}
+          />
         }
       />
 

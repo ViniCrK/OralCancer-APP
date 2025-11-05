@@ -1,7 +1,7 @@
-import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
+import { useAvaliacaoService } from "@/services/avaliacao";
 import { AvaliacaoBreve } from "@/types/avaliacao";
 import { Link, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,26 +9,41 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  RefreshControl,
 } from "react-native";
 
 export default function ListaAvaliacoes() {
   const router = useRouter();
   const avaliacaoService = useAvaliacaoService();
+
   const [avaliacoes, setAvaliacaoes] = useState<AvaliacaoBreve[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [recarregando, setRecarregando] = useState(false);
 
-  const carregarAvaliacoes = async () => {
-    setCarregando(true);
+  const carregarAvaliacoes = useCallback(async () => {
+    try {
+      setCarregando(true);
 
-    const dados = await avaliacaoService.listar();
+      const dados = await avaliacaoService.listar();
 
-    setAvaliacaoes(dados);
-    setCarregando(false);
-  };
+      setAvaliacaoes(dados);
+    } catch (error) {
+      console.error("Erro ao listar as avaliaçãoes:", error);
+    } finally {
+      setCarregando(false);
+      setRecarregando(false);
+    }
+  }, []);
 
   useEffect(() => {
+    setCarregando(true);
     carregarAvaliacoes();
-  }, []);
+  }, [carregarAvaliacoes]);
+
+  const handleRecarregar = () => {
+    setRecarregando(true);
+    carregarAvaliacoes();
+  };
 
   const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => (
     <View style={styles.card}>
@@ -88,6 +103,12 @@ export default function ListaAvaliacoes() {
           <View style={styles.containerCentralizado}>
             <Text>Nenhuma avaliação cadastrada.</Text>
           </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={recarregando}
+            onRefresh={handleRecarregar}
+          />
         }
       />
 
