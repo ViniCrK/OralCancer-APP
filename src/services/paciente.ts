@@ -16,16 +16,23 @@ const PacienteService = {
     return { sucesso: true, mensagem: "Paciente cadastrado com sucesso!" };
   },
 
-  listar: async (): Promise<any[]> => {
-    const { data, error } = await supabase
-      .from("PACIENTES")
-      .select(
-        `
-        *,
-        SEXOS ( id, nome )
-        `
-      )
-      .order("nome");
+  listar: async (termoBusca?: string): Promise<any[]> => {
+    let query = supabase.from("PACIENTES").select(
+      `
+      *, 
+      SEXOS ( id, nome )
+      `
+    );
+
+    if (termoBusca && termoBusca.trim() !== "") {
+      const textoBusca = `%${termoBusca.trim()}%`;
+
+      query = query.or(
+        `nome.ilike.${textoBusca},sobrenome.ilike.${textoBusca},registro_hospitalar.ilike.${textoBusca}`
+      );
+    }
+
+    const { data, error } = await query.order("nome", { ascending: true });
 
     if (error) {
       console.error("Erro ao listar os pacientes:", error.message);

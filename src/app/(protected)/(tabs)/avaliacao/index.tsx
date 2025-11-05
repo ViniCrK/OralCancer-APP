@@ -1,7 +1,8 @@
 import { useAvaliacaoService } from "@/services/avaliacao";
 import { AvaliacaoBreve } from "@/types/avaliacao";
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,6 +11,7 @@ import {
   View,
   StyleSheet,
   RefreshControl,
+  TextInput,
 } from "react-native";
 
 export default function ListaAvaliacoes() {
@@ -20,29 +22,38 @@ export default function ListaAvaliacoes() {
   const [carregando, setCarregando] = useState(true);
   const [recarregando, setRecarregando] = useState(false);
 
-  const carregarAvaliacoes = useCallback(async () => {
-    try {
-      setCarregando(true);
-
-      const dados = await avaliacaoService.listar();
-
-      setAvaliacaoes(dados);
-    } catch (error) {
-      console.error("Erro ao listar as avaliaçãoes:", error);
-    } finally {
-      setCarregando(false);
-      setRecarregando(false);
-    }
-  }, []);
+  const [termoBusca, setTermoBusca] = useState("");
+  const [filtroAtivo, setFiltroAtivo] = useState("");
 
   useEffect(() => {
-    setCarregando(true);
-    carregarAvaliacoes();
-  }, [carregarAvaliacoes]);
+    const carregar = async () => {
+      if (!recarregando) {
+        setCarregando(true);
+      }
+      try {
+        const dados = await avaliacaoService.listar(filtroAtivo);
+        setAvaliacaoes(dados);
+      } catch (error) {
+        console.error("Erro ao listar as avaliaçãoes:", error);
+      } finally {
+        setCarregando(false);
+        setRecarregando(false);
+      }
+    };
+
+    carregar();
+  }, [filtroAtivo, avaliacaoService]);
+
+  const handleBuscar = () => setFiltroAtivo(termoBusca);
+
+  const handleLimparBusca = () => {
+    setTermoBusca("");
+    setFiltroAtivo("");
+  };
 
   const handleRecarregar = () => {
     setRecarregando(true);
-    carregarAvaliacoes();
+    handleLimparBusca();
   };
 
   const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => (
@@ -52,7 +63,8 @@ export default function ListaAvaliacoes() {
 
         <Text style={styles.cardTitle}>
           {avaliacao.PACIENTES?.nome ?? "Não informado"}{" "}
-          {avaliacao.PACIENTES?.sobrenome}
+          {avaliacao.PACIENTES?.sobrenome} -{" "}
+          {avaliacao.PACIENTES?.registro_hospitalar}
         </Text>
       </View>
 
@@ -97,11 +109,46 @@ export default function ListaAvaliacoes() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
         ListHeaderComponent={
-          <Text style={styles.titulo}>Minhas Avaliações</Text>
+          <>
+            <Text style={styles.titulo}>Minhas Avaliações</Text>
+
+            <View style={styles.searchBarContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Nome ou registro do paciente..."
+                placeholderTextColor="#9ca3af"
+                value={termoBusca}
+                onChangeText={setTermoBusca}
+                autoCapitalize="none"
+                returnKeyType="search"
+                onSubmitEditing={handleBuscar}
+              />
+
+              {termoBusca.length > 0 && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={handleLimparBusca}
+                >
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleBuscar}
+              >
+                <Ionicons name="search" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </>
         }
         ListEmptyComponent={
           <View style={styles.containerCentralizado}>
-            <Text>Nenhuma avaliação cadastrada.</Text>
+            <Text style={styles.titulo}>
+              {filtroAtivo
+                ? "Nenhum resultado encontrado."
+                : "Nenhuma avaliação cadastrada."}
+            </Text>
           </View>
         }
         refreshControl={
@@ -128,12 +175,54 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 30,
   },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#333",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    paddingHorizontal: 15,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  clearButton: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#9ca3af",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  searchButton: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    elevation: 2,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
   },
   card: {
     backgroundColor: "#FFFFFF",

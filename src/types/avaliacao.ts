@@ -1,5 +1,5 @@
 import { Especialista } from "./especialista";
-import { Paciente } from "./paciente";
+import { Paciente, PacienteDados } from "./paciente";
 
 type Avaliacao = { PACIENTES: Paciente | null };
 
@@ -35,7 +35,7 @@ type AvaliacaoBreve = {
   id: number;
   observacoes: string | null;
   created_at: string;
-  PACIENTES: Paciente | null;
+  PACIENTES: PacienteDados | null;
   ESPECIALISTAS: Especialista | null;
 };
 

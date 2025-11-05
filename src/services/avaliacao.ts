@@ -38,20 +38,32 @@ const AvaliacaoService = {
     return { sucesso: true, mensagem: "Avaliação cadastrada com sucesso!" };
   },
 
-  listar: async (): Promise<any[]> => {
-    const { data, error } = await supabase
+  listar: async (termoBusca?: string): Promise<any[]> => {
+    let query = supabase
       .from("AVALIACOES")
       .select(
         `
-        id,
-        observacoes,
-        created_at,
-        PACIENTES ( id, nome, sobrenome ),
-        ESPECIALISTAS ( id, nome, sobrenome )
-        `
+      id,
+      observacoes,
+      created_at,
+      PACIENTES!inner ( id, nome, sobrenome, registro_hospitalar ),
+      ESPECIALISTAS ( id, nome, sobrenome )
+      `
       )
-      .eq("rascunho", false)
-      .order("created_at", { ascending: false });
+      .eq("rascunho", false);
+
+    if (termoBusca && termoBusca.trim() !== "") {
+      const textoBusca = `%${termoBusca.trim()}%`;
+
+      query = query.or(
+        `nome.ilike.${textoBusca},sobrenome.ilike.${textoBusca},registro_hospitalar.ilike.${textoBusca}`,
+        { foreignTable: "PACIENTES" }
+      );
+    }
+
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("Erro ao listar as avaliações:", error.message);

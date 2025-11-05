@@ -1,5 +1,6 @@
 import { usePacienteService } from "@/services/paciente";
 import { PacienteCompleto } from "@/types/paciente";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  TextInput,
 } from "react-native";
 
 export default function ListaPacientes() {
@@ -20,29 +22,43 @@ export default function ListaPacientes() {
   const [carregando, setCarregando] = useState(true);
   const [recarregando, setRecarregando] = useState(false);
 
-  const carregarPacientes = useCallback(async () => {
-    try {
-      setCarregando(true);
+  const [termoBusca, setTermoBusca] = useState("");
+  const [filtroAtivo, setFiltroAtivo] = useState("");
 
-      const dados = await pacienteService.listar();
-
-      setPacientes(dados);
-    } catch (error) {
-      console.error("Erro ao listar os pacientes:", error);
-    } finally {
-      setCarregando(false);
-      setRecarregando(false);
-    }
-  }, []);
+  const carregarPacientes = useCallback(
+    async (busca: string) => {
+      if (!recarregando) {
+        setCarregando(true);
+      }
+      try {
+        const dados = await pacienteService.listar(busca);
+        setPacientes(dados || []);
+      } catch (error) {
+        console.error("Erro ao listar os pacientes:", error);
+      } finally {
+        setCarregando(false);
+        setRecarregando(false);
+      }
+    },
+    [pacienteService]
+  );
 
   useEffect(() => {
-    setCarregando(true);
-    carregarPacientes();
-  }, [carregarPacientes]);
+    carregarPacientes(filtroAtivo);
+  }, [filtroAtivo, carregarPacientes]);
+
+  const handleBuscar = () => {
+    setFiltroAtivo(termoBusca);
+  };
+
+  const handleLimparBusca = () => {
+    setTermoBusca("");
+    setFiltroAtivo("");
+  };
 
   const handleRecarregar = () => {
     setRecarregando(true);
-    carregarPacientes();
+    handleLimparBusca();
   };
 
   const renderItem = ({ item: paciente }: { item: PacienteCompleto }) => (
@@ -86,10 +102,47 @@ export default function ListaPacientes() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
-        ListHeaderComponent={<Text style={styles.titulo}>Pacientes</Text>}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.titulo}>Pacientes</Text>
+
+            <View style={styles.searchBarContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar por nome ou registro..."
+                placeholderTextColor="#9ca3af"
+                value={termoBusca}
+                onChangeText={setTermoBusca}
+                autoCapitalize="none"
+                returnKeyType="search"
+                onSubmitEditing={handleBuscar}
+              />
+
+              {termoBusca.length > 0 && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={handleLimparBusca}
+                >
+                  <Ionicons name="close" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleBuscar}
+              >
+                <Ionicons name="search" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </>
+        }
         ListEmptyComponent={
-          <View style={styles.botaoFlutuante}>
-            <Text>Nenhum paciente cadastrado.</Text>
+          <View style={styles.containerCentralizado}>
+            <Text style={styles.titulo}>
+              {filtroAtivo
+                ? "Nenhum resultado encontrado."
+                : "Nenhum paciente cadastrado."}
+            </Text>
           </View>
         }
         refreshControl={
@@ -119,13 +172,50 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 30,
   },
   titulo: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 20,
     textAlign: "center",
-    marginBottom: 25,
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  searchInput: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
     color: "#333",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    paddingHorizontal: 15,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  clearButton: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#9ca3af",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  searchButton: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#10B981",
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    elevation: 2,
   },
   card: {
     backgroundColor: "#FFFFFF",
