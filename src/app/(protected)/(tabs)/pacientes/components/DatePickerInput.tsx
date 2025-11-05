@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   textValue: { fontSize: 16, color: "#333" },
-  errorBorder: { borderColor: "red" },
+  errorBorder: { borderColor: "#ef4444", borderWidth: 2 },
   errorText: { color: "red", fontSize: 12, marginTop: 4 },
 });

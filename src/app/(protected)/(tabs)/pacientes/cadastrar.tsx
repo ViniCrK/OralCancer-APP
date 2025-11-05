@@ -142,6 +142,11 @@ export default function CadastroPaciente() {
                 onChange={(novaData) =>
                   setFieldValue("data_nascimento", novaData)
                 }
+                errorMessage={
+                  touched.data_nascimento && errors.data_nascimento
+                    ? (errors.data_nascimento as string)
+                    : undefined
+                }
               />
 
               <View style={styles.inputContainer}>

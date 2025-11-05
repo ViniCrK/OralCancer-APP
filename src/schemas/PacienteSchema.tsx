@@ -1,5 +1,8 @@
 import * as Yup from "yup";
 
+const hojeFimDoDia = new Date();
+hojeFimDoDia.setHours(23, 59, 59, 999);
+
 const PacienteSchema = Yup.object().shape({
   nome: Yup.string()
     .min(3, "O nome deve ter pelo menos 3 caracteres")
@@ -8,7 +11,7 @@ const PacienteSchema = Yup.object().shape({
     .min(3, "O sobrenome deve ter pelo menos 3 caracteres")
     .required("O sobrenome é obrigatório."),
   data_nascimento: Yup.date()
-    .max(new Date(), "A data de nascimento não pode ser uma data futura.")
+    .max(hojeFimDoDia, "A data de nascimento não pode ser uma data futura.")
     .required("A data de nascimento é obrigatória."),
   sexo_id: Yup.number()
     .nullable()
