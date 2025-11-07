@@ -38,7 +38,7 @@ export default function DetalheRelatorio() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }

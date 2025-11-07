@@ -140,7 +140,7 @@ export default function DetalheAvaliacao() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   botao: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#10B981",
+    color: "#008C9E",
     marginBottom: 10,
   },
   chipContainer: {

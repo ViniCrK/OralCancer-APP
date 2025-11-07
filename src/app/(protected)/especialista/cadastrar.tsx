@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   botao: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

@@ -95,7 +95,7 @@ export default function Perfil() {
 
   if (carregando) {
     return (
-      <ActivityIndicator size="large" color="#10B981" style={{ flex: 1 }} />
+      <ActivityIndicator size="large" color="#008C9E" style={{ flex: 1 }} />
     );
   }
 
@@ -181,7 +181,7 @@ export default function Perfil() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f0f0f0" },
   header: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     alignItems: "center",
     padding: 30,
     paddingTop: 50,

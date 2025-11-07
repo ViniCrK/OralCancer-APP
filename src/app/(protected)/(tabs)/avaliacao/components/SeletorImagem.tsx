@@ -43,7 +43,7 @@ const ImagemItem = ({
       />
       {carregandoImagem && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="small" color="#10B981" />
+          <ActivityIndicator size="small" color="#008C9E" />
         </View>
       )}
 

@@ -57,7 +57,7 @@ export default function DetalheNotificacao() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   botao: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

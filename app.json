@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.vinicrk.OralCancer"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -37,6 +38,12 @@
           "microphonePermission": false
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6176cfe9-ec75-414c-af5d-5b33da96490d"
+      }
+    }
   }
 }

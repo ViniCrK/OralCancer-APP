@@ -87,7 +87,7 @@ export default function ListaRelatorios() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   cardText: { fontSize: 16 },
   cardContent: { fontSize: 16, fontStyle: "italic", color: "#555" },
   botaoVerMais: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 12,
     borderRadius: 5,
     marginTop: 16,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     bottom: 20,
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     width: 60,
     height: 60,
     borderRadius: 30,

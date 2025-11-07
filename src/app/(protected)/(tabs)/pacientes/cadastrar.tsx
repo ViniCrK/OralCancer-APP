@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePickerInput from "./components/DatePickerInput";
@@ -66,35 +67,35 @@ export default function CadastroPaciente() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Formik
-        initialValues={{
-          nome: "",
-          sobrenome: "",
-          sexo_id: null,
-          registro_hospitalar: "",
-          data_nascimento: new Date(),
-        }}
-        validationSchema={PacienteSchema}
-        onSubmit={handleSalvarPaciente}
-      >
-        {({
-          handleSubmit,
-          handleChange,
-          setFieldValue,
-          values,
-          errors,
-          touched,
-          handleBlur,
-          isSubmitting,
-        }) => (
-          <View style={styles.container}>
-            <Text style={styles.titulo}>Cadastrar Paciente</Text>
-
-            <View style={styles.form}>
+    <>
+      <View style={styles.customHeader}>
+        <Text style={styles.headerTitle}>Cadastro de Pacientes</Text>
+      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Formik
+          initialValues={{
+            nome: "",
+            sobrenome: "",
+            sexo_id: null,
+            registro_hospitalar: "",
+            data_nascimento: new Date(),
+          }}
+          validationSchema={PacienteSchema}
+          onSubmit={handleSalvarPaciente}
+        >
+          {({
+            handleSubmit,
+            handleChange,
+            setFieldValue,
+            values,
+            errors,
+            touched,
+            handleBlur,
+            isSubmitting,
+          }) => (
+            <View style={styles.formContent}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Nome</Text>
-
                 <TextInput
                   style={[
                     styles.input,
@@ -103,11 +104,10 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("nome")}
                   onBlur={handleBlur("nome")}
                   value={values.nome}
-                  placeholder="Digite o nome do paciente"
-                  keyboardType="default"
+                  placeholder="" // Placeholder vazio como na imagem
+                  placeholderTextColor="#9ca3af"
                   autoCapitalize="words"
                 />
-
                 {touched.nome && errors.nome && (
                   <Text style={styles.errorText}>{errors.nome}</Text>
                 )}
@@ -115,7 +115,6 @@ export default function CadastroPaciente() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Sobrenome</Text>
-
                 <TextInput
                   style={[
                     styles.input,
@@ -126,18 +125,17 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("sobrenome")}
                   onBlur={handleBlur("sobrenome")}
                   value={values.sobrenome}
-                  placeholder="Digite o sobrenome do paciente"
-                  keyboardType="default"
+                  placeholder="" // Placeholder vazio
+                  placeholderTextColor="#9ca3af"
                   autoCapitalize="sentences"
                 />
-
                 {touched.sobrenome && errors.sobrenome && (
                   <Text style={styles.errorText}>{errors.sobrenome}</Text>
                 )}
               </View>
 
               <DatePickerInput
-                label="Date de Nascimento"
+                label="Data de Nascimento"
                 value={values.data_nascimento}
                 onChange={(novaData) =>
                   setFieldValue("data_nascimento", novaData)
@@ -155,6 +153,7 @@ export default function CadastroPaciente() {
                 <Dropdown
                   style={[
                     styles.dropdown,
+
                     touched.sexo_id && errors.sexo_id && styles.inputError,
                   ]}
                   containerStyle={styles.dropdownContainer}
@@ -185,6 +184,7 @@ export default function CadastroPaciente() {
                         </TouchableOpacity>
                       );
                     }
+
                     return (
                       <Ionicons name="chevron-down" size={22} color="gray" />
                     );
@@ -209,9 +209,11 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("registro_hospitalar")}
                   onBlur={handleBlur("registro_hospitalar")}
                   value={values.registro_hospitalar}
-                  placeholder="Digite o registro hospitalar do paciente"
+                  placeholder="" // Placeholder vazio
+                  placeholderTextColor="#9ca3af"
                   keyboardType="numeric"
                 />
+
                 {touched.registro_hospitalar && errors.registro_hospitalar && (
                   <Text style={styles.errorText}>
                     {errors.registro_hospitalar}
@@ -227,67 +229,129 @@ export default function CadastroPaciente() {
                 {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.botaoTexto}>Salvar Paciente</Text>
+                  <Text style={styles.botaoTexto}>Salvar</Text>
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        )}
-      </Formik>
-    </ScrollView>
+          )}
+        </Formik>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: { flexGrow: 1, justifyContent: "center", paddingTop: 20 },
-  container: { flex: 1, padding: 20, backgroundColor: "#f0f0f0" },
-  titulo: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: "#F8FAFC", // Fundo claro da imagem
+    paddingHorizontal: 20, // Padding lateral para o conteúdo
+    paddingTop: 20, // Espaço do topo do conteúdo (abaixo do header)
   },
-  form: { backgroundColor: "#fff", padding: 20, borderRadius: 10 },
-  inputContainer: { marginBottom: 15 },
-  label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    flexDirection: "row", // Alinha itens horizontalmente
+    justifyContent: "center", // Espaça os itens
+    alignItems: "center", // Centraliza verticalmente
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  formContent: {
+    paddingBottom: 40, // Espaço extra no final do formulário
+  },
+  inputContainer: {
+    marginBottom: 20, // Espaçamento entre os campos
+  },
+  label: {
     fontSize: 16,
-    backgroundColor: "#f9fafb",
+    color: "#334155", // Mais escuro
+    marginBottom: 8, // Mais espaço entre label e input
+    fontWeight: "600", // Mais negrito
+  },
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 10, // Bordas arredondadas
+    paddingVertical: Platform.OS === "ios" ? 14 : 10, // Ajuste para iOS vs Android
+    paddingHorizontal: 15,
+    fontSize: 16,
+    color: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2, // Sombra suave
+    borderWidth: 1, // Borda sutil
+    borderColor: "#e2e8f0", // Cor da borda
   },
   dropdown: {
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    height: Platform.OS === "ios" ? 50 : 50, // Altura padrão
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    height: 50,
+    borderColor: "#e2e8f0",
   },
   dropdownContainer: {
     borderBottomLeftRadius: 8,
+
     borderBottomRightRadius: 8,
+
     borderColor: "#ccc",
   },
+  dropdownPlaceholder: {
+    fontSize: 16,
+    color: "#9ca3af",
+  },
+  dropdownSelectedText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  dropdownIcon: {
+    width: 20, // Ajuste do tamanho do ícone
+    height: 20,
+    tintColor: "#64748b",
+  },
   inputError: {
-    borderColor: "#ef4444",
+    borderColor: "#EF4444", // Vermelho para erro
     borderWidth: 2,
   },
   errorText: {
-    color: "#ef4444",
+    color: "#EF4444",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 5,
   },
   botao: {
-    backgroundColor: "#10B981",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#008C9E", // Cor teal
+    padding: 16,
+    borderRadius: 10, // Bordas arredondadas
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20, // Mais espaço antes do botão
+    shadowColor: "#008C9E", // Sombra colorida
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
-  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  botaoDesabilitado: {
+    backgroundColor: "#7DD3FC", // Azul claro para desabilitado
+    shadowOpacity: 0.1,
+    elevation: 2,
+  },
+  botaoTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
 });

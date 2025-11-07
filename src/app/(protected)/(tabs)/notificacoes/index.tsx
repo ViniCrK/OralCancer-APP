@@ -92,7 +92,7 @@ export default function ListaNotificacoes() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -155,14 +155,14 @@ const styles = StyleSheet.create({
   cardNaoLida: {
     backgroundColor: "#e0f2f1",
     borderLeftWidth: 5,
-    borderLeftColor: "#10B981",
+    borderLeftColor: "#008C9E",
     paddingLeft: 15,
   },
   unreadDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     marginRight: 15,
   },
   cardContent: {

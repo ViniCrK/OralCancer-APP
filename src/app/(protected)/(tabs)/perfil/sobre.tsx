@@ -35,7 +35,7 @@ export default function Sobre() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -51,7 +51,7 @@ export default function Sobre() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="information-circle-outline" size={60} color="#10B981" />
+        <Ionicons name="information-circle-outline" size={60} color="#008C9E" />
         <Text style={styles.titulo}>Sobre o Aplicativo</Text>
       </View>
 
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#10B981",
+    color: "#008C9E",
     marginTop: 20,
     marginBottom: 8,
   },

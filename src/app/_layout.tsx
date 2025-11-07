@@ -1,6 +1,7 @@
 import { Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { GlobalProvider, useGlobalContext } from "../context/GlobalProvider";
+import { MenuProvider } from "react-native-popup-menu";
 
 function RootLayout() {
   const { isLoading } = useGlobalContext();
@@ -18,8 +19,10 @@ function RootLayout() {
 
 export default function AppLayout() {
   return (
-    <GlobalProvider>
-      <RootLayout />
-    </GlobalProvider>
+    <MenuProvider>
+      <GlobalProvider>
+        <RootLayout />
+      </GlobalProvider>
+    </MenuProvider>
   );
 }

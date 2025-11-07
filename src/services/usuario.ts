@@ -46,11 +46,11 @@ const UsuarioService = {
 
       return {
         sucesso: false,
-        mensagem: "E-mai ou senha incorretos, tente novamente!",
+        mensagem: "E-mail ou senha incorretos. Tente novamente mais tarde!",
       };
     }
 
-    return { sucesso: true, mensagem: "Usuário logado com sucesso!" };
+    return { sucesso: true, mensagem: "Login realizado com sucesso!" };
   },
 
   sair: async () => {

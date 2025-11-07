@@ -292,7 +292,7 @@ export default function EditarAvaliacao() {
   if (carregando || !initialValues) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -474,7 +474,7 @@ export default function EditarAvaliacao() {
                       setFieldValue("historico_familiar_cancer", escolha)
                     }
                     color={
-                      values.historico_familiar_cancer ? "#10B981" : undefined
+                      values.historico_familiar_cancer ? "#008C9E" : undefined
                     }
                   />
                 </TouchableOpacity>
@@ -1062,7 +1062,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   botao: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 15,
     borderRadius: 5,
     marginTop: 10,

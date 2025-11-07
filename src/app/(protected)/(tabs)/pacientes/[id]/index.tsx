@@ -58,7 +58,7 @@ export default function DetalhePaciente() {
   if (carregando) {
     return (
       <View style={styles.containerCentralizado}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color="#008C9E" />
       </View>
     );
   }
@@ -113,7 +113,7 @@ export default function DetalhePaciente() {
                 <Ionicons
                   name="document-text-outline"
                   size={20}
-                  color="#10B981"
+                  color="#008C9E"
                 />
                 <Text style={styles.linkItemText}>
                   Avaliação #{avaliacao.id}
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#10B981",
+    backgroundColor: "#008C9E",
     padding: 20,
     paddingTop: 40,
   },
