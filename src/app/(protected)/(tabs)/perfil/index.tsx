@@ -11,12 +11,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useEffect, useState } from "react";
 import { useEspecialistaService } from "@/services/especialista";
 import { PerfilCompleto } from "@/types/especialista";
 
-const TextoInfo = ({
+const InfoRow = ({
   icon,
   label,
   value,
@@ -26,11 +25,9 @@ const TextoInfo = ({
   value: string | null | undefined;
 }) => (
   <View style={styles.infoRow}>
-    <Ionicons name={icon} size={24} color="#555" style={styles.infoIcon} />
-    <View>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value || "Não informado"}</Text>
-    </View>
+    <Ionicons name={icon} size={22} color="#008C9E" style={styles.infoIcon} />
+    <Text style={styles.infoLabel}>{label}:</Text>
+    <Text style={styles.infoValue}>{value || "Não informado"}</Text>
   </View>
 );
 
@@ -44,10 +41,36 @@ const BotaoNavegacao = ({
   onPress: () => void;
 }) => (
   <TouchableOpacity style={styles.navButton} onPress={onPress}>
-    <Ionicons name={icon} size={22} color="#555" style={styles.navButtonIcon} />
+    <Ionicons
+      name={icon}
+      size={22}
+      color="#64748b"
+      style={styles.navButtonIcon}
+    />
     <Text style={styles.navButtonText}>{label}</Text>
-    <Ionicons name="chevron-forward-outline" size={22} color="#ccc" />
+    <Ionicons name="chevron-forward-outline" size={22} color="#008C9E" />
   </TouchableOpacity>
+);
+
+const InfoRowEstatica = ({
+  icon,
+  label,
+  value,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+}) => (
+  <View style={styles.navButton}>
+    <Ionicons
+      name={icon}
+      size={22}
+      color="#64748b"
+      style={styles.navButtonIcon}
+    />
+    <Text style={styles.navButtonText}>{label}</Text>
+    <Text style={styles.infoStaticValue}>{value}</Text>
+  </View>
 );
 
 export default function Perfil() {
@@ -107,39 +130,48 @@ export default function Perfil() {
     );
   }
 
+  const iniciais = `${dadosPerfil.nome?.[0] || ""}${
+    dadosPerfil.sobrenome?.[0] || ""
+  }`.toUpperCase();
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.avatar}>
-          <FontAwesome6 name="user-doctor" size={46} color="white" />
-        </View>
-        <Text style={styles.nome}>
-          {dadosPerfil.nome} {dadosPerfil.sobrenome}
-        </Text>
-        <Text style={styles.email}>{dadosPerfil.email}</Text>
+      <View style={styles.customHeader}>
+        <Text style={styles.headerTitle}>Perfil do Usuário</Text>
       </View>
 
-      <View style={styles.card}>
-        <TextoInfo
-          icon="medkit-outline"
-          label="Especialidade"
-          value={dadosPerfil.ESPECIALIDADES?.nome}
-        />
-        <TextoInfo
-          icon="document-text-outline"
-          label="Registro Profissional"
-          value={dadosPerfil.registro_profissional}
-        />
+      <View style={styles.profileCard}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{iniciais}</Text>
+          </View>
+          <View style={styles.nameEmailContainer}>
+            <Text style={styles.nome}>
+              Dr. {dadosPerfil.nome} {dadosPerfil.sobrenome}
+            </Text>
+            <Text style={styles.email}>{dadosPerfil.email}</Text>
+          </View>
+        </View>
+
+        <View style={styles.profileDivider} />
+
+        <View style={styles.infoContainer}>
+          <InfoRow
+            icon="briefcase-outline"
+            label="Especialidade"
+            value={dadosPerfil.ESPECIALIDADES?.nome}
+          />
+          <InfoRow
+            icon="bag-handle-outline"
+            label="Registro Profissional"
+            value={dadosPerfil.registro_profissional}
+          />
+        </View>
       </View>
 
       <View style={styles.actionsContainer}>
+        <Text style={styles.sectionTitle}>Configurações</Text>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Conta</Text>
-          <BotaoNavegacao
-            icon="pencil-outline"
-            label="Editar Perfil"
-            onPress={() => router.push("/perfil/editar")}
-          />
           <BotaoNavegacao
             icon="mail-outline"
             label="Alterar E-mail"
@@ -150,28 +182,29 @@ export default function Perfil() {
             label="Alterar Senha"
             onPress={() => router.push("/perfil/alterarSenha")}
           />
+          <BotaoNavegacao
+            icon="pencil-outline"
+            label="Alterar Meus Dados"
+            onPress={() => router.push("/perfil/editar")}
+          />
         </View>
 
+        <Text style={styles.sectionTitle}>Informações</Text>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações</Text>
           <BotaoNavegacao
             icon="information-circle-outline"
             label="Sobre o Aplicativo"
             onPress={() => router.push("/perfil/sobre")}
           />
-          <BotaoNavegacao
-            icon="document-text-outline"
-            label="Termos e Condições"
-            onPress={() => router.push("/perfil/termos")}
+          <InfoRowEstatica
+            icon="pricetag-outline"
+            label="Versão"
+            value="1.0.0"
           />
         </View>
 
-        <TouchableOpacity
-          style={[styles.botao, styles.botaoSair]}
-          onPress={handleSair}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#fff" />
-          <Text style={styles.botaoTexto}>Sair</Text>
+        <TouchableOpacity style={styles.botaoSair} onPress={handleSair}>
+          <Text style={styles.botaoSairTexto}>Sair da Conta</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -179,85 +212,131 @@ export default function Perfil() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0" },
-  header: {
-    backgroundColor: "#008C9E",
-    alignItems: "center",
-    padding: 30,
-    paddingTop: 50,
-    paddingBottom: 70,
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+    paddingTop: 20,
   },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+  customHeader: {
+    paddingTop: 30,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  profileCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16, // Margem nas laterais
+    marginTop: 20, // Margem superior
+    borderRadius: 16,
+    padding: 20, // Padding interno geral
+    borderBottomWidth: 5, // Borda na parte inferior
+    borderBottomColor: "#008C9E", // Cor Teal
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  profileHeader: {
+    // NOVO ESTILO: Container para avatar + nome/email
+    flexDirection: "row", // Alinha horizontalmente
+    alignItems: "center", // Centraliza verticalmente
+    marginBottom: 20, // Espaço antes do divisor
+  },
+  avatar: {
+    width: 65, // Tamanho menor
+    height: 65,
+    borderRadius: 32.5, // Metade do tamanho para ser um círculo
+    backgroundColor: "#008C9E",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15, // Espaço entre o avatar e o nome/email
   },
   avatarText: {
-    fontSize: 40,
+    fontSize: 28, // Tamanho da fonte menor
     fontWeight: "bold",
     color: "#fff",
   },
-  nome: { fontSize: 22, fontWeight: "bold", color: "#fff" },
-  email: { fontSize: 16, color: "#e0f2f1" },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 16,
-    marginTop: -40,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
+  nameEmailContainer: {
+    // NOVO ESTILO: Container para nome e email
+    flex: 1, // Ocupa o espaço restante
+  },
+  nome: {
+    fontSize: 18, // Tamanho da fonte menor
+    fontWeight: "bold",
+    color: "#1e293b",
+    marginBottom: 2, // Menos espaço entre nome e email
+  },
+  email: {
+    fontSize: 14, // Tamanho da fonte menor
+    color: "#64748b",
+  },
+  profileDivider: {
+    // NOVO ESTILO: Divisor horizontal
+    height: 1,
+    backgroundColor: "#e2e8f0", // Cor do divisor
+    marginHorizontal: -20, // Estende o divisor pelas bordas do padding do card
+    marginBottom: 20, // Espaço depois do divisor
+  },
+  infoContainer: {
+    width: "100%",
   },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    paddingVertical: 8, // Menos padding vertical
   },
   infoIcon: {
-    marginRight: 15,
+    marginRight: 12, // Espaço maior para o ícone
   },
   infoLabel: {
-    fontSize: 14,
-    color: "gray",
+    fontSize: 15,
+    color: "#64748b",
+    marginRight: 5, // Espaço entre label e valor
   },
   infoValue: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
+    fontSize: 15,
+    color: "#1e293b",
+    fontWeight: "500", // Peso da fonte um pouco menor
+  },
+  infoDivider: {
+    height: 1,
+    backgroundColor: "#f1f5f9",
+    marginVertical: 5,
   },
   actionsContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 20,
+    paddingVertical: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#334155",
+    marginTop: 10,
+    marginBottom: 10,
+    paddingHorizontal: 5,
   },
   section: {
     backgroundColor: "#fff",
-    borderRadius: 10,
-    marginTop: 20,
-    paddingHorizontal: 15,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "gray",
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    textTransform: "uppercase",
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
   },
   navButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+    paddingVertical: 16,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
   navButtonIcon: {
     width: 30,
@@ -265,24 +344,28 @@ const styles = StyleSheet.create({
   navButtonText: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
-    marginLeft: 10,
+    color: "#334155",
   },
-  botao: {
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+  infoStaticValue: {
+    fontSize: 16,
+    color: "#64748b",
+    fontWeight: "500",
   },
   botaoSair: {
-    backgroundColor: "#e53e3e",
-    marginTop: 20,
+    backgroundColor: "#ef4444",
+    padding: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30,
+    elevation: 3,
+    shadowColor: "#ef4444",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
-  botaoTexto: {
+  botaoSairTexto: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
-    marginLeft: 10,
   },
 });

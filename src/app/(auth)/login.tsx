@@ -31,8 +31,8 @@ export default function LoginPagina() {
     try {
       const { sucesso, mensagem } = await usuarioService.entrar(email, senha);
 
-      if (!sucesso) {
-        Alert.alert("Erro", mensagem);
+      if (sucesso) {
+        Alert.alert("Sucesso", mensagem);
       }
     } catch (error) {
       console.error("Erro no login:", error);

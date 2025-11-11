@@ -2,7 +2,6 @@ import { supabase } from "@/config/supabase-client";
 import { EdicaoPerfilSchema } from "@/schemas/PerfilSchema";
 import { useEspecialistaService } from "@/services/especialista";
 import { useEspecialistaStore } from "@/store/especialista";
-import { DropdownItem } from "@/types/avaliacao";
 import { DadosPerfil } from "@/types/especialista";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -17,9 +16,38 @@ import {
   View,
   StyleSheet,
   ScrollView,
+  Platform,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { MaskedTextInput } from "react-native-mask-text";
+
+type InputProps = {
+  label: string;
+  children: React.ReactNode;
+  errorMessage?: string;
+  isTouched?: boolean;
+};
+const FormInput = ({
+  label,
+  children,
+  errorMessage,
+  isTouched,
+}: InputProps) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <View
+      style={[
+        styles.inputBase,
+        isTouched && errorMessage ? styles.inputError : null,
+      ]}
+    >
+      {children}
+    </View>
+    {isTouched && errorMessage && (
+      <Text style={styles.errorText}>{errorMessage}</Text>
+    )}
+  </View>
+);
 
 export default function EditarPerfil() {
   const router = useRouter();
@@ -33,7 +61,10 @@ export default function EditarPerfil() {
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    if (!especialista?.id) return;
+    if (!especialista?.id) {
+      setCarregando(false);
+      return;
+    }
 
     const carregarDados = async () => {
       setCarregando(true);
@@ -94,28 +125,34 @@ export default function EditarPerfil() {
           text: "Sim",
           style: "default",
           onPress: async () => {
-            const dadosParaAtualizar = {
-              nome: dados.nome,
-              sobrenome: dados.sobrenome,
-              registro_profissional: dados.registro_profissional,
-              especialidade_id: dados.especialidade_id,
-            };
+            try {
+              const dadosParaAtualizar = {
+                nome: dados.nome,
+                sobrenome: dados.sobrenome,
+                registro_profissional: dados.registro_profissional,
+                especialidade_id: dados.especialidade_id,
+              };
 
-            if (!especialista?.id) return;
+              if (!especialista?.id)
+                throw new Error("ID do especialista não encontrado.");
 
-            const { sucesso, mensagem } = await especialistaService.atualizar(
-              especialista?.id,
-              dadosParaAtualizar
-            );
+              const { sucesso, mensagem } = await especialistaService.atualizar(
+                especialista.id,
+                dadosParaAtualizar
+              );
 
-            if (!sucesso) {
-              Alert.alert("Erro", mensagem);
-            } else {
-              Alert.alert("Sucesso", mensagem);
-              router.replace("/(tabs)/perfil");
+              if (!sucesso) {
+                Alert.alert("Erro", mensagem);
+              } else {
+                Alert.alert("Sucesso", mensagem);
+                router.replace("/(tabs)/perfil");
+              }
+            } catch (error) {
+              console.error("Erro ao atualizar:", error);
+              Alert.alert("Erro", "Falha ao salvar as alterações.");
+            } finally {
+              setSubmitting(false);
             }
-
-            setSubmitting(false);
           },
         },
       ]
@@ -124,226 +161,276 @@ export default function EditarPerfil() {
 
   if (carregando || !initialValues) {
     return (
-      <ActivityIndicator size="large" color="#008C9E" style={{ flex: 1 }} />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#008C9E" />
+      </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Editar Perfil</Text>
-
-        <Formik
-          initialValues={initialValues}
-          validationSchema={EdicaoPerfilSchema}
-          onSubmit={handleAlterarDados}
-          enableReinitialize
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContainer}
+    >
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          {({
-            handleChange,
-            handleSubmit,
-            setFieldValue,
-            values,
-            errors,
-            touched,
-            handleBlur,
-            isSubmitting,
-          }) => (
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Nome</Text>
-
-                <TextInput
-                  value={values.nome}
-                  placeholder="Nome"
-                  style={[
-                    styles.input,
-                    touched.nome && errors.nome ? styles.inputError : null,
-                  ]}
-                  onChangeText={handleChange("nome")}
-                  onBlur={handleBlur("nome")}
-                  autoCapitalize="words"
-                />
-
-                {touched.nome && errors.nome && (
-                  <Text style={styles.errorText}>{errors.nome}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Sobrenome</Text>
-
-                <TextInput
-                  value={values.sobrenome}
-                  placeholder="Sobrenome"
-                  style={[
-                    styles.input,
-                    touched.sobrenome && errors.sobrenome
-                      ? styles.inputError
-                      : null,
-                  ]}
-                  onChangeText={handleChange("sobrenome")}
-                  onBlur={handleBlur("sobrenome")}
-                />
-
-                {touched.sobrenome && errors.sobrenome && (
-                  <Text style={styles.errorText}>{errors.sobrenome}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Registro Profissional</Text>
-
-                <MaskedTextInput
-                  style={[
-                    styles.input,
-                    touched.registro_profissional &&
-                    errors.registro_profissional
-                      ? styles.inputError
-                      : null,
-                  ]}
-                  mask="AAA-AA 999999"
-                  onChangeText={(text) => {
-                    setFieldValue("registro_profissional", text);
-                  }}
-                  onBlur={handleBlur("registro_profissional")}
-                  value={values.registro_profissional}
-                  placeholder="EX.: CRM-AL 123456"
-                  autoCapitalize="characters"
-                />
-
-                {touched.registro_profissional &&
-                  errors.registro_profissional && (
-                    <Text style={styles.errorText}>
-                      {errors.registro_profissional}
-                    </Text>
-                  )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Especialidade</Text>
-
-                <Dropdown
-                  style={[
-                    styles.dropdown,
-                    touched.especialidade_id && errors.especialidade_id
-                      ? styles.inputError
-                      : null,
-                  ]}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={especialidades}
-                  valueField={"value"}
-                  labelField={"label"}
-                  placeholder="Selecione a especialidade"
-                  search
-                  searchPlaceholder="Especialidade"
-                  searchField={"label"}
-                  value={values.especialidade_id}
-                  onChange={(item) =>
-                    setFieldValue("especialidade_id", item.value)
-                  }
-                  onBlur={() => handleBlur("especialidade_id")}
-                  renderRightIcon={() => {
-                    if (values.especialidade_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("especialidade_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-
-                {touched.especialidade_id && errors.especialidade_id && (
-                  <Text style={styles.errorText}>
-                    {errors.especialidade_id}
-                  </Text>
-                )}
-              </View>
-
-              <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
-                onPress={() => handleSubmit()}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.botaoTexto}>Salvar Alterações</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          )}
-        </Formik>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Alterar Meus Dados</Text>
+        <View style={{ width: 40 }} />
       </View>
+
+      <Formik
+        initialValues={initialValues}
+        validationSchema={EdicaoPerfilSchema}
+        onSubmit={handleAlterarDados}
+        enableReinitialize
+      >
+        {({
+          handleChange,
+          handleSubmit,
+          setFieldValue,
+          values,
+          errors,
+          touched,
+          handleBlur,
+          isSubmitting,
+        }) => (
+          <View style={styles.form}>
+            <FormInput
+              label="Nome"
+              isTouched={touched.nome}
+              errorMessage={errors.nome as string}
+            >
+              <TextInput
+                value={values.nome}
+                placeholder=""
+                style={styles.inputText}
+                placeholderTextColor="#9ca3af"
+                onChangeText={handleChange("nome")}
+                onBlur={handleBlur("nome")}
+                autoCapitalize="words"
+              />
+            </FormInput>
+
+            <FormInput
+              label="Sobrenome"
+              isTouched={touched.sobrenome}
+              errorMessage={errors.sobrenome as string}
+            >
+              <TextInput
+                value={values.sobrenome}
+                placeholder=""
+                style={styles.inputText}
+                placeholderTextColor="#9ca3af"
+                onChangeText={handleChange("sobrenome")}
+                onBlur={handleBlur("sobrenome")}
+                autoCapitalize="words"
+              />
+            </FormInput>
+
+            <FormInput
+              label="Especialidade"
+              isTouched={touched.especialidade_id}
+              errorMessage={errors.especialidade_id as string}
+            >
+              <Dropdown
+                style={styles.dropdown}
+                containerStyle={styles.dropdownContainer}
+                placeholderStyle={styles.dropdownPlaceholder}
+                selectedTextStyle={styles.inputText}
+                iconStyle={styles.dropdownIcon}
+                data={especialidades}
+                valueField={"value"}
+                labelField={"label"}
+                placeholder="Selecionar"
+                value={values.especialidade_id}
+                onChange={(item) =>
+                  setFieldValue("especialidade_id", item.value)
+                }
+                onBlur={() => handleBlur("especialidade_id")}
+                renderRightIcon={() => {
+                  if (values.especialidade_id != null && !isSubmitting) {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => setFieldValue("especialidade_id", null)}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          size={22}
+                          color="#9ca3af"
+                        />
+                      </TouchableOpacity>
+                    );
+                  }
+                  return (
+                    <Ionicons name="chevron-down" size={22} color="gray" />
+                  );
+                }}
+              />
+            </FormInput>
+
+            <FormInput
+              label="Registro Profissional"
+              isTouched={touched.registro_profissional}
+              errorMessage={errors.registro_profissional as string}
+            >
+              <MaskedTextInput
+                style={styles.inputText}
+                mask="AAA-AA 999999"
+                onChangeText={(text) => {
+                  setFieldValue("registro_profissional", text);
+                }}
+                onBlur={handleBlur("registro_profissional")}
+                value={values.registro_profissional}
+                placeholder="EX.: CRM-AL 123456"
+                placeholderTextColor="#9ca3af"
+                autoCapitalize="characters"
+              />
+            </FormInput>
+
+            <TouchableOpacity
+              style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
+              onPress={() => handleSubmit()}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botaoTexto}>Salvar Alterações</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+      </Formik>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: { flexGrow: 1, justifyContent: "center" },
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
-    paddingTop: 20,
+    backgroundColor: "#F8FAFC", // Fundo cinza bem claro da imagem
+  },
+  scrollContainer: {
+    flexGrow: 1,
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 20 : 0, // Ajuste para Android
+    paddingBottom: 40,
   },
-  titulo: {
-    fontSize: 24,
-    fontWeight: "bold",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+  },
+  // Cabeçalho customizado (sem Stack header)
+  customHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 40, // Espaço para status bar
+    paddingBottom: 20,
+  },
+  backButton: {
+    padding: 5,
+  },
+  headerTitle: {
+    flex: 1,
     textAlign: "center",
-    marginBottom: 20,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1e293b",
   },
-  form: { padding: 20, backgroundColor: "#fff", borderRadius: 10 },
-  inputContainer: { marginBottom: 15 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+  form: {
+    // O formulário agora é a própria página
+  },
+  inputContainer: {
+    marginBottom: 20, // Espaçamento entre os campos
+  },
+  label: {
     fontSize: 16,
-    backgroundColor: "#f9fafb",
+    color: "#334155", // Label mais escuro
+    marginBottom: 8,
+    fontWeight: "600",
   },
-  label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
-  dropdown: {
+  // Estilo base para todos os inputs
+  inputBase: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    height: 52,
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    shadowColor: "#9ca3af",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: "#f9fafb",
-    height: 50,
+    borderColor: "#e2e8f0", // Borda sutil
+  },
+  // Estilo para o texto dentro do TextInput/MaskedInput
+  inputText: {
+    fontSize: 16,
+    color: "#1e293b",
+    padding: 0, // Remove padding nativo
+  },
+  // Estilos específicos para o Dropdown
+  dropdown: {
+    height: "100%", // Ocupa a altura do 'inputBase'
+  },
+  dropdownPlaceholder: {
+    fontSize: 16,
+    color: "#9ca3af",
+  },
+  dropdownIcon: {
+    width: 22,
+    height: 22,
+    tintColor: "#64748b",
   },
   dropdownContainer: {
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderColor: "#ccc",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
   },
+  // Estilos de erro
   inputError: {
-    borderColor: "#ef4444",
-    borderWidth: 2,
+    borderColor: "#EF4444",
   },
-  errorText: { color: "#ef4444", fontSize: 12, marginTop: 4 },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 5,
+  },
+  // Estilo do botão
   botao: {
-    backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#008C9E", // Cor teal
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 20,
+    shadowColor: "#008C9E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
-  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  botaoDesabilitado: {
+    backgroundColor: "#a5f3fc",
+    shadowOpacity: 0.1,
+    elevation: 2,
+  },
+  botaoTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
 });

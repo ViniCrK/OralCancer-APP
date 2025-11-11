@@ -63,8 +63,7 @@ export default function DatePickerInput({
         >
           {formattedDate}
         </Text>
-        <Ionicons name="calendar-outline" size={24} color="#64748b" />{" "}
-        {/* Ícone de calendário */}
+        <Ionicons name="calendar-outline" size={24} color="#64748b" />
       </TouchableOpacity>
 
       {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}

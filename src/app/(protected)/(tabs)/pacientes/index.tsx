@@ -97,23 +97,19 @@ export default function ListaPacientes() {
         onPress={() => router.push(`/pacientes/${paciente.id}`)}
         activeOpacity={0.7}
       >
-        {/* Avatar Esquerdo */}
         <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
           <Text style={styles.avatarText}>{iniciais}</Text>
         </View>
 
-        {/* Conteúdo do Card */}
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>
             {paciente.nome} {paciente.sobrenome}
           </Text>
 
-          {/* Subtítulo (Registro Hospitalar) */}
           <Text style={styles.cardSubtitle}>
             Registro: {paciente.registro_hospitalar}
           </Text>
 
-          {/* Linha de Metadados (Data e Sexo com ícones) */}
           <View style={styles.metaContainer}>
             <View style={styles.metaItem}>
               <Ionicons
@@ -179,13 +175,13 @@ export default function ListaPacientes() {
         data={pacientes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 40 }}
         ListHeaderComponent={
           <>
             <View style={styles.searchBarContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Buscar por nome ou registro..."
+                placeholder="Pesquisar por paciente ou ID..."
                 placeholderTextColor="#9ca3af"
                 value={termoBusca}
                 onChangeText={setTermoBusca}
@@ -193,21 +189,19 @@ export default function ListaPacientes() {
                 returnKeyType="search"
                 onSubmitEditing={handleBuscar}
               />
-
               {termoBusca.length > 0 && (
                 <TouchableOpacity
                   style={styles.clearButton}
                   onPress={handleLimparBusca}
                 >
-                  <Ionicons name="close" size={24} color="#fff" />
+                  <Ionicons name="close-circle" size={24} color="#9ca3af" />
                 </TouchableOpacity>
               )}
-
               <TouchableOpacity
-                style={styles.searchButton}
+                style={styles.finalSearchButton}
                 onPress={handleBuscar}
               >
-                <Ionicons name="search" size={20} color="#fff" />
+                <Ionicons name="search" size={24} color="#008C9E" />
               </TouchableOpacity>
             </View>
           </>
@@ -256,7 +250,7 @@ const styles = StyleSheet.create({
     alignItems: "center", // Centraliza verticalmente
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
   },
@@ -365,40 +359,37 @@ const styles = StyleSheet.create({
   },
   searchBarContainer: {
     flexDirection: "row",
-    marginBottom: 20,
     alignItems: "center",
-  },
-  searchInput: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    color: "#333",
     backgroundColor: "#fff",
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
-    paddingHorizontal: 15,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    paddingLeft: 15,
     elevation: 2,
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
-  clearButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#9ca3af",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
+  searchIcon: {
+    marginRight: 10,
   },
-  searchButton: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#008C9E",
+  searchInput: {
+    flex: 1,
+    height: 52,
+    fontSize: 16,
+    color: "#333",
+  },
+  clearButton: {
+    padding: 5, // Área de toque maior
+  },
+  finalSearchButton: {
+    borderRadius: 12, // Bordas arredondadas
+    width: 48, // Largura fixa
+    height: 48, // Altura fixa
     justifyContent: "center",
     alignItems: "center",
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    elevation: 2,
+    marginRight: 5,
   },
 });
 
