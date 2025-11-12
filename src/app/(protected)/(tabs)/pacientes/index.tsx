@@ -151,7 +151,12 @@ export default function ListaPacientes() {
   return (
     <View style={styles.container}>
       <View style={styles.customHeader}>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Listagem de Pacientes</Text>
 
@@ -248,6 +253,9 @@ const styles = StyleSheet.create({
     flexDirection: "row", // Alinha itens horizontalmente
     justifyContent: "space-between", // Espaça os itens
     alignItems: "center", // Centraliza verticalmente
+  },
+  backButton: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 24,

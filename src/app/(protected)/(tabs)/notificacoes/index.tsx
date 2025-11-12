@@ -1,6 +1,7 @@
 import { useNotificacaoService } from "@/services/notificacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { Notificacao } from "@/types/notificacao";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -12,6 +13,40 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
+
+const getAvatarColor = (nome: string) => {
+  const colors = [
+    "#00897B",
+    "#00BFA5",
+    "#FFA000",
+    "#F57C00",
+    "#1E88E5",
+    "#43A047",
+  ];
+  let hash = 0;
+  if (nome.length === 0) return colors[0];
+  for (let i = 0; i < nome.length; i++) {
+    hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const formatarDataNotificacao = (dataString: string) => {
+  const data = new Date(dataString);
+  const agora = new Date();
+  const diffMs = agora.getTime() - data.getTime();
+  const diffSeg = Math.round(diffMs / 1000);
+  const diffMin = Math.round(diffSeg / 60);
+  const diffHoras = Math.round(diffMin / 60);
+  const diffDias = Math.round(diffHoras / 24);
+
+  if (diffMin < 60)
+    return `${data.getHours()}:${String(data.getMinutes()).padStart(2, "0")}`;
+  if (diffHoras < 24)
+    return `${data.getHours()}:${String(data.getMinutes()).padStart(2, "0")}`;
+  if (diffDias === 1) return "Ontem";
+  return `${diffDias} dias atrás`;
+};
 
 export default function ListaNotificacoes() {
   const router = useRouter();
@@ -63,31 +98,48 @@ export default function ListaNotificacoes() {
     }
   };
 
-  const renderItem = ({ item }: { item: Notificacao }) => (
-    <TouchableOpacity
-      style={[styles.card, !item.lida && styles.cardNaoLida]}
-      onPress={() => handleNotificationPress(item)}
-    >
-      {!item.lida && <View style={styles.unreadDot} />}
-      <View style={styles.cardContent}>
-        <Text style={styles.cardHeader}>
-          Nova notificação de{" "}
-          <Text style={styles.boldText}>
-            {item.remetente?.nome ?? "Sistema"} {item.remetente?.sobrenome}
-          </Text>
-        </Text>
-        <Text style={styles.cardBody}>{item.conteudo}</Text>
-        {item.AVALIACOES?.id && (
-          <Text style={styles.cardFooter}>
-            Ref. Avaliação: "{item.AVALIACOES.id}"
-          </Text>
-        )}
-        <Text style={styles.cardTimestamp}>
-          {new Date(item.created_at).toLocaleString("pt-BR")}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }: { item: Notificacao }) => {
+    const timestamp = formatarDataNotificacao(item.created_at);
+    const iniciais = `${item.remetente?.nome[0] || ""}${
+      item.remetente?.sobrenome?.[0] || ""
+    }`.toUpperCase();
+
+    const avatarColor = getAvatarColor(item.remetente?.nome || "S");
+
+    return (
+      <TouchableOpacity
+        style={[styles.card, !item.lida ? styles.cardNaoLida : styles.cardLida]}
+        onPress={() => handleNotificationPress(item)}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
+          <Text style={styles.avatarText}>{iniciais}</Text>
+        </View>
+
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.remetenteNome} numberOfLines={1}>
+              Dr. {item.remetente?.nome} {item.remetente?.sobrenome}
+            </Text>
+            <Text style={styles.timestamp}>{timestamp}</Text>
+          </View>
+
+          <View style={styles.cardBodyRow}>
+            <Text style={styles.conteudoText} numberOfLines={2}>
+              {item.conteudo}
+            </Text>
+            {!item.lida && <View style={styles.statusDot} />}
+          </View>
+
+          {item.AVALIACOES?.id && (
+            <Text style={styles.cardFooter}>
+              Ref. Avaliação: "{item.AVALIACOES.id}"
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (carregando) {
     return (
@@ -99,21 +151,41 @@ export default function ListaNotificacoes() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>Notificações</Text>
+
+        <View style={{ width: 40 }}></View>
+      </View>
+
       <FlatList
         data={notificacoes}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
-        ListHeaderComponent={<Text style={styles.titulo}>Notificações</Text>}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.containerCentralizado}>
-            <Text>Você não tem nenhuma notificação.</Text>
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="notifications-off-outline"
+              size={60}
+              color="#cbd5e1"
+            />
+            <Text style={styles.emptyText}>
+              Você não tem nenhuma notificação.
+            </Text>
           </View>
         }
         refreshControl={
           <RefreshControl
             refreshing={recarregando}
             onRefresh={handleRecarregar}
+            colors={["#008C9E"]}
           />
         }
       />
@@ -124,71 +196,128 @@ export default function ListaNotificacoes() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#F8FAFC",
   },
   containerCentralizado: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    backgroundColor: "#F8FAFC",
   },
-  titulo: {
-    fontSize: 28,
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#333",
+    color: "#fff",
+  },
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
+  },
+  menuOptionText: {
+    fontSize: 16,
+    padding: 10,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 16,
     flexDirection: "row",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
     alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    elevation: 3,
+    shadowColor: "#64748b",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  cardLida: {
+    backgroundColor: "#FFFFFF",
   },
   cardNaoLida: {
-    backgroundColor: "#e0f2f1",
-    borderLeftWidth: 5,
-    borderLeftColor: "#008C9E",
-    paddingLeft: 15,
+    backgroundColor: "#E0F2F1",
   },
-  unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#008C9E",
-    marginRight: 15,
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16, // Espaço entre o avatar e o bloco de texto
+  },
+  avatarText: {
+    fontSize: 16, // Tamanho da fonte menor
+    fontWeight: "bold",
+    color: "#fff",
   },
   cardContent: {
     flex: 1,
   },
-  cardHeader: {
+  cardHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  remetenteNome: {
     fontSize: 16,
-    color: "#555",
-  },
-  boldText: {
     fontWeight: "bold",
-    color: "#333",
+    color: "#1e293b",
+    flexShrink: 1,
   },
-  cardBody: {
-    fontSize: 15,
-    marginVertical: 8,
+  timestamp: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginLeft: 10,
+  },
+  cardBodyRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  conteudoText: {
+    fontSize: 14,
+    color: "#64748b",
+    flex: 1,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#007AFF",
+    marginLeft: 15,
   },
   cardFooter: {
+    // Estilo mantido do seu código original
     fontSize: 14,
     color: "gray",
     fontStyle: "italic",
+    marginTop: 8,
   },
-  cardTimestamp: {
-    fontSize: 12,
-    color: "gray",
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: "30%",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#9ca3af",
     marginTop: 10,
-    textAlign: "right",
   },
 });

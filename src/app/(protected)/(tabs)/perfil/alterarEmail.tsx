@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Platform,
 } from "react-native";
 import { useUsuarioService } from "@/services/usuario";
 import { Formik } from "formik";
@@ -16,6 +17,35 @@ import { useEspecialistaService } from "@/services/especialista";
 import { useEspecialistaStore } from "@/store/especialista";
 import { AlterarEmailDados } from "@/types/especialista";
 import { AlterarEmailSchema } from "@/schemas/PerfilSchema";
+import { Ionicons } from "@expo/vector-icons";
+
+type InputProps = {
+  label: string;
+  children: React.ReactNode;
+  errorMessage?: string;
+  isTouched?: boolean;
+};
+const FormInput = ({
+  label,
+  children,
+  errorMessage,
+  isTouched,
+}: InputProps) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <View
+      style={[
+        styles.inputBase,
+        isTouched && errorMessage ? styles.inputError : null,
+      ]}
+    >
+      {children}
+    </View>
+    {isTouched && errorMessage && (
+      <Text style={styles.errorText}>{errorMessage}</Text>
+    )}
+  </View>
+);
 
 export default function AlterarEmail() {
   const router = useRouter();
@@ -74,131 +104,170 @@ export default function AlterarEmail() {
     );
   };
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Alterar E-mail</Text>
-        <Formik
-          initialValues={{ novoEmail: "", confirmarEmail: "" }}
-          validationSchema={AlterarEmailSchema}
-          onSubmit={handleAlterarEmail}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          {({
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            values,
-            errors,
-            touched,
-            isSubmitting,
-          }) => (
-            <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Novo Endereço de E-mail</Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    touched.novoEmail && errors.novoEmail
-                      ? styles.inputError
-                      : null,
-                  ]}
-                  placeholder="seunovoemail@exemplo.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  onChangeText={handleChange("novoEmail")}
-                  onBlur={handleBlur("novoEmail")}
-                  value={values.novoEmail}
-                  autoFocus={true}
-                />
-
-                {touched.novoEmail && errors.novoEmail && (
-                  <Text style={styles.errorText}>{errors.novoEmail}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Confirmar Novo E-mail</Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    touched.confirmarEmail && errors.confirmarEmail
-                      ? styles.inputError
-                      : null,
-                  ]}
-                  placeholder="Repita o novo e-mail"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  onChangeText={handleChange("confirmarEmail")}
-                  onBlur={handleBlur("confirmarEmail")}
-                  value={values.confirmarEmail}
-                />
-
-                {touched.confirmarEmail && errors.confirmarEmail && (
-                  <Text style={styles.errorText}>{errors.confirmarEmail}</Text>
-                )}
-              </View>
-
-              <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
-                onPress={() => handleSubmit()}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.botaoTexto}>Enviar Confirmação</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          )}
-        </Formik>
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Alterar E-mail</Text>
+        <View style={{ width: 40 }} />
       </View>
+
+      <Formik
+        initialValues={{ novoEmail: "", confirmarEmail: "" }}
+        validationSchema={AlterarEmailSchema}
+        onSubmit={handleAlterarEmail}
+      >
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          values,
+          errors,
+          touched,
+          isSubmitting,
+        }) => (
+          <View>
+            <FormInput
+              label="Novo Endereço de E-mail"
+              isTouched={touched.novoEmail}
+              errorMessage={errors.novoEmail as string}
+            >
+              <TextInput
+                style={styles.inputText}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onChangeText={handleChange("novoEmail")}
+                onBlur={handleBlur("novoEmail")}
+                value={values.novoEmail}
+                autoFocus={true}
+              />
+            </FormInput>
+
+            <FormInput
+              label="Confirmar Novo E-mail"
+              isTouched={touched.confirmarEmail}
+              errorMessage={errors.confirmarEmail as string}
+            >
+              <TextInput
+                style={styles.inputText}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onChangeText={handleChange("confirmarEmail")}
+                onBlur={handleBlur("confirmarEmail")}
+                value={values.confirmarEmail}
+              />
+            </FormInput>
+
+            <TouchableOpacity
+              style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
+              onPress={() => handleSubmit()}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.botaoTexto}>Enviar Confirmação</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+      </Formik>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: { flexGrow: 1, justifyContent: "center" },
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
-    paddingTop: 20,
-    padding: 20,
+    backgroundColor: "#F8FAFC", // Fundo cinza bem claro
   },
-  titulo: {
-    fontSize: 24,
-    fontWeight: "bold",
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 20 : 0, // Ajuste para Android
+    paddingBottom: 40,
+  },
+  customHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 40, // Espaço para status bar
+    paddingBottom: 20,
+  },
+  backButton: {
+    padding: 5,
+  },
+  headerTitle: {
+    flex: 1,
     textAlign: "center",
-    marginBottom: 20,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1e293b",
   },
-  form: { backgroundColor: "#fff", borderRadius: 10, padding: 20 },
-  inputContainer: { marginBottom: 15 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+  inputContainer: {
+    marginBottom: 20, // Espaçamento entre os campos
+  },
+  label: {
     fontSize: 16,
-    backgroundColor: "#f9fafb",
+    color: "#334155", // Label mais escuro
+    marginBottom: 8,
+    fontWeight: "600",
   },
-  label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
+  inputBase: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    height: 52,
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    shadowColor: "#9ca3af",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#e2e8f0", // Borda sutil
+  },
+  inputText: {
+    fontSize: 16,
+    color: "#1e293b",
+    padding: 0, // Remove padding nativo
+  },
   inputError: {
-    borderColor: "#ef4444",
-    borderWidth: 2,
+    borderColor: "#EF4444",
   },
   errorText: {
-    color: "#ef4444",
+    color: "#EF4444",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 5,
   },
   botao: {
-    backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#008C9E", // Cor teal
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 20,
+    shadowColor: "#008C9E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
-  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  botaoDesabilitado: {
+    backgroundColor: "#a5f3fc",
+    shadowOpacity: 0.1,
+    elevation: 2,
+  },
+  botaoTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
 });

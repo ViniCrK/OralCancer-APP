@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 100,
   },
   botaoExcluir: {
     backgroundColor: "#e53e3e",

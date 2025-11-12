@@ -146,7 +146,16 @@ export default function ListaAvaliacoes() {
   return (
     <View style={styles.container}>
       <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Avaliações</Text>
+
+        <View style={{ width: 40 }}></View>
       </View>
       <FlatList
         data={avaliacoes}
@@ -217,9 +226,13 @@ const styles = StyleSheet.create({
   },
   customHeader: {
     paddingTop: 60,
-    flexDirection: "row",
-    justifyContent: "center",
+    paddingHorizontal: 20,
+    flexDirection: "row", // Alinha itens horizontalmente
+    justifyContent: "space-between", // Espaça os itens
     alignItems: "center",
+  },
+  backButton: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 24,

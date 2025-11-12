@@ -69,7 +69,16 @@ export default function CadastroPaciente() {
   return (
     <>
       <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Cadastro de Pacientes</Text>
+
+        <View style={{ width: 40 }}></View>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Formik
@@ -255,8 +264,11 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
     flexDirection: "row", // Alinha itens horizontalmente
-    justifyContent: "center", // Espaça os itens
+    justifyContent: "space-between", // Espaça os itens
     alignItems: "center", // Centraliza verticalmente
+  },
+  backButton: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 20,

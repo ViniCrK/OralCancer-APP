@@ -137,7 +137,16 @@ export default function Perfil() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Perfil do Usuário</Text>
+
+        <View style={{ width: 40 }}></View>
       </View>
 
       <View style={styles.profileCard}>
@@ -219,9 +228,13 @@ const styles = StyleSheet.create({
   },
   customHeader: {
     paddingTop: 30,
+    paddingHorizontal: 20,
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
+  },
+  backButton: {
+    padding: 5,
   },
   headerTitle: {
     fontSize: 24,
