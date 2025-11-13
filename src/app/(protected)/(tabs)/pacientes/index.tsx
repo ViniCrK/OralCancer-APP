@@ -166,7 +166,11 @@ export default function ListaPacientes() {
           </MenuTrigger>
           <MenuOptions customStyles={optionsStyles}>
             <MenuOption
-              style={{ flexDirection: "row", alignItems: "center" }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingLeft: 10,
+              }}
               onSelect={() => router.push("/pacientes/cadastrar")}
             >
               <Ionicons name="add" size={24} color="#008C9E" />

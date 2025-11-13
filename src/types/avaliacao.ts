@@ -3,7 +3,7 @@ import { Paciente, PacienteDados } from "./paciente";
 
 type Avaliacao = { PACIENTES: Paciente | null };
 
-type AvaliacaoSimples = { id: number; created_at: string };
+type AvaliacaoSimples = { id: number; rascunho: boolean; created_at: string };
 
 type AvaliacaoCompleta = {
   id: number;

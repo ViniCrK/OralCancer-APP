@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#008C9E",
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
@@ -104,11 +104,11 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#fff",
   },
   subtitulo: {
     fontSize: 16,
-    color: "#555",
+    color: "#fff",
     marginTop: 4,
   },
   metaInfoContainer: {

@@ -1,6 +1,11 @@
 import { DropdownItem } from "./avaliacao";
 
-type Especialista = { id: number; nome: string; sobrenome: string };
+type Especialista = {
+  id: number;
+  nome: string;
+  sobrenome: string;
+  ESPECIALIDADES: DropdownItem | null;
+};
 
 type EspecialistaBreve = {
   id: number;

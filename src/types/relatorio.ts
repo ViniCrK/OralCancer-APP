@@ -1,5 +1,5 @@
 import { Avaliacao } from "./avaliacao";
-import { Especialista } from "./especialista";
+import { Especialista, EspecialistaCompleto } from "./especialista";
 
 type RelatorioComEspecialista = {
   id: number;

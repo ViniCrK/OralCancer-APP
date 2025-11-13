@@ -15,32 +15,38 @@ import {
   FlatList,
   Image,
   Modal,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  Menu,
+  MenuTrigger,
+  MenuOptions,
+  MenuOption,
+} from "react-native-popup-menu"; // Importar Menu
 
-const GridItem = ({
+const StatusTag = ({ riscoNome }: { riscoNome: string | null | undefined }) => {
+  const isAltoRisco = riscoNome?.toLowerCase().includes("alto");
+  const cor = isAltoRisco ? "#EF4444" : "#10B981"; // Vermelho para alto, Verde para outros
+  const texto = riscoNome || "Não Classificado";
+
+  return (
+    <View style={[styles.statusTag, { backgroundColor: `${cor}20` }]}>
+      <Text style={[styles.statusTagText, { color: cor }]}>{texto}</Text>
+    </View>
+  );
+};
+
+const InfoRow = ({
   label,
   value,
 }: {
   label: string;
   value: string | number | null | undefined;
 }) => (
-  <View style={styles.gridItem}>
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value || "Não informado"}</Text>
-  </View>
-);
-
-const TextoDetalhe = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number | null | undefined;
-}) => (
-  <View style={styles.detailRow}>
-    <Text style={styles.detailLabel}>{label}</Text>
-    <Text style={styles.detailValue}>{value || "Não informado"}</Text>
+  <View style={styles.infoRow}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text style={styles.infoValue}>{value || "Não informado"}</Text>
   </View>
 );
 
@@ -154,178 +160,184 @@ export default function DetalheAvaliacao() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>
-          Detalhes da Avaliação #{avaliacao.id}
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detalhes da Avaliação</Text>
+        <Menu>
+          <MenuTrigger style={styles.headerButton}>
+            <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+          </MenuTrigger>
+          <MenuOptions customStyles={optionsStyles}>
+            <MenuOption
+              onSelect={() => router.push(`/avaliacao/${id}/editar`)}
+              disabled={!especialistaCriador}
+            >
+              <Text
+                style={[
+                  styles.menuOptionText,
+                  !especialistaCriador && styles.menuOptionDisabled,
+                ]}
+              >
+                Editar
+              </Text>
+            </MenuOption>
+            <MenuOption
+              onSelect={handleExcluirAvaliacao}
+              disabled={!especialistaCriador}
+            >
+              <Text
+                style={[
+                  styles.menuOptionText,
+                  styles.menuOptionDanger,
+                  !especialistaCriador && styles.menuOptionDisabled,
+                ]}
+              >
+                Excluir
+              </Text>
+            </MenuOption>
+          </MenuOptions>
+        </Menu>
+      </View>
 
-        <TextoDetalhe
-          label="Paciente"
-          value={`${avaliacao.PACIENTES?.nome ?? ""} ${
-            avaliacao.PACIENTES?.sobrenome ?? ""
-          }`}
-        />
-        <TextoDetalhe
-          label="Especialista"
-          value={`${avaliacao.ESPECIALISTAS?.nome ?? ""} ${
-            avaliacao.ESPECIALISTAS?.sobrenome ?? ""
-          }`}
-        />
-        <TextoDetalhe
-          label="Data da Avaliação"
-          value={new Date(avaliacao.created_at).toLocaleDateString("pt-BR")}
-        />
-
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Características da Lesão</Text>
-          <View style={styles.gridContainer}>
-            <GridItem
-              label="Tamanho"
-              value={`${avaliacao.tamanho_aproximado} cm`}
-            />
-            <GridItem
-              label="Evolução"
-              value={`${avaliacao.tempo_evolucao} meses`}
-            />
-            <GridItem label="Aspecto" value={avaliacao.ASPECTOS_LESAO?.nome} />
-            <GridItem label="Superfície" value={avaliacao.SUPERFICIES?.nome} />
-            <GridItem label="Bordas" value={avaliacao.BORDAS?.nome} />
-            <GridItem label="Sintomas" value={avaliacao.SINTOMAS?.nome} />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.card}>
+          <View style={styles.patientHeader}>
+            <View>
+              <Text style={styles.patientName}>
+                {avaliacao.PACIENTES?.nome} {avaliacao.PACIENTES?.sobrenome}
+              </Text>
+              <Text style={styles.evaluationId}>Avaliação #{avaliacao.id}</Text>
+            </View>
+            <StatusTag riscoNome={avaliacao.CLASSIFICACOES_RISCO?.nome} />
           </View>
+
+          <Text style={styles.sectionTitle}>Queixa Principal:</Text>
+          <Text style={styles.queixaText}>{avaliacao.queixa_principal}</Text>
+
+          <Text style={styles.sectionTitle}>Observações:</Text>
+          <Text style={styles.queixaText}>{avaliacao.observacoes}</Text>
         </View>
 
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Fatores Associados</Text>
-          <View style={styles.gridContainer}>
-            <GridItem
-              label="Hábito Principal"
-              value={avaliacao.HABITOS?.nome}
-            />
-            <GridItem
-              label="Carga Tabágica/Etílica"
-              value={avaliacao.carga_tabagica_etilica}
-            />
-          </View>
-        </View>
+        {avaliacao.AVALIACAO_IMAGENS_URL &&
+          avaliacao.AVALIACAO_IMAGENS_URL.length > 0 && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Imagem da Lesão</Text>
+              <FlatList
+                data={avaliacao.AVALIACAO_IMAGENS_URL}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => abrirImagem(item.url)}>
+                    <Image
+                      source={{ uri: item.url }}
+                      style={styles.imagemThumbnail}
+                    />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
 
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Avaliação Clínica</Text>
-          <View style={styles.gridContainer}>
-            <GridItem label="Linfonodos" value={avaliacao.LINFONODOS?.nome} />
-            <GridItem
-              label="Classificação de Risco"
-              value={avaliacao.CLASSIFICACOES_RISCO?.nome}
-            />
+        {fatoresDeRisco.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Fatores de Risco Associados</Text>
+            <View style={styles.chipContainer}>
+              {fatoresDeRisco.map((fator) => (
+                <View key={fator!.id} style={styles.chip}>
+                  <Text style={styles.chipText}>{fator!.nome}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-          <TextoDetalhe
+        )}
+
+        <View style={styles.card}>
+          <Text style={styles.sectionTitle}>Detalhes Clínicos</Text>
+          <InfoRow
+            label="Tamanho"
+            value={`${avaliacao.tamanho_aproximado} cm`}
+          />
+          <InfoRow
+            label="Tempo de Evolução"
+            value={`${avaliacao.tempo_evolucao} meses`}
+          />
+          <InfoRow
+            label="Aspecto"
+            value={`${avaliacao.ASPECTOS_LESAO?.nome}`}
+          />
+          <InfoRow
+            label="Superfície"
+            value={`${avaliacao.SUPERFICIES?.nome}`}
+          />
+          <InfoRow label="Bordas" value={`${avaliacao.BORDAS?.nome}`} />
+          <InfoRow
+            label="Sintoma Associado"
+            value={`${avaliacao.SINTOMAS?.nome}`}
+          />
+          <InfoRow label="Hábitos" value={avaliacao.HABITOS?.nome} />
+          <InfoRow
+            label="Carga Tabágica/Etílica"
+            value={avaliacao.carga_tabagica_etilica}
+          />
+          <InfoRow
+            label="Linfonodos Regionais"
+            value={avaliacao.LINFONODOS?.nome}
+          />
+          <InfoRow
+            label="Histórico Familiar de CA"
+            value={avaliacao.historico_familiar_cancer ? "Sim" : "Não"}
+          />
+          <InfoRow
+            label="Classificação de Risco"
+            value={avaliacao.CLASSIFICACOES_RISCO?.nome}
+          />
+          <InfoRow
             label="Conduta Recomendada"
             value={avaliacao.CONDUTAS?.nome}
           />
-          <TextoDetalhe
+          <InfoRow
             label="Área de Encaminhamento"
             value={avaliacao.AREAS_ENCAMINHAMENTO?.nome}
           />
         </View>
 
-        {avaliacao.observacoes && (
-          <View style={styles.sectionContainer}>
-            <TextoDetalhe label="Observações" value={avaliacao.observacoes} />
-          </View>
-        )}
-      </View>
-
-      {avaliacao?.AVALIACAO_IMAGENS_URL &&
-        avaliacao.AVALIACAO_IMAGENS_URL.length > 0 && (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Imagens da Lesão</Text>
-            <FlatList
-              data={avaliacao.AVALIACAO_IMAGENS_URL}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => abrirImagem(item.url)}>
-                  <Image
-                    source={{ uri: item.url }}
-                    style={styles.imagemThumbnail}
-                  />
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        )}
-
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Fatores de Risco Associados</Text>
-        <View style={styles.chipContainer}>
-          {fatoresDeRisco.map((fator) => (
-            <View key={fator!.id} style={styles.chip}>
-              <Text style={styles.chipText}>{fator!.nome}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.botoesContainer}>
-        <TouchableOpacity
-          style={styles.botao}
-          onPress={() => router.push(`/avaliacao/${id}/relatorios/cadastrar`)}
-          disabled={excluindo}
-        >
-          <Text style={styles.botaoTexto}>Gerar Relatório</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.botao, styles.botaoSecundario]}
-          onPress={() => router.push(`/avaliacao/${id}/relatorios`)}
-          disabled={excluindo}
-        >
-          <Text style={styles.botaoTexto}>Ver Relatórios</Text>
-        </TouchableOpacity>
-
-        {especialistaCriador ? (
-          <>
-            <TouchableOpacity
-              style={[styles.botao, styles.botaoEditar]}
-              onPress={() => router.push(`/(tabs)/avaliacao/${id}/editar`)}
-            >
-              <Text style={styles.botaoTexto}>Editar Avaliação</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.botao,
-                styles.botaoExcluir,
-                excluindo && styles.botaoDesabilitado,
-              ]}
-              onPress={handleExcluirAvaliacao}
-              disabled={excluindo}
-            >
-              {excluindo ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.botaoTexto}>Excluir Avaliação</Text>
-              )}
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Link
-            href={{
-              pathname: "/notificacoes/cadastrar",
-              params: {
-                avaliacaoId: avaliacao.id,
-                destinatarioId: avaliacao.ESPECIALISTAS?.id,
-              },
-            }}
-            asChild
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={styles.botaoPrincipal}
+            onPress={() => router.push(`/avaliacao/${id}/relatorios/cadastrar`)}
+            disabled={excluindo}
           >
-            <TouchableOpacity style={styles.botaoEditar}>
-              <Text style={styles.botaoTexto}>Gerar Notificação</Text>
-            </TouchableOpacity>
-          </Link>
-        )}
-      </View>
+            <Ionicons
+              name="document-attach-outline"
+              size={20}
+              color="#fff"
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.botaoPrincipalTexto}>Gerar Relatório</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.botaoSecundario}
+            onPress={() => router.push(`/avaliacao/${id}/relatorios`)}
+            disabled={excluindo}
+          >
+            <Ionicons
+              name="list-outline"
+              size={20}
+              color="#008C9E"
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.botaoSecundarioTexto}>Ver Relatórios</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       <Modal
         visible={modalVisivel}
@@ -346,90 +358,200 @@ export default function DetalheAvaliacao() {
           )}
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0", padding: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
   containerCentralizado: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#F8FAFC",
+  },
+  // Cabeçalho
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
+  },
+  menuOptionText: { fontSize: 16, padding: 10 },
+  menuOptionDanger: { color: "#EF4444" },
+  menuOptionDisabled: { color: "#9ca3af" },
+
+  // Conteúdo
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 60,
   },
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 10,
+    borderRadius: 16,
     padding: 20,
     marginBottom: 16,
+    elevation: 3,
+    shadowColor: "#64748b",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
   },
-  cardTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    paddingBottom: 10,
-  },
-  gridContainer: {
+  // Card do Paciente
+  patientHeader: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -5,
-  },
-  gridItem: {
-    width: "50%",
-    paddingHorizontal: 5,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: 15,
   },
-  detailRow: {
-    marginBottom: 12,
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: "gray",
-    fontWeight: "500",
-  },
-  detailValue: {
-    fontSize: 18,
-    color: "#333",
-  },
-  botoesContainer: {
-    margin: 10,
-  },
-  botao: {
-    backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  botaoSecundario: {
-    backgroundColor: "#0d9488",
-  },
-  botaoEditar: {
-    backgroundColor: "#f97316",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 100,
-  },
-  botaoExcluir: {
-    backgroundColor: "#e53e3e",
-  },
-  botaoDesabilitado: {
-    backgroundColor: "#f8b4b4",
-  },
-  botaoTexto: {
-    color: "#fff",
+  patientName: {
+    fontSize: 20,
     fontWeight: "bold",
-    fontSize: 16,
+    color: "#1e293b",
   },
+  evaluationId: {
+    fontSize: 14,
+    color: "#64748b",
+  },
+  statusTag: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusTagText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#334155",
+    marginBottom: 10,
+  },
+  queixaText: {
+    fontSize: 15,
+    color: "#475569",
+    lineHeight: 22,
+    paddingBottom: 8,
+  },
+  // Card de Imagens
   imagemThumbnail: {
     width: 100,
     height: 100,
     borderRadius: 8,
     marginRight: 10,
     backgroundColor: "#e0e0e0",
+  },
+  // Card de Detalhes
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9", // Divisor sutil
+  },
+  infoLabel: {
+    fontSize: 15,
+    color: "#64748b", // Cinza médio
+  },
+  infoValue: {
+    fontSize: 15,
+    color: "#1e293b", // Cinza escuro
+    fontWeight: "500",
+  },
+  // Botões de Ação
+  actionsContainer: {
+    padding: 16,
+    marginTop: 0,
+    paddingTop: 0,
+  },
+  buttonIcon: {
+    marginRight: 10,
+  },
+  botaoPrincipal: {
+    flexDirection: "row",
+    backgroundColor: "#008C9E",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    elevation: 3,
+  },
+  botaoPrincipalTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoSecundario: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  botaoSecundarioTexto: {
+    color: "#008C9E",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoEditar: {
+    flexDirection: "row",
+    backgroundColor: "#FFF7ED", // Fundo laranja claro
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#F97316",
+  },
+  botaoEditarTexto: {
+    color: "#F97316", // Laranja
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  // Lista de Outras Avaliações
+  linkItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  linkItemText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 10,
+    fontWeight: "500",
+  },
+  linkItemData: {
+    fontSize: 14,
+    color: "gray",
+    marginHorizontal: 10,
   },
   modalContainer: {
     flex: 1,
@@ -447,24 +569,12 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 1,
   },
-  sectionContainer: {
-    marginTop: 15,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#008C9E",
-    marginBottom: 10,
-  },
   chipContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
   },
   chip: {
-    backgroundColor: "#e0f2f1",
+    backgroundColor: "#008C9E",
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 15,
@@ -472,8 +582,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   chipText: {
-    color: "#0d9488",
+    color: "#fff",
     fontSize: 14,
     fontWeight: "500",
   },
 });
+
+const optionsStyles = {
+  optionsContainer: {
+    borderRadius: 8,
+    marginTop: 40,
+    width: 200,
+  },
+};
