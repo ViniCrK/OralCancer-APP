@@ -336,6 +336,75 @@ export default function DetalheAvaliacao() {
             />
             <Text style={styles.botaoSecundarioTexto}>Ver Relatórios</Text>
           </TouchableOpacity>
+
+          {especialistaCriador ? (
+            <>
+              <TouchableOpacity
+                style={styles.botaoEditar}
+                onPress={() => router.push(`/avaliacao/${id}/editar`)}
+                disabled={excluindo}
+              >
+                <Ionicons
+                  name="pencil"
+                  size={20}
+                  color="#F97316"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.botaoEditarTexto}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.botaoExcluir,
+                  excluindo && styles.botaoDesabilitado,
+                ]}
+                onPress={handleExcluirAvaliacao}
+                disabled={excluindo}
+              >
+                {excluindo ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name="trash-outline"
+                      size={20}
+                      color="#fff"
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.botaoExcluirTexto}>
+                      Excluir Avaliação
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Link
+              href={{
+                pathname: "/notificacoes/cadastrar",
+                params: {
+                  avaliacaoId: avaliacao.id,
+                  destinatarioId: avaliacao.ESPECIALISTAS?.id,
+                },
+              }}
+              asChild
+            >
+              <TouchableOpacity
+                style={styles.botaoNotificacao}
+                disabled={excluindo}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={20}
+                  color="#581c87"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.botaoNotificacaoTexto}>
+                  Gerar Notificação
+                </Text>
+              </TouchableOpacity>
+            </Link>
+          )}
         </View>
       </ScrollView>
 
@@ -373,7 +442,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8FAFC",
   },
-  // Cabeçalho
   customHeader: {
     backgroundColor: "#008C9E",
     paddingTop: Platform.OS === "android" ? 40 : 60,
@@ -399,7 +467,6 @@ const styles = StyleSheet.create({
   menuOptionDanger: { color: "#EF4444" },
   menuOptionDisabled: { color: "#9ca3af" },
 
-  // Conteúdo
   scrollContent: {
     padding: 16,
     paddingBottom: 60,
@@ -415,7 +482,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
   },
-  // Card do Paciente
   patientHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -452,7 +518,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     paddingBottom: 8,
   },
-  // Card de Imagens
   imagemThumbnail: {
     width: 100,
     height: 100,
@@ -460,7 +525,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: "#e0e0e0",
   },
-  // Card de Detalhes
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -533,7 +597,40 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  // Lista de Outras Avaliações
+  botaoNotificacao: {
+    flexDirection: "row",
+    backgroundColor: "#F3E8FF", // Fundo roxo claro
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#9333ea", // Roxo
+  },
+  botaoNotificacaoTexto: {
+    color: "#581c87", // Roxo escuro
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoExcluir: {
+    flexDirection: "row", // Adicionado
+    backgroundColor: "#ef4444", // Vermelho
+    padding: 15,
+    borderRadius: 10, // Arredondado
+    alignItems: "center",
+    justifyContent: "center", // Adicionado
+    marginBottom: 12,
+    elevation: 3,
+  },
+  botaoExcluirTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoDesabilitado: {
+    backgroundColor: "#f8b4b4",
+  },
   linkItem: {
     flexDirection: "row",
     alignItems: "center",

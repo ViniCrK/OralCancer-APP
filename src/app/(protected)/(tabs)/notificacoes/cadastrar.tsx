@@ -1,6 +1,7 @@
 import CadastroNotificacaoSchema from "@/schemas/NotificacaoSchema";
 import { useNotificacaoService } from "@/services/notificacao";
 import { useEspecialistaStore } from "@/store/especialista";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Formik } from "formik";
 import {
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 
 export default function CadastroNotificacao() {
@@ -71,8 +73,19 @@ export default function CadastroNotificacao() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Gerar Notificação</Text>
+        <View style={{ width: 40 }} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Formik
           initialValues={{ conteudo: "" }}
           validationSchema={CadastroNotificacaoSchema}
@@ -87,123 +100,150 @@ export default function CadastroNotificacao() {
             touched,
             isSubmitting,
           }) => (
-            <>
-              <Text style={styles.titulo}>Gerar Notificação</Text>
+            <View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Conteúdo da Mensagem</Text>
 
-              <View style={styles.form}>
-                <View style={styles.inputContainer}>
-                  <Text style={styles.label}>Conteúdo da Mensagem</Text>
+                <View
+                  style={[
+                    styles.inputBase,
+                    styles.textArea,
+                    touched.conteudo && errors.conteudo
+                      ? styles.inputError
+                      : null,
+                  ]}
+                >
                   <TextInput
-                    style={[
-                      styles.input,
-                      styles.textArea,
-                      touched.conteudo && errors.conteudo
-                        ? styles.inputError
-                        : null,
-                    ]}
+                    style={styles.inputText}
                     onChangeText={handleChange("conteudo")}
                     onBlur={handleBlur("conteudo")}
                     value={values.conteudo}
                     placeholder="Descreva o conteúdo da notificação..."
+                    placeholderTextColor="#9ca3af"
                     keyboardType="default"
                     autoCapitalize="sentences"
                     multiline={true}
-                    numberOfLines={6}
+                    numberOfLines={8}
                     maxLength={250}
                   />
-
-                  {touched.conteudo && errors.conteudo && (
-                    <Text style={styles.errorText}>{errors.conteudo}</Text>
-                  )}
                 </View>
 
-                <TouchableOpacity
-                  style={[
-                    styles.botao,
-                    isSubmitting && styles.botaoDesabilitado,
-                  ]}
-                  onPress={() => handleSubmit()}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.botaoTexto}>Enviar Notificação</Text>
-                  )}
-                </TouchableOpacity>
+                {touched.conteudo && errors.conteudo && (
+                  <Text style={styles.errorText}>{errors.conteudo}</Text>
+                )}
               </View>
-            </>
+
+              <TouchableOpacity
+                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
+                onPress={() => handleSubmit()}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.botaoTexto}>Enviar Notificação</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           )}
         </Formik>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#F8FAFC",
   },
-  titulo: {
-    fontSize: 24,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+    color: "#fff",
   },
-  form: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: "#333",
-    marginBottom: 5,
-    fontWeight: "500",
+    color: "#334155",
+    marginBottom: 8,
+    fontWeight: "600",
   },
-  input: {
+  inputBase: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    justifyContent: "flex-start",
+    shadowColor: "#9ca3af",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: "#f9fafb",
+    borderColor: "#e2e8f0",
   },
-  textArea: {
-    height: 150,
+  inputText: {
+    fontSize: 16,
+    color: "#1e293b",
+    padding: 0,
     textAlignVertical: "top",
   },
+  textArea: {
+    height: 200,
+  },
   inputError: {
-    borderColor: "#ef4444",
-    borderWidth: 2,
+    borderColor: "#EF4444",
   },
   errorText: {
-    color: "#ef4444",
+    color: "#EF4444",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 5,
   },
   botao: {
     backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
+    marginTop: 20,
+    shadowColor: "#008C9E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   botaoDesabilitado: {
-    backgroundColor: "#a0d8c5",
+    backgroundColor: "#a5f3fc",
+    shadowOpacity: 0.1,
+    elevation: 2,
   },
   botaoTexto: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
   },
 });

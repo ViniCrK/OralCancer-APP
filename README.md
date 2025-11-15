@@ -63,4 +63,4 @@ Você também pode ver a lista de todos os [colaboradores](https://github.com/Vi
 
 - Conte a outras pessoas sobre este projeto 📢;
 - Convide alguém da equipe para uma cerveja 🍺;
-- Um agradecimento ao professor Carlos Gama pela confiança no projeto;
+- Um agradecimento aos professores Carlos Gama, Wagner Palmeira e Tacyana Batista pela confiança no projeto;

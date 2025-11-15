@@ -12,6 +12,7 @@ import {
   FlatList,
   RefreshControl,
   TextInput,
+  Platform,
 } from "react-native";
 import {
   Menu,
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   },
   customHeader: {
     backgroundColor: "#008C9E",
-    paddingTop: 60,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 25,

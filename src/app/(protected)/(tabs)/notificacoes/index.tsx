@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  Platform,
 } from "react-native";
 
 const getAvatarColor = (nome: string) => {
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   },
   customHeader: {
     backgroundColor: "#008C9E",
-    paddingTop: 60,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
     flexDirection: "row",

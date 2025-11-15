@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 40, // Espaço para status bar
+    paddingTop: Platform.OS === "android" ? 40 : 60, // Espaço para status bar
     paddingBottom: 20,
   },
   backButton: {

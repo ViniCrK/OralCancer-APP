@@ -28,26 +28,21 @@ export default function LoginPagina() {
     { email, password: senha }: any,
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
-    try {
-      const { sucesso, mensagem } = await usuarioService.entrar(email, senha);
+    const { sucesso, mensagem } = await usuarioService.entrar(email, senha);
 
-      if (sucesso) {
-        Alert.alert("Sucesso", mensagem);
-      }
-    } catch (error) {
-      console.error("Erro no login:", error);
-      Alert.alert("Erro", "Ocorreu uma falha inesperada no login.");
-    } finally {
-      setSubmitting(false);
+    if (!sucesso) {
+      Alert.alert("Erro", mensagem);
+      console.error("Erro ao fazer login:", mensagem);
+    } else {
+      Alert.alert("Sucesso", mensagem);
     }
+    setSubmitting(false);
   };
 
   return (
     <View style={styles.mainContainer}>
-      {/* Header falso para simular o espaço superior */}
       <View style={styles.headerBackground} />
 
-      {/* Container Branco que sobe (Bottom Sheet effect) */}
       <View style={styles.whiteSheet}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -74,7 +69,6 @@ export default function LoginPagina() {
                 isSubmitting,
               }) => (
                 <View style={styles.form}>
-                  {/* Input de E-mail com Ícone */}
                   <View style={styles.inputWrapper}>
                     <Ionicons
                       name="mail-outline"
@@ -99,7 +93,6 @@ export default function LoginPagina() {
                     </Text>
                   )}
 
-                  {/* Input de Senha com Ícone na esquerda e Toggle na direita */}
                   <View style={styles.inputWrapper}>
                     <Ionicons
                       name="lock-closed-outline"
@@ -134,7 +127,6 @@ export default function LoginPagina() {
                     </Text>
                   )}
 
-                  {/* Link de Esqueci Senha */}
                   <Link href="/esqueci-senha" asChild>
                     <TouchableOpacity style={styles.forgotContainer}>
                       <Text style={styles.forgotPasswordLink}>
@@ -143,7 +135,6 @@ export default function LoginPagina() {
                     </TouchableOpacity>
                   </Link>
 
-                  {/* Botão de Entrar */}
                   <TouchableOpacity
                     onPress={() => handleSubmit()}
                     style={[
@@ -162,7 +153,6 @@ export default function LoginPagina() {
               )}
             </Formik>
 
-            {/* Footer de Cadastro */}
             <View style={styles.footerContainer}>
               <Text style={styles.footerText}>Não tem cadastro? </Text>
               <Link href="/cadastro" asChild>
@@ -181,11 +171,10 @@ export default function LoginPagina() {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "#0a8ea0", // Cor Teal do fundo
+    backgroundColor: "#0a8ea0",
   },
   headerBackground: {
-    height: height * 0.25, // Ocupa aprox. 35% da tela superior
-    // Aqui você poderia adicionar uma Image de background se tivesse os assets das formas curvas
+    height: height * 0.25,
   },
   whiteSheet: {
     flex: 1,
@@ -209,7 +198,7 @@ const styles = StyleSheet.create({
   },
   subtitulo: {
     fontSize: 16,
-    color: "#6b7280", // Cinza mais suave
+    color: "#6b7280",
   },
   form: {
     marginBottom: 20,
@@ -218,10 +207,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#e5e7eb", // Cinza bem claro para a borda
+    borderColor: "#e5e7eb",
     borderRadius: 12,
     paddingHorizontal: 15,
-    height: 55, // Altura um pouco maior para ficar moderno
+    height: 55,
     marginBottom: 15,
     backgroundColor: "#fff",
   },
@@ -249,23 +238,23 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   forgotPasswordLink: {
-    color: "#6b7280", // Cinza para o link de esqueci senha (como na imagem)
+    color: "#6b7280",
     fontSize: 14,
     fontWeight: "500",
   },
   botao: {
-    backgroundColor: "#008C9E", // Um tom de teal um pouco mais vibrante para o botão
+    backgroundColor: "#008C9E",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
-    elevation: 2, // Sombra leve no Android
-    shadowColor: "#008C9E", // Sombra no iOS
+    elevation: 2,
+    shadowColor: "#008C9E",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
   },
   botaoDesabilitado: {
-    backgroundColor: "#a5f3fc", // Versão mais clara do teal
+    backgroundColor: "#a5f3fc",
   },
   botaoTexto: {
     color: "#fff",
@@ -275,7 +264,7 @@ const styles = StyleSheet.create({
   footerContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 38, // Empurra para o final da tela se houver espaço
+    marginTop: 38,
     paddingBottom: 30,
   },
   footerText: {
@@ -284,7 +273,7 @@ const styles = StyleSheet.create({
   },
   linkCadastro: {
     fontSize: 15,
-    color: "#008C9E", // Mesma cor do botão principal
+    color: "#008C9E",
     fontWeight: "bold",
   },
 });

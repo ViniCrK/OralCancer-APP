@@ -959,6 +959,8 @@ export default function CadastroAvaliacao() {
                   <Text style={styles.botaoTexto}>Finalizar depois</Text>
                 )}
               </TouchableOpacity>
+
+              <View style={{ height: 60 }} />
             </View>
           </View>
         )}

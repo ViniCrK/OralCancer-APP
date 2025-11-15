@@ -46,7 +46,7 @@ const UsuarioService = {
 
       return {
         sucesso: false,
-        mensagem: "E-mail ou senha incorretos. Tente novamente mais tarde!",
+        mensagem: "E-mail ou senha incorretos. Digite seus dados novamente!",
       };
     }
 

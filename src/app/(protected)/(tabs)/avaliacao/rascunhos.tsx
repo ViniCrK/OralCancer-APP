@@ -1,6 +1,7 @@
 import { useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { AvaliacaoBreve } from "@/types/avaliacao";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -11,7 +12,25 @@ import {
   View,
   StyleSheet,
   RefreshControl,
+  Platform,
 } from "react-native";
+
+const getAvatarColor = (nome: string) => {
+  const colors = [
+    "#00897B",
+    "#00BFA5",
+    "#FFA000",
+    "#F57C00",
+    "#1E88E5",
+    "#43A047",
+  ];
+  let hash = 0;
+  if (nome.length === 0) return colors[0];
+  for (let i = 0; i < nome.length; i++) {
+    hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
 
 export default function ListaRascunhos() {
   const router = useRouter();
@@ -49,42 +68,60 @@ export default function ListaRascunhos() {
     carregarRascunhos();
   };
 
-  const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => (
-    <View style={styles.cardRascunho}>
-      <View style={{ marginTop: 8 }}>
-        <Text style={styles.cardLabel}>Paciente:</Text>
+  const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => {
+    const pacienteNome = avaliacao.PACIENTES?.nome || "Paciente";
+    const pacienteSobrenome = avaliacao.PACIENTES?.sobrenome || "Não Vinculado";
+    const nomeCompleto = `${pacienteNome} ${pacienteSobrenome}`;
 
-        <Text style={styles.cardTitle}>
-          {avaliacao.PACIENTES?.nome ?? "Não informado"}{" "}
-          {avaliacao.PACIENTES?.sobrenome}
-        </Text>
-      </View>
+    const iniciais = `${pacienteNome[0] || "?"}${
+      pacienteSobrenome[0] || ""
+    }`.toUpperCase();
+    const avatarColor = getAvatarColor(pacienteNome);
+    const dataCriacao = new Date(avaliacao.created_at).toLocaleDateString(
+      "pt-BR"
+    );
 
-      <View style={{ marginTop: 8 }}>
-        <Text style={styles.cardLabel}>Especialista:</Text>
-
-        <Text style={styles.cardTitle}>
-          {avaliacao.ESPECIALISTAS?.nome ?? "Não informado"}{" "}
-          {avaliacao.ESPECIALISTAS?.sobrenome}
-        </Text>
-      </View>
-
-      <View style={{ marginTop: 8 }}>
-        <Text style={styles.cardLabel}>Data da Avaliação:</Text>
-
-        <Text style={styles.cardText}>
-          {new Date(avaliacao.created_at).toLocaleDateString("pt-BR")}
-        </Text>
-      </View>
-
+    return (
       <TouchableOpacity
-        style={styles.botaoContinuar}
-        onPress={() => router.push(`/(tabs)/avaliacao/${avaliacao.id}/editar`)}
+        style={styles.card}
+        onPress={() => router.push(`/avaliacao/${avaliacao.id}/editar`)}
+        activeOpacity={0.7}
       >
-        <Text style={styles.botaoTexto}>Continuar Editando</Text>
+        <View
+          style={[
+            styles.avatar,
+            { backgroundColor: avatarColor, opacity: 0.6 },
+          ]}
+        >
+          <Text style={styles.avatarText}>{iniciais}</Text>
+        </View>
+
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle} numberOfLines={1}>
+            {nomeCompleto}
+          </Text>
+          <Text style={styles.cardSubtitle}>Rascunho #{avaliacao.id}</Text>
+          <View style={styles.metaContainer}>
+            <View style={styles.metaItem}>
+              <Ionicons
+                name="calendar-outline"
+                size={14}
+                color="#9ca3af"
+                style={styles.metaIcon}
+              />
+              <Text style={styles.metaText}>Salvo em: {dataCriacao}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={[styles.statusTag, { backgroundColor: "#FEF9C3" }]}>
+          <Text style={[styles.statusText, { color: "#F97316" }]}>
+            Rascunho
+          </Text>
+        </View>
       </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   if (carregando) {
     return (
@@ -96,94 +133,156 @@ export default function ListaRascunhos() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerTitle}>Rascunhos</Text>
+
+        <View style={styles.headerButton} />
+      </View>
+
       <FlatList
         data={rascunhos}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 50 }}
-        ListHeaderComponent={
-          <Text style={styles.titulo}>Avaliações em Rascunho</Text>
-        }
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <View style={styles.containerCentralizado}>
-            <Text>Nenhuma rascunho encontrado.</Text>
+          <View style={styles.emptyContainer}>
+            <Ionicons name="document-text-outline" size={60} color="#cbd5e1" />
+            <Text style={styles.emptyText}>Nenhum rascunho encontrado.</Text>
           </View>
         }
         refreshControl={
           <RefreshControl
             refreshing={recarregando}
             onRefresh={handleRecarregar}
+            colors={["#008C9E"]}
           />
         }
       />
-
-      <TouchableOpacity
-        style={styles.botaoFlutuante}
-        onPress={() => router.push("/avaliacao/cadastrar")}
-      >
-        <Text style={styles.botaoFlutuanteTexto}>+</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0" },
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
   containerCentralizado: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#F8FAFC",
   },
-  titulo: {
-    fontSize: 24,
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
+    color: "#fff",
   },
-  cardRascunho: {
-    backgroundColor: "#ffffff",
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 16,
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+    alignItems: "center",
     elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: "#64748b",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-  cardTitle: { fontSize: 18, fontWeight: "bold" },
-  cardLabel: { fontSize: 14, color: "gray" },
-  cardText: { fontSize: 16, marginTop: 4 },
-  botaoVerMais: {
-    backgroundColor: "#008C9E",
-    padding: 12,
-    borderRadius: 5,
-    marginTop: 16,
-    alignItems: "center",
-  },
-  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  botaoContinuar: {
-    backgroundColor: "#f97316",
-    padding: 12,
-    borderRadius: 5,
-    marginTop: 16,
-    alignItems: "center",
-  },
-  botaoFlutuante: {
-    position: "absolute",
-    right: 20,
-    bottom: 20,
-    backgroundColor: "#008C9E",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
+    marginRight: 16,
   },
-  botaoFlutuanteTexto: {
+  avatarText: {
     color: "#fff",
-    fontSize: 30,
-    lineHeight: 32,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1e293b",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#64748b",
+    marginBottom: 8,
+  },
+  metaContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  metaIcon: {
+    marginRight: 4,
+  },
+  metaText: {
+    fontSize: 13,
+    color: "#9ca3af",
+    fontWeight: "500",
+  },
+  statusTag: {
+    marginLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: "30%",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#9ca3af",
+    marginTop: 10,
+    textAlign: "center",
   },
 });

@@ -12,6 +12,7 @@ import {
   StyleSheet,
   RefreshControl,
   TextInput,
+  Platform,
 } from "react-native";
 
 const getAvatarColor = (nome: string) => {
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   customHeader: {
-    paddingTop: 60,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingHorizontal: 20,
     flexDirection: "row", // Alinha itens horizontalmente
     justifyContent: "space-between", // Espaça os itens

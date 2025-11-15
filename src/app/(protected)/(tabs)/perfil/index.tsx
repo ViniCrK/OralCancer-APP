@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   customHeader: {
-    paddingTop: 30,
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
