@@ -4,7 +4,7 @@ import { DropdownItem } from "@/types/avaliacao";
 import { PacienteItem } from "@/types/paciente";
 import Checkbox from "expo-checkbox";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Formik } from "formik";
+import { Formik, FormikErrors } from "formik";
 import { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -15,6 +15,8 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform,
+  Switch,
 } from "react-native";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 
@@ -22,10 +24,41 @@ import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import SeletorImagem, { Imagem } from "../components/SeletorImagem";
 import { Ionicons } from "@expo/vector-icons";
+import { CadastrodeAvaliacaoSchemas } from "@/schemas/AvaliacaoSchema";
+
+type InputProps = {
+  label: string;
+  children: React.ReactNode;
+  errorMessage?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
+  isTouched?: boolean;
+};
+const FormInput = ({
+  label,
+  children,
+  errorMessage,
+  isTouched,
+}: InputProps) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <View
+      style={[
+        styles.inputBase,
+        isTouched && errorMessage ? styles.inputError : null,
+      ]}
+    >
+      {children}
+    </View>
+    {isTouched && errorMessage && (
+      <Text style={styles.errorText}>{String(errorMessage)}</Text>
+    )}
+  </View>
+);
 
 export default function CadastroAvaliacao() {
   const router = useRouter();
   const { especialista } = useEspecialistaStore();
+
+  const [pagina, setPagina] = useState(0);
 
   const [habitos, setHabitos] = useState<DropdownItem[]>([]);
   const [localizacoesIntraorais, setLocalizacoesIntraorais] = useState<
@@ -56,6 +89,25 @@ export default function CadastroAvaliacao() {
     ...paciente,
     label: `${paciente.nome} ${paciente.sobrenome} - ${paciente.registro_hospitalar}`,
   }));
+
+  const proximaPagina = async (
+    validateForm: (values?: any) => Promise<FormikErrors<any>>
+  ) => {
+    const erros = await validateForm();
+
+    if (Object.keys(erros).length === 0) {
+      setPagina((prevPagina) => prevPagina + 1);
+    } else {
+      Alert.alert(
+        "Erro",
+        "Por favor, selecione pelo menos o paciente na página 1."
+      );
+    }
+  };
+
+  const paginaAnterior = () => {
+    setPagina((prevPagina) => prevPagina - 1);
+  };
 
   const carregarDados = useCallback(async () => {
     try {
@@ -251,7 +303,17 @@ export default function CadastroAvaliacao() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Formulário de Avaliação</Text>
+        <View style={{ width: 40 }} />
+      </View>
       <Formik
         initialValues={{
           queixa_principal: "",
@@ -278,777 +340,878 @@ export default function CadastroAvaliacao() {
         onSubmit={(values, { setSubmitting }) =>
           handleSalvarAvaliacao(values, { setSubmitting })
         }
+        validationSchema={CadastrodeAvaliacaoSchemas[pagina]}
       >
         {({
           handleSubmit,
           handleChange,
           setFieldValue,
+          validateForm,
           values,
+          errors,
+          touched,
+          handleBlur,
           isSubmitting,
         }) => (
-          <View style={styles.container}>
-            <Text style={styles.titulo}>Formulário de Triagem</Text>
-
-            <View style={styles.form}>
-              <SeletorImagem
-                imagens={values.imagens}
-                onImagensAlteradas={(novasImagens) => {
-                  setFieldValue("imagens", novasImagens);
-                }}
-                desabilitada={isSubmitting}
-              />
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Paciente</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={pacientesFormatados}
-                  search
-                  searchPlaceholder="Registro Hospitalar"
-                  searchField={"registro_hospitalar"}
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"label"}
-                  placeholder="Selecione o paciente"
-                  value={values.paciente_id}
-                  onChange={(paciente) =>
-                    setFieldValue("paciente_id", paciente.id)
-                  }
-                  renderRightIcon={() => {
-                    if (values.paciente_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => setFieldValue("paciente_id", null)}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
+          <ScrollView
+            style={styles.form}
+            contentContainerStyle={styles.scrollContainer}
+            keyboardShouldPersistTaps="handled"
+          >
+            {pagina === 0 && (
+              <>
+                <FormInput
+                  label="Paciente"
+                  isTouched={touched.paciente_id}
+                  errorMessage={errors.paciente_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={pacientesFormatados}
+                    search
+                    searchPlaceholder="Registro Hospitalar..."
+                    searchField={"registro_hospitalar"}
+                    maxHeight={280}
+                    valueField={"id"}
+                    labelField={"label"}
+                    placeholder="Selecione o paciente"
+                    value={values.paciente_id}
+                    onChange={(paciente) =>
+                      setFieldValue("paciente_id", paciente.id)
                     }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
+                    onBlur={() => handleBlur("paciente_id")}
+                    renderRightIcon={() => {
+                      if (values.paciente_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => setFieldValue("paciente_id", null)}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
 
                 <TouchableOpacity
                   style={styles.linkNovoPaciente}
                   onPress={() => router.push("/pacientes/cadastrar")}
                 >
                   <Text style={styles.linkNovoPacienteTexto}>
-                    Não encontrou o paciente? Cadastre um novo
+                    Não encontrou? Cadastre um novo
                   </Text>
                 </TouchableOpacity>
-              </View>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Queixa Principal</Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={handleChange("queixa_principal")}
-                  placeholder="Descreva a queixa principal"
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Tamanho Aproximado da Lesão(cm)
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(valorTexto) =>
-                    setFieldValue("tamanho_aproximado", parseInt(valorTexto))
-                  }
-                  placeholder="Digite o tamanho em cm"
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Tempo de Evolução da Lesão(meses)
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(valorTexto) =>
-                    setFieldValue("tempo_evolucao", parseInt(valorTexto))
-                  }
-                  placeholder="Digite o tempo em meses"
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Hábitos do Paciente</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={habitos}
-                  search
-                  searchPlaceholder="Nome do hábito"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o hábito"
-                  value={values.habito_id}
-                  onChange={(habito) => setFieldValue("habito_id", habito.id)}
-                  renderRightIcon={() => {
-                    if (values.habito_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => setFieldValue("habito_id", null)}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Carga Tabágica/Etílica</Text>
-
-                <TextInput
-                  style={styles.input}
-                  onChangeText={(valorTexto) =>
-                    setFieldValue(
-                      "carga_tabagica_etilica",
-                      parseInt(valorTexto)
-                    )
-                  }
-                  placeholder="Tabágica(maços) / Etílica(ml)"
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Histórico Familiar de Câncer</Text>
-
-                <TouchableOpacity
-                  style={styles.checkboxContainer}
-                  onPress={() =>
-                    setFieldValue("historico_familiar_cancer", true)
-                  }
+                <FormInput
+                  label="Queixa Principal"
+                  isTouched={touched.queixa_principal}
+                  errorMessage={errors.queixa_principal as string}
                 >
-                  <Checkbox
-                    style={styles.checkbox}
-                    value={values.historico_familiar_cancer}
-                    onValueChange={(escolha) =>
-                      setFieldValue("historico_familiar_cancer", escolha)
-                    }
-                    color={
-                      values.historico_familiar_cancer ? "#008C9E" : undefined
-                    }
+                  <TextInput
+                    style={[styles.inputText, styles.textArea]}
+                    onChangeText={handleChange("queixa_principal")}
+                    onBlur={handleBlur("queixa_principal")}
+                    value={values.queixa_principal}
+                    placeholder="Descreva a queixa principal do paciente..."
+                    placeholderTextColor="#9ca3af"
+                    multiline={true}
+                    numberOfLines={4}
                   />
-                </TouchableOpacity>
-              </View>
+                </FormInput>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Observações Clínicas</Text>
+                <FormInput
+                  label="Tamanho Aproximado (cm)"
+                  isTouched={touched.tamanho_aproximado}
+                  errorMessage={errors.tamanho_aproximado as string}
+                >
+                  <TextInput
+                    style={styles.inputText}
+                    onChangeText={(text) =>
+                      setFieldValue(
+                        "tamanho_aproximado",
+                        text.replace(/[^0-9,.]/g, "")
+                      )
+                    }
+                    onBlur={handleBlur("tamanho_aproximado")}
+                    value={
+                      values.tamanho_aproximado
+                        ? String(values.tamanho_aproximado)
+                        : ""
+                    }
+                    placeholder="Ex: 2.5"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                  />
+                </FormInput>
 
-                <TextInput
-                  style={styles.observacoesTexto}
-                  multiline
-                  numberOfLines={4}
-                  maxLength={200}
-                  onChangeText={handleChange("observacoes")}
-                  placeholder="Digite as observações adicionais"
-                  keyboardType="default"
+                <FormInput
+                  label="Tempo de Evolução (meses)"
+                  isTouched={touched.tempo_evolucao}
+                  errorMessage={errors.tempo_evolucao as string}
+                >
+                  <TextInput
+                    style={styles.inputText}
+                    onChangeText={(text) =>
+                      setFieldValue(
+                        "tempo_evolucao",
+                        text.replace(/[^0-9]/g, "")
+                      )
+                    }
+                    onBlur={handleBlur("tempo_evolucao")}
+                    value={
+                      values.tempo_evolucao ? String(values.tempo_evolucao) : ""
+                    }
+                    placeholder="Ex: 6"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Hábitos"
+                  isTouched={touched.habito_id}
+                  errorMessage={errors.habito_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={habitos}
+                    search
+                    searchPlaceholder="Hábito"
+                    maxHeight={280}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione o hábito"
+                    value={values.habito_id}
+                    onChange={(habito) => setFieldValue("habito_id", habito.id)}
+                    onBlur={() => handleBlur("habito_id")}
+                    renderRightIcon={() => {
+                      if (values.habito_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => setFieldValue("habito_id", null)}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Carga Tabágica/Etílica"
+                  isTouched={touched.carga_tabagica_etilica}
+                  errorMessage={errors.carga_tabagica_etilica as string}
+                >
+                  <TextInput
+                    style={styles.inputText}
+                    onChangeText={(text) =>
+                      setFieldValue(
+                        "carga_tabagica_etilica",
+                        text.replace(/[^0-9]/g, "")
+                      )
+                    }
+                    onBlur={handleBlur("carga_tabagica_etilica")}
+                    value={
+                      values.carga_tabagica_etilica
+                        ? String(values.carga_tabagica_etilica)
+                        : ""
+                    }
+                    placeholder="Tabágica(maços) / Etílica(ml)"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                  />
+                </FormInput>
+
+                <View style={styles.switchContainer}>
+                  <Text style={styles.label}>Histórico Familiar de Câncer</Text>
+                  <Switch
+                    trackColor={{ false: "#e2e8f0", true: "#008C9E" }}
+                    thumbColor={"#fff"}
+                    onValueChange={(val) => {
+                      setFieldValue("historico_familiar_cancer", val);
+                      return;
+                    }}
+                    value={values.historico_familiar_cancer}
+                  />
+                </View>
+              </>
+            )}
+
+            {pagina === 1 && (
+              <>
+                <FormInput
+                  label="Fatores de Risco"
+                  isTouched={!!touched.fatores_risco_ids}
+                  errorMessage={errors.fatores_risco_ids as string}
+                >
+                  <MultiSelect
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    selectedStyle={styles.selectedChip}
+                    activeColor="#d1fae5"
+                    data={fatoresRisco}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione um ou mais fatores de risco"
+                    value={values.fatores_risco_ids}
+                    onChange={(fator) =>
+                      setFieldValue("fatores_risco_ids", fator)
+                    }
+                    onBlur={() => handleBlur("fatores_risco_ids")}
+                    renderRightIcon={() => {
+                      if (
+                        values.fatores_risco_ids &&
+                        values.fatores_risco_ids.length > 0 &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setFieldValue("fatores_risco_ids", []);
+                            }}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                    mode="modal"
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Localização Intraoral"
+                  isTouched={touched.localizacao_intraoral_id}
+                  errorMessage={errors.localizacao_intraoral_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={localizacoesIntraorais}
+                    search
+                    searchPlaceholder="Nome da localização"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.localizacao_intraoral_id}
+                    onChange={(loc) =>
+                      setFieldValue("localizacao_intraoral_id", loc.id)
+                    }
+                    onBlur={() => handleBlur("localizacao_intraoral_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.localizacao_intraoral_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("localizacao_intraoral_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Aspecto da Lesão"
+                  isTouched={touched.aspecto_lesao_id}
+                  errorMessage={errors.aspecto_lesao_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={aspectosLesao}
+                    search
+                    searchPlaceholder="Nome do aspecto"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.aspecto_lesao_id}
+                    onChange={(aspec) =>
+                      setFieldValue("aspecto_lesao_id", aspec.id)
+                    }
+                    onBlur={() => handleBlur("aspecto_lesao_id")}
+                    renderRightIcon={() => {
+                      if (values.aspecto_lesao_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("aspecto_lesao_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Superfície"
+                  isTouched={touched.superficie_id}
+                  errorMessage={errors.superficie_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={superficies}
+                    search
+                    searchPlaceholder="Nome da superfície"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.superficie_id}
+                    onChange={(superficie) =>
+                      setFieldValue("superficie_id", superficie.id)
+                    }
+                    onBlur={() => handleBlur("superficie_id")}
+                    renderRightIcon={() => {
+                      if (values.superficie_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => setFieldValue("superficie_id", null)}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Sintoma Associado"
+                  isTouched={touched.sintoma_associado_id}
+                  errorMessage={errors.sintoma_associado_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={sintomasAssociados}
+                    search
+                    searchPlaceholder="Nome do sintoma associado"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.sintoma_associado_id}
+                    onChange={(sintomaAssociado) =>
+                      setFieldValue("sintoma_associado_id", sintomaAssociado.id)
+                    }
+                    onBlur={() => handleBlur("sintoma_associado_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.sintoma_associado_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("sintoma_associado_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Borda"
+                  isTouched={touched.bordas_id}
+                  errorMessage={errors.bordas_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={bordas}
+                    search
+                    searchPlaceholder="Nome da borda"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.bordas_id}
+                    onChange={(borda) => setFieldValue("bordas_id", borda.id)}
+                    onBlur={() => handleBlur("bordas_id")}
+                    renderRightIcon={() => {
+                      if (values.bordas_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => setFieldValue("bordas_id", null)}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Linfonodo Regional"
+                  isTouched={touched.linfonodo_regional_id}
+                  errorMessage={errors.linfonodo_regional_id as string}
+                >
+                  <Dropdown
+                    dropdownPosition="top"
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={linfonodosRegionais}
+                    search
+                    searchPlaceholder="Nome do linfonodo regional"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.linfonodo_regional_id}
+                    onChange={(linfonodoRegional) =>
+                      setFieldValue(
+                        "linfonodo_regional_id",
+                        linfonodoRegional.id
+                      )
+                    }
+                    onBlur={() => handleBlur("linfonodo_regional_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.linfonodo_regional_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("linfonodo_regional_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+              </>
+            )}
+
+            {pagina === 2 && (
+              <>
+                <FormInput
+                  label="Classificação de Risco"
+                  isTouched={touched.classificacao_risco_id}
+                  errorMessage={errors.classificacao_risco_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={classificacoesRisco}
+                    search
+                    searchPlaceholder="Nome da classificação de risco"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.classificacao_risco_id}
+                    onChange={(classificacaoRisco) =>
+                      setFieldValue(
+                        "classificacao_risco_id",
+                        classificacaoRisco.id
+                      )
+                    }
+                    onBlur={() => handleBlur("classificacao_risco_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.classificacao_risco_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("classificacao_risco_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Conduta Recomendada"
+                  isTouched={touched.conduta_recomendada_id}
+                  errorMessage={errors.conduta_recomendada_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={condutasRecomendadas}
+                    search
+                    searchPlaceholder="Nome da conduta recomendada"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.conduta_recomendada_id}
+                    onChange={(condutaRecomendada) =>
+                      setFieldValue(
+                        "conduta_recomendada_id",
+                        condutaRecomendada.id
+                      )
+                    }
+                    onBlur={() => handleBlur("conduta_recomendada_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.conduta_recomendada_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("conduta_recomendada_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Área de Encaminhamento"
+                  isTouched={touched.area_encaminhamento_id}
+                  errorMessage={errors.area_encaminhamento_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={areasEncaminhamento}
+                    search
+                    searchPlaceholder="Nome da área de encaminhamento"
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecionar"
+                    value={values.area_encaminhamento_id}
+                    onChange={(areaEncaminhamento) =>
+                      setFieldValue(
+                        "area_encaminhamento_id",
+                        areaEncaminhamento.id
+                      )
+                    }
+                    onBlur={() => handleBlur("area_encaminhamento_id")}
+                    renderRightIcon={() => {
+                      if (
+                        values.area_encaminhamento_id != null &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("area_encaminhamento_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <SeletorImagem
+                  imagens={values.imagens}
+                  onImagensAlteradas={(novasImagens) => {
+                    setFieldValue("imagens", novasImagens);
+                  }}
+                  desabilitada={isSubmitting}
                 />
 
+                <FormInput
+                  label="Observações Clínicas"
+                  isTouched={touched.observacoes}
+                  errorMessage={errors.observacoes as string}
+                >
+                  <TextInput
+                    style={[styles.inputText, styles.textArea]}
+                    onChangeText={handleChange("observacoes")}
+                    onBlur={handleBlur("observacoes")}
+                    value={values.observacoes}
+                    placeholder="Digite observações adicionais..."
+                    placeholderTextColor="#9ca3af"
+                    multiline={true}
+                    numberOfLines={4}
+                    maxLength={200}
+                  />
+                </FormInput>
                 <Text style={styles.contador}>
                   {values.observacoes.length}/200
                 </Text>
-              </View>
+              </>
+            )}
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Fatores de Risco</Text>
+            <View style={styles.botoesContainer}>
+              {pagina > 0 && (
+                <TouchableOpacity
+                  style={styles.botaoVoltar}
+                  onPress={paginaAnterior}
+                >
+                  <Text style={styles.botaoVoltarTexto}>Voltar</Text>
+                </TouchableOpacity>
+              )}
 
-                <MultiSelect
-                  mode="modal"
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  activeColor="#e0f2f1"
-                  selectedTextStyle={{
-                    fontWeight: "bold",
-                    color: "black",
-                    fontSize: 14,
-                  }}
-                  selectedStyle={styles.selectedChip}
-                  data={fatoresRisco}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione um ou mais fatores"
-                  value={values.fatores_risco_ids}
-                  search
-                  searchField={"nome"}
-                  searchPlaceholder="Nome do Fator"
-                  onChange={(fator) =>
-                    setFieldValue("fatores_risco_ids", fator)
-                  }
-                  renderRightIcon={() => {
-                    if (
-                      values.fatores_risco_ids &&
-                      values.fatores_risco_ids.length > 0 &&
-                      !isSubmitting
-                    ) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => {
-                            setFieldValue("fatores_risco_ids", []);
-                          }}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
+              {pagina < CadastrodeAvaliacaoSchemas.length - 1 && (
+                <TouchableOpacity
+                  style={styles.botao}
+                  onPress={() => proximaPagina(validateForm)}
+                >
+                  <Text style={styles.botaoTexto}>Próximo</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                </TouchableOpacity>
+              )}
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Localização Intraoral</Text>
+              {pagina === CadastrodeAvaliacaoSchemas.length - 1 && (
+                <>
+                  <TouchableOpacity
+                    style={[
+                      styles.botaoRascunho,
+                      isSubmitting && styles.botaoDesabilitado,
+                    ]}
+                    onPress={() => {
+                      setFieldValue("rascunho", true);
+                      handleSubmit();
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.botaoTexto}>Salvar rascunho</Text>
+                    )}
+                  </TouchableOpacity>
 
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={localizacoesIntraorais}
-                  search
-                  searchPlaceholder="Nome da localização"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a localização intraoral"
-                  value={values.localizacao_intraoral_id}
-                  onChange={(localizacaoIntraoral) =>
-                    setFieldValue(
-                      "localizacao_intraoral_id",
-                      localizacaoIntraoral.id
-                    )
-                  }
-                  renderRightIcon={() => {
-                    if (
-                      values.localizacao_intraoral_id != null &&
-                      !isSubmitting
-                    ) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("localizacao_intraoral_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Aspecto da Lesão</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={aspectosLesao}
-                  search
-                  searchPlaceholder="Nome do aspecto"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o aspecto"
-                  value={values.aspecto_lesao_id}
-                  onChange={(aspectoLesao) =>
-                    setFieldValue("aspecto_lesao_id", aspectoLesao.id)
-                  }
-                  renderRightIcon={() => {
-                    if (values.aspecto_lesao_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("aspecto_lesao_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Superfície da Lesão</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={superficies}
-                  search
-                  searchPlaceholder="Nome da superfície"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a superfície"
-                  value={values.superficie_id}
-                  onChange={(superficie) =>
-                    setFieldValue("superficie_id", superficie.id)
-                  }
-                  renderRightIcon={() => {
-                    if (values.superficie_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => setFieldValue("superficie_id", null)}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Sintomas Associados</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={sintomasAssociados}
-                  search
-                  searchPlaceholder="Nome do sintoma"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o sintoma"
-                  value={values.sintoma_associado_id}
-                  onChange={(sintoma) =>
-                    setFieldValue("sintoma_associado_id", sintoma.id)
-                  }
-                  renderRightIcon={() => {
-                    if (values.sintoma_associado_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("sintoma_associado_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Aspecto da Borda</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={bordas}
-                  search
-                  searchPlaceholder="Nome da borda"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a borda"
-                  value={values.bordas_id}
-                  onChange={(borda) => setFieldValue("bordas_id", borda.id)}
-                  renderRightIcon={() => {
-                    if (values.bordas_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() => setFieldValue("bordas_id", null)}
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Linfonodos Regionais</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={linfonodosRegionais}
-                  search
-                  searchPlaceholder="Nome do linfonodo"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione o linfonodo"
-                  value={values.linfonodo_regional_id}
-                  onChange={(linfonodoRegional) =>
-                    setFieldValue("linfonodo_regional_id", linfonodoRegional.id)
-                  }
-                  renderRightIcon={() => {
-                    if (values.linfonodo_regional_id != null && !isSubmitting) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("linfonodo_regional_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Classificação de Risco</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={classificacoesRisco}
-                  search
-                  searchPlaceholder="Nome da classificação"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a classificação"
-                  value={values.classificacao_risco_id}
-                  onChange={(classificacaoRisco) =>
-                    setFieldValue(
-                      "classificacao_risco_id",
-                      classificacaoRisco.id
-                    )
-                  }
-                  renderRightIcon={() => {
-                    if (
-                      values.classificacao_risco_id != null &&
-                      !isSubmitting
-                    ) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("classificacao_risco_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Conduta Recomendada</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={condutasRecomendadas}
-                  search
-                  searchPlaceholder="Nome da conduta"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a conduta"
-                  value={values.conduta_recomendada_id}
-                  onChange={(conduta) =>
-                    setFieldValue("conduta_recomendada_id", conduta.id)
-                  }
-                  renderRightIcon={() => {
-                    if (
-                      values.conduta_recomendada_id != null &&
-                      !isSubmitting
-                    ) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("conduta_recomendada_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Área de Encaminhamento</Text>
-
-                <Dropdown
-                  style={styles.dropdown}
-                  containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
-                  data={areasEncaminhamento}
-                  search
-                  searchPlaceholder="Nome da área"
-                  maxHeight={280}
-                  valueField={"id"}
-                  labelField={"nome"}
-                  placeholder="Selecione a área"
-                  value={values.area_encaminhamento_id}
-                  onChange={(areaEncaminhamento) =>
-                    setFieldValue(
-                      "area_encaminhamento_id",
-                      areaEncaminhamento.id
-                    )
-                  }
-                  renderRightIcon={() => {
-                    if (
-                      values.area_encaminhamento_id != null &&
-                      !isSubmitting
-                    ) {
-                      return (
-                        <TouchableOpacity
-                          onPress={() =>
-                            setFieldValue("area_encaminhamento_id", null)
-                          }
-                        >
-                          <Ionicons
-                            name="close-circle"
-                            size={22}
-                            color="#9ca3af"
-                          />
-                        </TouchableOpacity>
-                      );
-                    }
-                    return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
-                    );
-                  }}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
-                onPress={() => {
-                  setFieldValue("rascunho", false);
-                  handleSubmit();
-                }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.botaoTexto}>Finalizar Avaliação</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.botaoRascunho,
-                  isSubmitting && styles.botaoDesabilitado,
-                ]}
-                onPress={() => {
-                  setFieldValue("rascunho", true);
-                  handleSubmit();
-                }}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.botaoTexto}>Finalizar depois</Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={{ height: 60 }} />
+                  <TouchableOpacity
+                    style={[
+                      styles.botao,
+                      isSubmitting && styles.botaoDesabilitado,
+                    ]}
+                    onPress={() => {
+                      setFieldValue("rascunho", false);
+                      handleSubmit();
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.botaoTexto}>Salvar</Text>
+                    )}
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
-          </View>
+            <View style={{ height: 80 }} />
+          </ScrollView>
         )}
       </Formik>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingTop: 30,
-  },
   container: {
     flex: 1,
-    paddingTop: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#F8FAFC", // Fundo cinza claro
   },
-  titulo: {
-    fontSize: 24,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 40,
+  },
+  // Cabeçalho
+  customHeader: {
+    backgroundColor: "#008C9E",
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+    color: "#fff",
   },
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
+  },
+  // Formulário
   form: {
-    backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 10,
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: "#333",
-    marginBottom: 5,
-    fontWeight: "500",
+    color: "#334155",
+    marginBottom: 8,
+    fontWeight: "600",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#212020",
-    borderRadius: 5,
-    paddingLeft: 8,
-    paddingVertical: 15,
-    fontSize: 16,
-  },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#212020",
-    borderRadius: 5,
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-  },
-  dropdownContainer: {
-    borderStartEndRadius: 10,
-    borderEndEndRadius: 10,
-  },
-  selectedChip: {
-    backgroundColor: "#d1fae5",
+  inputBase: {
+    backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 8,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  checkbox: {
-    marginRight: 12,
-    width: 24,
-    height: 24,
-    borderWidth: 1.5,
-    borderColor: "#ccc",
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: "#333",
-  },
-  observacoesTexto: {
+    minHeight: 52, // Altura mínima
+    justifyContent: "center",
+    shadowColor: "#9ca3af",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "black",
-    borderRadius: 5,
-    paddingLeft: 8,
-    paddingBottom: 15,
+    borderColor: "#e2e8f0",
+  },
+  inputText: {
     fontSize: 16,
-    height: 80,
+    color: "#1e293b",
+    paddingVertical: 12, // Padding interno para inputs de linha única
+  },
+  textArea: {
+    height: 120,
     textAlignVertical: "top",
+    paddingTop: 12,
+    paddingLeft: 12,
   },
   contador: {
     textAlign: "right",
@@ -1056,19 +1219,113 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
+  // Dropdown
+  dropdown: {
+    height: 52, // Altura fixa
+    paddingHorizontal: 15,
+  },
+  dropdownPlaceholder: {
+    fontSize: 16,
+    color: "#9ca3af",
+  },
+  dropdownIcon: {
+    width: 32,
+    height: 32,
+    tintColor: "black",
+  },
+  dropdownContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  selectedChip: {
+    backgroundColor: "#d1fae5",
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  // Checkbox (Switch)
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 52,
+  },
+  // Link Novo Paciente
+  linkNovoPaciente: {
+    alignItems: "flex-end",
+  },
+  linkNovoPacienteTexto: {
+    color: "#008C9E",
+    fontWeight: "500",
+    fontSize: 14,
+  },
+  // Erro
+  inputError: {
+    borderColor: "#EF4444",
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 12,
+    marginTop: 5,
+  },
+  // Botões
+  botoesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+    gap: 10,
+  },
   botao: {
     backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 5,
-    marginTop: 10,
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    flex: 1,
+    shadowColor: "#008C9E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  botaoVoltar: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  botaoVoltarTexto: {
+    color: "#334155",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   botaoRascunho: {
-    backgroundColor: "#ffa500",
-    padding: 15,
-    borderRadius: 5,
-    marginTop: 10,
+    backgroundColor: "#f97316", // Laranja
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    flex: 1,
+    shadowColor: "#f97316",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   botaoTexto: {
     color: "#fff",
@@ -1076,17 +1333,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   botaoDesabilitado: {
-    backgroundColor: "#f0f0f0",
-    borderColor: "#ccc",
-  },
-  linkNovoPaciente: {
-    marginTop: 10,
-    alignItems: "flex-end",
-  },
-  linkNovoPacienteTexto: {
-    color: "#008C9E",
-    fontWeight: "500",
-    fontSize: 14,
-    textDecorationLine: "underline",
+    backgroundColor: "#a5f3fc",
+    shadowOpacity: 0.1,
+    elevation: 2,
   },
 });

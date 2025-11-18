@@ -387,6 +387,7 @@ export default function DetalheAvaliacao() {
                   destinatarioId: avaliacao.ESPECIALISTAS?.id,
                 },
               }}
+              push
               asChild
             >
               <TouchableOpacity

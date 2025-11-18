@@ -103,6 +103,7 @@ export default function SeletorImagem({
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Imagens da Lesão</Text>
+
       <FlatList
         horizontal
         data={imagens}
@@ -121,10 +122,13 @@ export default function SeletorImagem({
             disabled={desabilitada}
           >
             <Ionicons
-              name="add"
+              name="cloud-upload-outline"
               size={40}
-              color={desabilitada ? "#ccc" : "#10B981"}
+              color={desabilitada ? "#ccc" : "#008C9E"}
             />
+            <Text style={styles.addButtonText}>
+              Carregue seus arquivos aqui
+            </Text>
           </TouchableOpacity>
         }
         showsHorizontalScrollIndicator={false}
@@ -137,17 +141,18 @@ const styles = StyleSheet.create({
   container: { marginBottom: 15 },
   label: { fontSize: 16, color: "#333", marginBottom: 10, fontWeight: "500" },
   addButton: {
-    width: 100,
+    padding: 10,
+    width: 150,
     height: 100,
     borderRadius: 8,
     backgroundColor: "#e0f2f1",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#10B981",
+    borderColor: "#008C9E",
     borderStyle: "dashed",
   },
-  addButtonText: { color: "#10B981", marginTop: 5 },
+  addButtonText: { color: "#008C9E", marginTop: 5, textAlign: "center" },
   imageContainer: {
     width: 100,
     height: 100,
@@ -165,8 +170,8 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     position: "absolute",
-    top: -5,
-    right: -5,
+    top: 0,
+    right: 0,
     backgroundColor: "white",
     borderRadius: 12,
   },

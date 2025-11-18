@@ -191,7 +191,7 @@ export default function ListaPacientes() {
             <View style={styles.searchBarContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Pesquisar por paciente ou ID..."
+                placeholder="Pesquisar por paciente ou registro hospitalar..."
                 placeholderTextColor="#9ca3af"
                 value={termoBusca}
                 onChangeText={setTermoBusca}
