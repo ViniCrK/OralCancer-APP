@@ -1,20 +1,20 @@
 import * as Yup from "yup";
 
-const msgObrigatorio = "Este campo é obrigatório";
-
 export const PaginaUmSchema = Yup.object().shape({
   paciente_id: Yup.number()
     .positive("Por favor, selecione um paciente.")
-    .required(msgObrigatorio),
+    .required("Campo obrigatório."),
 
   queixa_principal: Yup.string()
     .optional()
+    .min(10, "Mínimo de 10 caracteres.")
     .max(200, "Máximo de 200 caracteres."),
 
   tamanho_aproximado: Yup.number()
     .nullable()
     .typeError("Deve ser um número")
-    .min(0, "O valor não pode ser negativo."),
+    .min(0, "O valor não pode ser negativo.")
+    .max(10, "O valor máximo permitido é 10 cm."),
 
   tempo_evolucao: Yup.number()
     .nullable()
@@ -34,6 +34,8 @@ export const PaginaUmSchema = Yup.object().shape({
 });
 
 export const PaginaDoisSchema = Yup.object().shape({
+  fatores_risco_ids: Yup.array().of(Yup.number()).nullable(),
+
   localizacao_intraoral_id: Yup.number()
     .nullable()
     .positive("Selecione uma opção válida."),
@@ -70,14 +72,9 @@ export const PaginaTresSchema = Yup.object().shape({
     .nullable()
     .positive("Selecione uma opção válida."),
 
-  fatores_risco_ids: Yup.array()
-    .of(Yup.number())
-    .min(0, "Selecione pelo menos um fator de risco.")
-    .nullable(),
-
   imagens: Yup.array().of(Yup.object()).nullable(),
 
-  observacoes: Yup.string().max(200, "Máximo de 200 caracteres.").nullable(),
+  observacoes: Yup.string().optional().max(200, "Máximo de 200 caracteres."),
 });
 
 export const CadastrodeAvaliacaoSchemas = [

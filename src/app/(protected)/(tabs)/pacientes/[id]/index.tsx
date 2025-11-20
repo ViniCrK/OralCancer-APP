@@ -192,6 +192,7 @@ export default function DetalhePaciente() {
             />
             <Text style={styles.botaoTexto}>Editar Paciente</Text>
           </TouchableOpacity>
+          <View style={{ height: 30 }} />
         </View>
       </ScrollView>
     </View>
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8FAFC",
   },
-  // --- CABEÇALHO CUSTOMIZADO ---
+
   customHeader: {
     backgroundColor: "#008C9E",
     paddingTop: Platform.OS === "android" ? 40 : 60,
@@ -217,9 +218,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
-    flexDirection: "row", // Alinha itens horizontalmente
-    justifyContent: "space-between", // Espaça os itens
-    alignItems: "center", // Centraliza verticalmente
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   backButton: {
     padding: 5,
@@ -233,19 +234,18 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 
-  // --- CONTEÚDO ---
   scrollContent: {
     paddingBottom: 40,
   },
-  // Avatar Header (agora parte do scroll)
+
   avatarHeader: {
     alignItems: "center",
     paddingVertical: 30,
-    backgroundColor: "#fff", // Fundo branco
-    borderBottomLeftRadius: 30, // Curva na parte inferior
+    backgroundColor: "#fff",
+    borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     marginBottom: 20,
-    // Sombra leve para separar do fundo cinza
+
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -259,9 +259,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
-    borderWidth: 4, // Borda branca ao redor do avatar
+    borderWidth: 4,
     borderColor: "#fff",
-    marginTop: -10, // Ajuste visual
+    marginTop: -10,
   },
   avatarText: {
     color: "#fff",
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // ... (Seus estilos de card, infoRow, actionsContainer, botões permanecem os mesmos) ...
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,

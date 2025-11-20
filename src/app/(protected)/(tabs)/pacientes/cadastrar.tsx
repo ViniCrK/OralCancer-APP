@@ -113,7 +113,7 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("nome")}
                   onBlur={handleBlur("nome")}
                   value={values.nome}
-                  placeholder="" // Placeholder vazio como na imagem
+                  placeholder=""
                   placeholderTextColor="#9ca3af"
                   autoCapitalize="words"
                 />
@@ -134,7 +134,7 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("sobrenome")}
                   onBlur={handleBlur("sobrenome")}
                   value={values.sobrenome}
-                  placeholder="" // Placeholder vazio
+                  placeholder=""
                   placeholderTextColor="#9ca3af"
                   autoCapitalize="sentences"
                 />
@@ -218,7 +218,7 @@ export default function CadastroPaciente() {
                   onChangeText={handleChange("registro_hospitalar")}
                   onBlur={handleBlur("registro_hospitalar")}
                   value={values.registro_hospitalar}
-                  placeholder="" // Placeholder vazio
+                  placeholder=""
                   placeholderTextColor="#9ca3af"
                   keyboardType="numeric"
                 />
@@ -241,6 +241,7 @@ export default function CadastroPaciente() {
                   <Text style={styles.botaoTexto}>Salvar</Text>
                 )}
               </TouchableOpacity>
+              <View style={{ height: 60 }} />
             </View>
           )}
         </Formik>
@@ -252,9 +253,9 @@ export default function CadastroPaciente() {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: "#F8FAFC", // Fundo claro da imagem
-    paddingHorizontal: 20, // Padding lateral para o conteúdo
-    paddingTop: 20, // Espaço do topo do conteúdo (abaixo do header)
+    backgroundColor: "#F8FAFC",
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   customHeader: {
     backgroundColor: "#008C9E",
@@ -263,9 +264,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
-    flexDirection: "row", // Alinha itens horizontalmente
-    justifyContent: "space-between", // Espaça os itens
-    alignItems: "center", // Centraliza verticalmente
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   backButton: {
     padding: 5,
@@ -276,21 +277,21 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   formContent: {
-    paddingBottom: 40, // Espaço extra no final do formulário
+    paddingBottom: 40,
   },
   inputContainer: {
-    marginBottom: 20, // Espaçamento entre os campos
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: "#334155", // Mais escuro
-    marginBottom: 8, // Mais espaço entre label e input
-    fontWeight: "600", // Mais negrito
+    color: "#334155",
+    marginBottom: 8,
+    fontWeight: "600",
   },
   input: {
     backgroundColor: "#fff",
-    borderRadius: 10, // Bordas arredondadas
-    paddingVertical: Platform.OS === "ios" ? 14 : 10, // Ajuste para iOS vs Android
+    borderRadius: 10,
+    paddingVertical: Platform.OS === "ios" ? 14 : 10,
     paddingHorizontal: 15,
     fontSize: 16,
     color: "#000",
@@ -298,15 +299,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
-    elevation: 2, // Sombra suave
-    borderWidth: 1, // Borda sutil
-    borderColor: "#e2e8f0", // Cor da borda
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
   dropdown: {
     backgroundColor: "#fff",
     borderRadius: 10,
     paddingHorizontal: 15,
-    height: Platform.OS === "ios" ? 50 : 50, // Altura padrão
+    height: Platform.OS === "ios" ? 50 : 50,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
@@ -317,9 +318,7 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     borderBottomLeftRadius: 8,
-
     borderBottomRightRadius: 8,
-
     borderColor: "#ccc",
   },
   dropdownPlaceholder: {
@@ -331,12 +330,12 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   dropdownIcon: {
-    width: 20, // Ajuste do tamanho do ícone
+    width: 20,
     height: 20,
     tintColor: "#64748b",
   },
   inputError: {
-    borderColor: "#EF4444", // Vermelho para erro
+    borderColor: "#EF4444",
     borderWidth: 2,
   },
   errorText: {
@@ -345,19 +344,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   botao: {
-    backgroundColor: "#008C9E", // Cor teal
+    backgroundColor: "#008C9E",
     padding: 16,
-    borderRadius: 10, // Bordas arredondadas
+    borderRadius: 10,
     alignItems: "center",
-    marginTop: 20, // Mais espaço antes do botão
-    shadowColor: "#008C9E", // Sombra colorida
+    marginTop: 20,
+    shadowColor: "#008C9E",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
   botaoDesabilitado: {
-    backgroundColor: "#7DD3FC", // Azul claro para desabilitado
+    backgroundColor: "#7DD3FC",
     shadowOpacity: 0.1,
     elevation: 2,
   },

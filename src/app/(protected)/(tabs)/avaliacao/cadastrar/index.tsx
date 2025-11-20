@@ -2,9 +2,8 @@ import { supabase } from "@/config/supabase-client";
 import { useEspecialistaStore } from "@/store/especialista";
 import { DropdownItem } from "@/types/avaliacao";
 import { PacienteItem } from "@/types/paciente";
-import Checkbox from "expo-checkbox";
 import { useFocusEffect, useRouter } from "expo-router";
-import { Formik, FormikErrors } from "formik";
+import { Formik, FormikErrors, FormikTouched } from "formik";
 import { useCallback, useEffect, useState } from "react";
 import {
   View,
@@ -91,16 +90,23 @@ export default function CadastroAvaliacao() {
   }));
 
   const proximaPagina = async (
-    validateForm: (values?: any) => Promise<FormikErrors<any>>
+    validateForm: (values?: any) => Promise<FormikErrors<any>>,
+    setTouched: (touched: FormikTouched<any>, shouldValidate?: boolean) => void
   ) => {
     const erros = await validateForm();
 
     if (Object.keys(erros).length === 0) {
       setPagina((prevPagina) => prevPagina + 1);
     } else {
+      const touchedFields: any = {};
+      Object.keys(erros).forEach((field) => {
+        touchedFields[field] = true;
+      });
+      setTouched(touchedFields);
+
       Alert.alert(
-        "Erro",
-        "Por favor, selecione pelo menos o paciente na página 1."
+        "Campos Incompletos",
+        "Por favor, preencha os campos obrigatórios em vermelho."
       );
     }
   };
@@ -217,89 +223,104 @@ export default function CadastroAvaliacao() {
 
   const handleSalvarAvaliacao = async (
     values: any,
-    {
-      setSubmitting,
-    }: {
-      setSubmitting: (isSubmitting: boolean) => void;
-    }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
-    if (!especialista) {
-      Alert.alert(
-        "Erro",
-        "Especialista não identificado. Por favor, faça o login novamente."
-      );
-      setSubmitting(false);
-      return;
-    }
+    Alert.alert(
+      "Salvar Avaliação",
+      "Você tem certeza que deseja salvar esta avaliação?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+          onPress: () => setSubmitting(false),
+        },
+        {
+          text: "Salvar",
+          onPress: async () => {
+            try {
+              if (!especialista) {
+                Alert.alert(
+                  "Erro",
+                  "Especialista não identificado. Por favor, faça o login novamente."
+                );
+                setSubmitting(false);
+                return;
+              }
 
-    setSubmitting(true);
+              setSubmitting(true);
 
-    try {
-      const { imagens, fatores_risco_ids, ...dadosAvaliacao } = values;
+              const { imagens, fatores_risco_ids, ...dadosAvaliacao } = values;
 
-      const { data: novaAvaliacao, error: erroAvaliacao } = await supabase
-        .from("AVALIACOES")
-        .insert({
-          ...dadosAvaliacao,
-          especialista_id: especialista.id,
-        })
-        .select()
-        .single();
+              const { data: novaAvaliacao, error: erroAvaliacao } =
+                await supabase
+                  .from("AVALIACOES")
+                  .insert({
+                    ...dadosAvaliacao,
+                    especialista_id: especialista.id,
+                  })
+                  .select()
+                  .single();
 
-      if (erroAvaliacao) throw erroAvaliacao;
+              if (erroAvaliacao) throw erroAvaliacao;
 
-      const novaAvaliacaoId = novaAvaliacao.id;
+              const novaAvaliacaoId = novaAvaliacao.id;
 
-      if (fatores_risco_ids && fatores_risco_ids.length > 0) {
-        const fatoresDeRisco = fatores_risco_ids.map((fatorId: number) => ({
-          avaliacao_id: novaAvaliacaoId,
-          fator_risco_id: fatorId,
-        }));
+              if (fatores_risco_ids && fatores_risco_ids.length > 0) {
+                const fatoresDeRisco = fatores_risco_ids.map(
+                  (fatorId: number) => ({
+                    avaliacao_id: novaAvaliacaoId,
+                    fator_risco_id: fatorId,
+                  })
+                );
 
-        const { error: erroFatorRisco } = await supabase
-          .from("AVALIACAO_FATORES_RISCO")
-          .insert(fatoresDeRisco);
+                const { error: erroFatorRisco } = await supabase
+                  .from("AVALIACAO_FATORES_RISCO")
+                  .insert(fatoresDeRisco);
 
-        if (erroFatorRisco) throw erroFatorRisco;
-      }
+                if (erroFatorRisco) throw erroFatorRisco;
+              }
 
-      if (imagens && imagens.length > 0) {
-        const uploadPromises = imagens.map((imagem: Imagem) =>
-          enviarImagem(imagem.uri)
-        );
-        const urlsPublicas = await Promise.all(uploadPromises);
+              if (imagens && imagens.length > 0) {
+                const uploadPromises = imagens.map((imagem: Imagem) =>
+                  enviarImagem(imagem.uri)
+                );
+                const urlsPublicas = await Promise.all(uploadPromises);
 
-        const dadosDasImagens = urlsPublicas.map((url) => ({
-          url: url,
-          avaliacao_id: novaAvaliacaoId,
-        }));
+                const dadosDasImagens = urlsPublicas.map((url) => ({
+                  url: url,
+                  avaliacao_id: novaAvaliacaoId,
+                }));
 
-        const { error: erroImagens } = await supabase
-          .from("AVALIACAO_IMAGENS_URL")
-          .insert(dadosDasImagens);
+                const { error: erroImagens } = await supabase
+                  .from("AVALIACAO_IMAGENS_URL")
+                  .insert(dadosDasImagens);
 
-        if (erroImagens) throw erroImagens;
-      }
+                if (erroImagens) throw erroImagens;
+              }
 
-      if (novaAvaliacao.rascunho == true) {
-        Alert.alert(
-          "Atenção",
-          "Não esqueça de finalizar sua avaliação posteriormente!"
-        );
-      } else {
-        Alert.alert("Sucesso", "Avaliação salva com sucesso!");
-      }
+              if (novaAvaliacao.rascunho == true) {
+                Alert.alert(
+                  "Atenção",
+                  "Não esqueça de finalizar sua avaliação posteriormente!"
+                );
+              } else {
+                Alert.alert("Sucesso", "Avaliação salva com sucesso!");
+              }
 
-      router.push("/(tabs)/avaliacao");
-    } catch (error) {
-      console.error("Erro no processo de salvamento:", error);
-      Alert.alert(
-        "Erro",
-        `Não foi possível salvar a avaliação. Detalhes: ${error}`
-      );
-    } finally {
-      setSubmitting(false);
-    }
+              router.push("/(tabs)/avaliacao");
+            } catch (error) {
+              console.error("Erro no processo de salvamento:", error);
+              Alert.alert(
+                "Erro",
+                `Não foi possível salvar a avaliação. Detalhes: ${error}`
+              );
+            } finally {
+              setSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -341,6 +362,7 @@ export default function CadastroAvaliacao() {
           handleSalvarAvaliacao(values, { setSubmitting })
         }
         validationSchema={CadastrodeAvaliacaoSchemas[pagina]}
+        validateOnMount={true}
       >
         {({
           handleSubmit,
@@ -352,6 +374,8 @@ export default function CadastroAvaliacao() {
           touched,
           handleBlur,
           isSubmitting,
+          setTouched,
+          isValid,
         }) => (
           <ScrollView
             style={styles.form}
@@ -1090,7 +1114,7 @@ export default function CadastroAvaliacao() {
               {pagina < CadastrodeAvaliacaoSchemas.length - 1 && (
                 <TouchableOpacity
                   style={styles.botao}
-                  onPress={() => proximaPagina(validateForm)}
+                  onPress={() => proximaPagina(validateForm, setTouched)}
                 >
                   <Text style={styles.botaoTexto}>Próximo</Text>
                   <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -1120,13 +1144,10 @@ export default function CadastroAvaliacao() {
                   <TouchableOpacity
                     style={[
                       styles.botao,
-                      isSubmitting && styles.botaoDesabilitado,
+                      (isSubmitting || !isValid) && styles.botaoDesabilitado,
                     ]}
-                    onPress={() => {
-                      setFieldValue("rascunho", false);
-                      handleSubmit();
-                    }}
-                    disabled={isSubmitting}
+                    onPress={() => handleSubmit()}
+                    disabled={isSubmitting || !isValid}
                   >
                     {isSubmitting ? (
                       <ActivityIndicator color="#fff" />
@@ -1148,13 +1169,12 @@ export default function CadastroAvaliacao() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Fundo cinza claro
+    backgroundColor: "#F8FAFC",
   },
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 40,
   },
-  // Cabeçalho
   customHeader: {
     backgroundColor: "#008C9E",
     paddingTop: Platform.OS === "android" ? 40 : 60,
@@ -1176,7 +1196,6 @@ const styles = StyleSheet.create({
     width: 40,
     alignItems: "center",
   },
-  // Formulário
   form: {
     padding: 20,
   },
@@ -1192,7 +1211,7 @@ const styles = StyleSheet.create({
   inputBase: {
     backgroundColor: "#fff",
     borderRadius: 10,
-    minHeight: 52, // Altura mínima
+    minHeight: 52,
     justifyContent: "center",
     shadowColor: "#9ca3af",
     shadowOffset: { width: 0, height: 2 },
@@ -1205,7 +1224,7 @@ const styles = StyleSheet.create({
   inputText: {
     fontSize: 16,
     color: "#1e293b",
-    paddingVertical: 12, // Padding interno para inputs de linha única
+    paddingVertical: 12,
   },
   textArea: {
     height: 120,
@@ -1219,9 +1238,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  // Dropdown
   dropdown: {
-    height: 52, // Altura fixa
+    height: 52,
     paddingHorizontal: 15,
   },
   dropdownPlaceholder: {
@@ -1251,14 +1269,12 @@ const styles = StyleSheet.create({
     marginRight: 5,
     marginBottom: 5,
   },
-  // Checkbox (Switch)
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     height: 52,
   },
-  // Link Novo Paciente
   linkNovoPaciente: {
     alignItems: "flex-end",
   },
@@ -1267,7 +1283,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontSize: 14,
   },
-  // Erro
   inputError: {
     borderColor: "#EF4444",
   },
@@ -1276,7 +1291,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
-  // Botões
   botoesContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1314,7 +1328,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   botaoRascunho: {
-    backgroundColor: "#f97316", // Laranja
+    backgroundColor: "#f97316",
     padding: 16,
     borderRadius: 10,
     alignItems: "center",
@@ -1333,7 +1347,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   botaoDesabilitado: {
-    backgroundColor: "#a5f3fc",
+    backgroundColor: "lightgray",
     shadowOpacity: 0.1,
     elevation: 2,
   },

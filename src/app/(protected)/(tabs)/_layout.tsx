@@ -21,7 +21,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
       <View style={styles.tabBarMain}>
         {visibleRoutes.slice(0, 2).map((route: any, index: any) => {
           const { options } = descriptors[route.key];
-          // Precisamos encontrar o índice original 'real' para verificar o foco corretamente
+
           const originalIndex = state.routes.findIndex(
             (r: any) => r.key === route.key
           );
@@ -38,10 +38,8 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           );
         })}
 
-        {/* Espaço para o botão central */}
         <View style={{ width: 64 }} />
 
-        {/* Lado Direito (2 últimas rotas visíveis) */}
         {visibleRoutes.slice(2, 4).map((route: any, index: any) => {
           const { options } = descriptors[route.key];
           const originalIndex = state.routes.findIndex(
@@ -72,8 +70,8 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
 const TabItem = ({ route, isFocused, navigation, options }: any) => {
   const label = options.tabBarLabel || options.title || route.name;
-  const activeColor = "#008C9E"; // Cor teal da imagem
-  const inactiveColor = "#9ca3af"; // Cor cinza da imagem
+  const activeColor = "#008C9E";
+  const inactiveColor = "#9ca3af";
   const color = isFocused ? activeColor : inactiveColor;
 
   const onPress = () => {
@@ -110,14 +108,12 @@ const TabItem = ({ route, isFocused, navigation, options }: any) => {
 export default function TabsLayout() {
   return (
     <Tabs
-      // 5. Substitui a barra de abas padrão pela nossa
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         animation: "shift",
       }}
     >
-      {/* Aba 1: INÍCIO */}
       <Tabs.Screen
         name="pagina_inicial"
         options={{
@@ -128,7 +124,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Aba 2: PACIENTES */}
+
       <Tabs.Screen
         name="pacientes"
         options={{
@@ -139,6 +135,7 @@ export default function TabsLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="avaliacao"
         options={{
@@ -149,7 +146,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Aba 4: PERFIL */}
+
       <Tabs.Screen
         name="perfil"
         options={{
@@ -166,19 +163,20 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBarContainer: {
-    position: "absolute", // Descomente se quiser que flutue sobre o conteúdo
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80, // Altura da barra
-    backgroundColor: "transparent", // O fundo fica por conta do Main
+    height: 90,
+    backgroundColor: "transparent",
   },
   tabBarMain: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 70, // Altura da barra de abas visível
+    height: 80,
+    paddingBottom: 10,
     flexDirection: "row",
     backgroundColor: "#fff",
     borderTopWidth: 1,
@@ -213,7 +211,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: "#008C9E", // Cor teal
+    backgroundColor: "#008C9E",
     justifyContent: "center",
     alignItems: "center",
     elevation: 6,
@@ -222,6 +220,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     borderWidth: 3,
-    borderColor: "#fff", // Borda branca como na imagem
+    borderColor: "#fff",
   },
 });

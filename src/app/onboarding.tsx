@@ -7,7 +7,6 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobalContext } from "@/context/GlobalProvider";
@@ -90,7 +89,7 @@ export default function OnboardingScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={slides}
@@ -115,7 +114,7 @@ export default function OnboardingScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

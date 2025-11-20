@@ -216,6 +216,7 @@ export default function Perfil() {
         <TouchableOpacity style={styles.botaoSair} onPress={handleSair}>
           <Text style={styles.botaoSairTexto}>Sair da Conta</Text>
         </TouchableOpacity>
+        <View style={{ height: 70 }} />
       </View>
     </ScrollView>
   );
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   customHeader: {
-    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -244,12 +245,12 @@ const styles = StyleSheet.create({
   },
   profileCard: {
     backgroundColor: "#fff",
-    marginHorizontal: 16, // Margem nas laterais
-    marginTop: 20, // Margem superior
+    marginHorizontal: 16,
+    marginTop: 20,
     borderRadius: 16,
-    padding: 20, // Padding interno geral
-    borderBottomWidth: 5, // Borda na parte inferior
-    borderBottomColor: "#008C9E", // Cor Teal
+    padding: 20,
+    borderBottomWidth: 5,
+    borderBottomColor: "#008C9E",
     elevation: 4,
     shadowColor: "#000",
     shadowOpacity: 0.05,
@@ -257,45 +258,42 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
   },
   profileHeader: {
-    // NOVO ESTILO: Container para avatar + nome/email
-    flexDirection: "row", // Alinha horizontalmente
-    alignItems: "center", // Centraliza verticalmente
-    marginBottom: 20, // Espaço antes do divisor
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
   },
   avatar: {
-    width: 65, // Tamanho menor
+    width: 65,
     height: 65,
-    borderRadius: 32.5, // Metade do tamanho para ser um círculo
+    borderRadius: 32.5,
     backgroundColor: "#008C9E",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15, // Espaço entre o avatar e o nome/email
+    marginRight: 15,
   },
   avatarText: {
-    fontSize: 28, // Tamanho da fonte menor
+    fontSize: 28,
     fontWeight: "bold",
     color: "#fff",
   },
   nameEmailContainer: {
-    // NOVO ESTILO: Container para nome e email
-    flex: 1, // Ocupa o espaço restante
+    flex: 1,
   },
   nome: {
-    fontSize: 18, // Tamanho da fonte menor
+    fontSize: 18,
     fontWeight: "bold",
     color: "#1e293b",
-    marginBottom: 2, // Menos espaço entre nome e email
+    marginBottom: 2,
   },
   email: {
-    fontSize: 14, // Tamanho da fonte menor
+    fontSize: 14,
     color: "#64748b",
   },
   profileDivider: {
-    // NOVO ESTILO: Divisor horizontal
     height: 1,
-    backgroundColor: "#e2e8f0", // Cor do divisor
-    marginHorizontal: -20, // Estende o divisor pelas bordas do padding do card
-    marginBottom: 20, // Espaço depois do divisor
+    backgroundColor: "#e2e8f0",
+    marginHorizontal: -20,
+    marginBottom: 20,
   },
   infoContainer: {
     width: "100%",
@@ -303,20 +301,20 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8, // Menos padding vertical
+    paddingVertical: 8,
   },
   infoIcon: {
-    marginRight: 12, // Espaço maior para o ícone
+    marginRight: 12,
   },
   infoLabel: {
     fontSize: 15,
     color: "#64748b",
-    marginRight: 5, // Espaço entre label e valor
+    marginRight: 5,
   },
   infoValue: {
     fontSize: 15,
     color: "#1e293b",
-    fontWeight: "500", // Peso da fonte um pouco menor
+    fontWeight: "500",
   },
   infoDivider: {
     height: 1,

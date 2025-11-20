@@ -284,6 +284,7 @@ export default function EditarPaciente() {
                   <Text style={styles.botaoTexto}>Salvar Alterações</Text>
                 )}
               </TouchableOpacity>
+              <View style={{ height: 60 }} />
             </View>
           </View>
         )}
