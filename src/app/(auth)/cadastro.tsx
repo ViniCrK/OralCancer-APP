@@ -69,9 +69,7 @@ export default function CadastroPagina() {
             touched,
             isSubmitting,
           }) => (
-            // 3. Removido o 'formCard'
             <View style={styles.form}>
-              {/* 4. Novo Input de Email com Ícone */}
               <View
                 style={[
                   styles.inputWrapper,
@@ -100,7 +98,6 @@ export default function CadastroPagina() {
                 <Text style={styles.errorText}>{errors.email as string}</Text>
               )}
 
-              {/* 5. Novo Input de Senha com Ícones */}
               <View
                 style={[
                   styles.inputWrapper,
@@ -142,7 +139,6 @@ export default function CadastroPagina() {
                 </Text>
               )}
 
-              {/* 6. Novo Input de Confirmar Senha com Ícones */}
               <View
                 style={[
                   styles.inputWrapper,
@@ -184,7 +180,6 @@ export default function CadastroPagina() {
                 </Text>
               )}
 
-              {/* 7. Botão Atualizado */}
               <TouchableOpacity
                 onPress={() => handleSubmit()}
                 style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
@@ -200,7 +195,6 @@ export default function CadastroPagina() {
           )}
         </Formik>
 
-        {/* 8. Link de Login Atualizado */}
         <View style={styles.linkContainer}>
           <Text style={styles.linkTexto}>Já tem uma conta? </Text>
           <Link href="/login" asChild>

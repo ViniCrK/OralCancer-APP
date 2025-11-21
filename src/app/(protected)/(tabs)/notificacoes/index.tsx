@@ -259,10 +259,10 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16, // Espaço entre o avatar e o bloco de texto
+    marginRight: 16,
   },
   avatarText: {
-    fontSize: 16, // Tamanho da fonte menor
+    fontSize: 16,
     fontWeight: "bold",
     color: "#fff",
   },
@@ -304,7 +304,6 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   cardFooter: {
-    // Estilo mantido do seu código original
     fontSize: 14,
     color: "gray",
     fontStyle: "italic",

@@ -37,6 +37,7 @@ type AvaliacaoBreve = {
   created_at: string;
   PACIENTES: PacienteDados | null;
   ESPECIALISTAS: Especialista | null;
+  CLASSIFICACOES_RISCO: DropdownItem | null;
 };
 
 type AvaliacaoClassificacaoRisco = {

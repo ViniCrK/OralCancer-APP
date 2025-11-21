@@ -100,7 +100,7 @@ export default function Sobre() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Fundo cinza bem claro
+    backgroundColor: "#F8FAFC",
   },
   containerCentralizado: {
     flex: 1,
@@ -111,14 +111,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "android" ? 20 : 0,
     paddingBottom: 40,
-    alignItems: "center", // Centraliza o conteúdo horizontalmente
+    alignItems: "center",
   },
-  // Cabeçalho
+
   customHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: Platform.OS === "android" ? 40 : 60, // Espaço para status bar
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
   },
@@ -132,17 +132,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1e293b",
   },
-  // Ícone Central
+
   iconCircle: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: "#008C9E", // Verde bem claro
+    backgroundColor: "#008C9E",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
   },
-  // Conteúdo Principal
+
   appName: {
     fontSize: 24,
     fontWeight: "bold",
@@ -156,9 +156,9 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginTop: 15,
     marginBottom: 30,
-    maxWidth: "90%", // Impede que o texto fique muito largo
+    maxWidth: "90%",
   },
-  // Seção de Informações
+
   infoSection: {
     width: "100%",
     backgroundColor: "#fff",
@@ -187,10 +187,10 @@ const styles = StyleSheet.create({
     color: "#008C9E",
     textDecorationLine: "underline",
   },
-  // Rodapé
+
   footer: {
     padding: 20,
-    backgroundColor: "#e2e8f0", // Fundo cinza claro
+    backgroundColor: "#e2e8f0",
     borderTopWidth: 1,
     borderTopColor: "#cbd5e1",
     alignItems: "center",

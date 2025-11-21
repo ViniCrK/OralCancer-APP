@@ -49,9 +49,9 @@ export default function DatePickerInput({
       <TouchableOpacity
         onPress={() => setShowPicker(true)}
         style={[
-          styles.input, // Reutilize o estilo do input normal
+          styles.input,
           errorMessage ? styles.inputError : null,
-          styles.dateInput, // Estilo específico para o date input
+          styles.dateInput,
         ]}
         activeOpacity={0.7}
       >
@@ -82,18 +82,18 @@ export default function DatePickerInput({
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginBottom: 20, // Espaçamento entre os campos
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: "#334155", // Mais escuro
-    marginBottom: 8, // Mais espaço entre label e input
-    fontWeight: "600", // Mais negrito
+    color: "#334155",
+    marginBottom: 8,
+    fontWeight: "600",
   },
   input: {
     backgroundColor: "#fff",
-    borderRadius: 10, // Bordas arredondadas
-    paddingVertical: Platform.OS === "ios" ? 14 : 10, // Ajuste para iOS vs Android
+    borderRadius: 10,
+    paddingVertical: Platform.OS === "ios" ? 14 : 10,
     paddingHorizontal: 15,
     fontSize: 16,
     color: "#000",
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
-    elevation: 2, // Sombra suave
-    borderWidth: 1, // Borda sutil
-    borderColor: "#e2e8f0", // Cor da borda
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
   inputError: {
-    borderColor: "#EF4444", // Vermelho para erro
+    borderColor: "#EF4444",
     borderWidth: 2,
   },
   errorText: {
@@ -121,6 +121,5 @@ const styles = StyleSheet.create({
   },
   dateInputText: {
     fontSize: 16,
-    // A cor será definida dinamicamente
   },
 });

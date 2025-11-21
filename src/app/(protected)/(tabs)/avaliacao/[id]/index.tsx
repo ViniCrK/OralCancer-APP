@@ -1,4 +1,4 @@
-import { Avaliacao, useAvaliacaoService } from "@/services/avaliacao";
+import { useAvaliacaoService } from "@/services/avaliacao";
 import { useEspecialistaStore } from "@/store/especialista";
 import { AvaliacaoCompleta } from "@/types/avaliacao";
 import { Link } from "expo-router";
@@ -23,19 +23,7 @@ import {
   MenuTrigger,
   MenuOptions,
   MenuOption,
-} from "react-native-popup-menu"; // Importar Menu
-
-const StatusTag = ({ riscoNome }: { riscoNome: string | null | undefined }) => {
-  const isAltoRisco = riscoNome?.toLowerCase().includes("alto");
-  const cor = isAltoRisco ? "#EF4444" : "#10B981"; // Vermelho para alto, Verde para outros
-  const texto = riscoNome || "Não Classificado";
-
-  return (
-    <View style={[styles.statusTag, { backgroundColor: `${cor}20` }]}>
-      <Text style={[styles.statusTagText, { color: cor }]}>{texto}</Text>
-    </View>
-  );
-};
+} from "react-native-popup-menu";
 
 const InfoRow = ({
   label,
@@ -214,7 +202,6 @@ export default function DetalheAvaliacao() {
               </Text>
               <Text style={styles.evaluationId}>Avaliação #{avaliacao.id}</Text>
             </View>
-            <StatusTag riscoNome={avaliacao.CLASSIFICACOES_RISCO?.nome} />
           </View>
 
           <Text style={styles.sectionTitle}>Queixa Principal:</Text>
@@ -497,15 +484,6 @@ const styles = StyleSheet.create({
   evaluationId: {
     fontSize: 14,
     color: "#64748b",
-  },
-  statusTag: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusTagText: {
-    fontSize: 12,
-    fontWeight: "bold",
   },
   sectionTitle: {
     fontSize: 16,

@@ -27,8 +27,10 @@ const InfoRow = ({
 }) => (
   <View style={styles.infoRow}>
     <Ionicons name={icon} size={22} color="#008C9E" style={styles.infoIcon} />
-    <Text style={styles.infoLabel}>{label}:</Text>
-    <Text style={styles.infoValue}>{value || "Não informado"}</Text>
+    <View style={styles.infoTextContainer}>
+      <Text style={styles.infoLabel}>{label}:</Text>
+      <Text style={styles.infoValue}>{value || "Não informado"}</Text>
+    </View>
   </View>
 );
 
@@ -216,7 +218,7 @@ export default function Perfil() {
         <TouchableOpacity style={styles.botaoSair} onPress={handleSair}>
           <Text style={styles.botaoSairTexto}>Sair da Conta</Text>
         </TouchableOpacity>
-        <View style={{ height: 70 }} />
+        <View style={{ height: 90 }} />
       </View>
     </ScrollView>
   );
@@ -300,11 +302,17 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: 8,
   },
   infoIcon: {
     marginRight: 12,
+    marginTop: 2,
+  },
+  infoTextContainer: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   infoLabel: {
     fontSize: 15,

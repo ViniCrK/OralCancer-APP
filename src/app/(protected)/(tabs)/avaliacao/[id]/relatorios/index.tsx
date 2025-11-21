@@ -159,7 +159,7 @@ export default function ListaRelatorios() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Fundo cinza claro
+    backgroundColor: "#F8FAFC",
   },
   containerCentralizado: {
     flex: 1,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8FAFC",
   },
-  // Cabeçalho
+
   customHeader: {
     backgroundColor: "#008C9E",
     paddingTop: Platform.OS === "android" ? 40 : 60,
@@ -193,12 +193,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 10,
   },
-  // Conteúdo da Lista
+
   listContent: {
     paddingHorizontal: 16,
     paddingVertical: 20,
   },
-  // Seção de Contexto (Header da Lista)
+
   contextHeader: {
     paddingVertical: 20,
     alignItems: "center",
@@ -212,10 +212,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#334155",
   },
-  // Card do Relatório
+
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20, // Mais arredondado
+    borderRadius: 20,
     padding: 24,
     marginBottom: 16,
     elevation: 4,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#008C9E", // Azul Teal
+    color: "#008C9E",
   },
   cardTimestamp: {
     fontSize: 13,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     backgroundColor: "#F8FAFC",
-    alignSelf: "flex-start", // Alinha o botão à esquerda
+    alignSelf: "flex-start",
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 14,
   },
-  // Lista Vazia
+
   emptyContainer: {
     flex: 1,
     justifyContent: "center",

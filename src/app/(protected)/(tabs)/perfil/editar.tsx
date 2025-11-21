@@ -313,12 +313,12 @@ export default function EditarPerfil() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Fundo cinza bem claro da imagem
+    backgroundColor: "#F8FAFC",
   },
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 20 : 0, // Ajuste para Android
+    paddingTop: Platform.OS === "android" ? 20 : 0,
     paddingBottom: 40,
   },
   loadingContainer: {
@@ -327,12 +327,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8FAFC",
   },
-  // Cabeçalho customizado (sem Stack header)
+
   customHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: Platform.OS === "android" ? 40 : 60, // Espaço para status bar
+    paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingBottom: 20,
   },
   backButton: {
@@ -345,19 +345,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1e293b",
   },
-  form: {
-    // O formulário agora é a própria página
-  },
+  form: {},
   inputContainer: {
-    marginBottom: 20, // Espaçamento entre os campos
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    color: "#334155", // Label mais escuro
+    color: "#334155",
     marginBottom: 8,
     fontWeight: "600",
   },
-  // Estilo base para todos os inputs
+
   inputBase: {
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -370,17 +368,17 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#e2e8f0", // Borda sutil
+    borderColor: "#e2e8f0",
   },
-  // Estilo para o texto dentro do TextInput/MaskedInput
+
   inputText: {
     fontSize: 16,
     color: "#1e293b",
-    padding: 0, // Remove padding nativo
+    padding: 0,
   },
-  // Estilos específicos para o Dropdown
+
   dropdown: {
-    height: "100%", // Ocupa a altura do 'inputBase'
+    height: "100%",
   },
   dropdownPlaceholder: {
     fontSize: 16,
@@ -401,7 +399,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-  // Estilos de erro
+
   inputError: {
     borderColor: "#EF4444",
   },
@@ -410,9 +408,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
-  // Estilo do botão
+
   botao: {
-    backgroundColor: "#008C9E", // Cor teal
+    backgroundColor: "#008C9E",
     padding: 16,
     borderRadius: 10,
     alignItems: "center",

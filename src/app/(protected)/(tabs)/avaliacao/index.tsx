@@ -15,23 +15,6 @@ import {
   Platform,
 } from "react-native";
 
-const getAvatarColor = (nome: string) => {
-  const colors = [
-    "#00897B", // Teal
-    "#00BFA5", // Verde água
-    "#FFA000", // Âmbar/Laranja
-    "#F57C00", // Laranja escuro
-    "#43A047", // Verde
-    "#1E88E5", // Azul
-  ];
-  let hash = 0;
-  if (nome.length === 0) return colors[0];
-  for (let i = 0; i < nome.length; i++) {
-    hash = nome.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-};
-
 export default function ListaAvaliacoes() {
   const router = useRouter();
   const avaliacaoService = useAvaliacaoService();
@@ -74,12 +57,25 @@ export default function ListaAvaliacoes() {
     handleLimparBusca();
   };
 
+  const StatusTag = ({
+    riscoNome,
+  }: {
+    riscoNome: string | null | undefined;
+  }) => {
+    const isAltoRisco = riscoNome?.toLowerCase().includes("alto");
+    const cor = isAltoRisco ? "#EF4444" : "#10B981";
+
+    return (
+      <View style={[styles.statusTag, { backgroundColor: `${cor}` }]}></View>
+    );
+  };
+
   const renderItem = ({ item: avaliacao }: { item: AvaliacaoBreve }) => {
     const pacienteNome = avaliacao.PACIENTES?.nome || "";
     const pacienteSobrenome = avaliacao.PACIENTES?.sobrenome || "";
     const nomeCompleto = `${pacienteNome} ${pacienteSobrenome}`.trim();
 
-    const avatarColor = getAvatarColor(nomeCompleto);
+    const avatarColor = "#008C9E";
     const iniciais = `${pacienteNome[0] || ""}${
       pacienteSobrenome[0] || ""
     }`.toUpperCase();
@@ -100,6 +96,8 @@ export default function ListaAvaliacoes() {
         </View>
 
         <View style={styles.cardContent}>
+          <StatusTag riscoNome={avaliacao.CLASSIFICACOES_RISCO?.nome} />
+
           <Text style={styles.cardTitle} numberOfLines={1}>
             {nomeCompleto || "Paciente não vinculado"}
           </Text>
@@ -228,8 +226,8 @@ const styles = StyleSheet.create({
   customHeader: {
     paddingTop: Platform.OS === "android" ? 40 : 60,
     paddingHorizontal: 20,
-    flexDirection: "row", // Alinha itens horizontalmente
-    justifyContent: "space-between", // Espaça os itens
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   backButton: {
@@ -270,21 +268,21 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   clearButton: {
-    padding: 8, // Área de toque maior
+    padding: 8,
   },
   finalSearchButton: {
-    backgroundColor: "#008C9E", // Cor de fundo do botão
-    borderRadius: 12, // Bordas arredondadas
-    width: 48, // Largura fixa
-    height: 48, // Altura fixa
+    backgroundColor: "#008C9E",
+    borderRadius: 12,
+    width: 48,
+    height: 48,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10, // Espaçamento entre o ícone de fechar e o botão
+    marginLeft: 10,
   },
   card: {
-    flexDirection: "row", // Layout horizontal
+    flexDirection: "row",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16, // Bordas mais arredondadas
+    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     alignItems: "center",
@@ -308,18 +306,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   cardContent: {
-    flex: 1, // Ocupa o espaço disponível
+    flex: 1,
     justifyContent: "center",
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#1e293b", // Cinza escuro, quase preto
+    color: "#1e293b",
     marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: 14,
-    color: "#64748b", // Cinza médio
+    color: "#64748b",
     marginBottom: 8,
   },
   cardLabel: { fontSize: 14, color: "gray" },
@@ -331,16 +329,16 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: "row",
     alignItems: "center",
-    flexShrink: 1, // Permite que o item diminua se o nome for longo
+    flexShrink: 1,
   },
   metaIcon: {
     marginRight: 4,
   },
   metaText: {
     fontSize: 13,
-    color: "#9ca3af", // Cinza claro para metadados
+    color: "#9ca3af",
     fontWeight: "500",
-    flexShrink: 1, // Garante que o texto quebre ou diminua
+    flexShrink: 1,
   },
   metaSeparator: {
     marginHorizontal: 8,
@@ -372,5 +370,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 30,
     lineHeight: 32,
+  },
+  statusTag: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    padding: 12,
+    borderRadius: 12,
+  },
+  statusTagText: {
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });

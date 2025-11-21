@@ -46,6 +46,7 @@ const AvaliacaoService = {
       id,
       observacoes,
       created_at,
+      CLASSIFICACOES_RISCO ( id, nome ),
       PACIENTES!inner ( id, nome, sobrenome, registro_hospitalar ),
       ESPECIALISTAS ( id, nome, sobrenome )
       `
