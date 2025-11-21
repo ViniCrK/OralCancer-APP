@@ -25,6 +25,76 @@ import SeletorImagem, { Imagem } from "../components/SeletorImagem";
 import { Ionicons } from "@expo/vector-icons";
 import { CadastrodeAvaliacaoSchemas } from "@/schemas/AvaliacaoSchema";
 
+const ID_RISCO = {
+  BAIXO: 1,
+  INTERMEDIARIO: 2,
+  ALTO: 3,
+};
+
+const ID_CONDICAO = {
+  HPV: 4,
+  ALCOOL_EXAGERADO: 2,
+  CIGARRO_EXAGERADO: 1,
+  NAO_FUMA_OU_BEBE: 3,
+};
+
+const calcularClassificacaoAuto = (values: any) => {
+  const {
+    carga_tabagica_etilica,
+    historico_familiar_cancer,
+    fatores_risco_ids,
+    habito_id,
+  } = values;
+
+  const cargaTabagicaEtilica = Number(carga_tabagica_etilica || 0);
+
+  const temFator = (id: number) => fatores_risco_ids?.includes(id);
+
+  const temHabito = (id: number) => habito_id === id;
+
+  if (
+    temFator(ID_CONDICAO.HPV) &&
+    cargaTabagicaEtilica > 20 &&
+    temHabito(ID_CONDICAO.ALCOOL_EXAGERADO)
+  ) {
+    return ID_RISCO.ALTO;
+  }
+
+  if (
+    cargaTabagicaEtilica > 0 &&
+    cargaTabagicaEtilica <= 20 &&
+    historico_familiar_cancer === true
+  ) {
+    return ID_RISCO.INTERMEDIARIO;
+  }
+
+  return ID_RISCO.BAIXO;
+};
+
+const AutoCalculoRisco = ({
+  values,
+  setFieldValue,
+}: {
+  values: any;
+  setFieldValue: any;
+}) => {
+  useEffect(() => {
+    const novoRiscoId = calcularClassificacaoAuto(values);
+
+    if (values.classificacao_risco_id !== novoRiscoId) {
+      console.log("Atualizando risco automaticamente para:", novoRiscoId);
+      setFieldValue("classificacao_risco_id", novoRiscoId);
+    }
+  }, [
+    values.carga_tabagica_etilica,
+    values.historico_familiar_cancer,
+    values.fatores_risco_ids,
+    values.habito_id,
+  ]);
+
+  return null;
+};
+
 type InputProps = {
   label: string;
   children: React.ReactNode;
@@ -917,13 +987,18 @@ export default function CadastroAvaliacao() {
 
             {pagina === 2 && (
               <>
+                <AutoCalculoRisco
+                  values={values}
+                  setFieldValue={setFieldValue}
+                />
                 <FormInput
-                  label="Classificação de Risco"
+                  label="Classificação de Risco (Auto-calculada)"
                   isTouched={touched.classificacao_risco_id}
                   errorMessage={errors.classificacao_risco_id as string}
                 >
                   <Dropdown
-                    style={styles.dropdown}
+                    disable
+                    style={styles.dropdownDisabled}
                     containerStyle={styles.dropdownContainer}
                     placeholderStyle={styles.dropdownPlaceholder}
                     selectedTextStyle={styles.inputText}
@@ -942,29 +1017,9 @@ export default function CadastroAvaliacao() {
                       )
                     }
                     onBlur={() => handleBlur("classificacao_risco_id")}
-                    renderRightIcon={() => {
-                      if (
-                        values.classificacao_risco_id != null &&
-                        !isSubmitting
-                      ) {
-                        return (
-                          <TouchableOpacity
-                            onPress={() =>
-                              setFieldValue("classificacao_risco_id", null)
-                            }
-                          >
-                            <Ionicons
-                              name="close-circle"
-                              size={22}
-                              color="#9ca3af"
-                            />
-                          </TouchableOpacity>
-                        );
-                      }
-                      return (
-                        <Ionicons name="chevron-down" size={22} color="gray" />
-                      );
-                    }}
+                    renderRightIcon={() => (
+                      <Ionicons name="chevron-down" size={22} color="gray" />
+                    )}
                   />
                 </FormInput>
 
@@ -1241,6 +1296,11 @@ const styles = StyleSheet.create({
   dropdown: {
     height: 52,
     paddingHorizontal: 15,
+  },
+  dropdownDisabled: {
+    height: 52,
+    paddingHorizontal: 15,
+    backgroundColor: "#a3a3a3ff",
   },
   dropdownPlaceholder: {
     fontSize: 16,
