@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "OralCancer",
-    "slug": "OralCancer",
-    "scheme": "OralCancer",
+    "name": "oralcancer",
+    "slug": "oralcancer",
+    "scheme": "oralcancer",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -44,23 +44,23 @@
           "microphonePermission": false
         }
       ],
-      "expo-splash-screen",
-      {
-        "backgroundColor": "#008C9E",
-        "image": "./assets/icons/splash-icon-light.png",
-        "dark": {
-          "image": "./assets/icons/splash-icon-dark.png",
-          "backgroundColor": "#ffffff"
-        },
-        "imageWidth": 200,
-        "resizeMode": "contain"
-      }
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#008C9E",
+          "image": "./assets/icons/splash-icon-light.png",
+          "dark": {
+            "image": "./assets/icons/splash-icon-dark.png",
+            "backgroundColor": "#ffffff"
+          },
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "extra": {
       "router": {},
-      "eas": {
-        "projectId": "6176cfe9-ec75-414c-af5d-5b33da96490d"
-      }
+      "eas": {}
     }
   }
 }
