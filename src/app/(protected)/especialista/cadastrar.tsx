@@ -3,7 +3,7 @@ import CadastroEspecialistaSchema from "@/schemas/EspecialistaSchema";
 import { useEspecialistaService } from "@/services/especialista";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Formik } from "formik";
+import { Formik, FormikErrors } from "formik";
 import { useEffect, useState } from "react";
 import {
   View,
@@ -14,9 +14,38 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { MaskedTextInput } from "react-native-mask-text";
+
+type InputProps = {
+  label: string;
+  children: React.ReactNode;
+  errorMessage?: string | string[] | FormikErrors<any>;
+  isTouched?: boolean;
+};
+const FormInput = ({
+  label,
+  children,
+  errorMessage,
+  isTouched,
+}: InputProps) => (
+  <View style={styles.inputContainer}>
+    <Text style={styles.label}>{label}</Text>
+    <View
+      style={[
+        styles.inputBase,
+        isTouched && errorMessage ? styles.inputError : null,
+      ]}
+    >
+      {children}
+    </View>
+    {isTouched && errorMessage && (
+      <Text style={styles.errorText}>{String(errorMessage)}</Text>
+    )}
+  </View>
+);
 
 export default function CadastroEspecialista() {
   const router = useRouter();
@@ -63,10 +92,22 @@ export default function CadastroEspecialista() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.titulo}>Cadastro de Especialista</Text>
+    <View style={styles.container}>
+      <View style={styles.customHeader}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Cadastro de Especialista</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
         <Formik
           initialValues={{
             nome: "",
@@ -88,104 +129,83 @@ export default function CadastroEspecialista() {
             isSubmitting,
           }) => (
             <View style={styles.form}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Nome</Text>
-
+              <FormInput
+                label="Nome"
+                isTouched={touched.nome}
+                errorMessage={errors.nome}
+              >
                 <TextInput
-                  placeholder="Nome"
-                  style={[
-                    styles.input,
-                    touched.nome && errors.nome ? styles.inputError : null,
-                  ]}
+                  placeholder="Seu nome"
+                  placeholderTextColor="#9ca3af"
+                  style={styles.inputText}
                   onChangeText={handleChange("nome")}
                   onBlur={handleBlur("nome")}
                   value={values.nome}
                   autoCapitalize="words"
                 />
+              </FormInput>
 
-                {touched.nome && errors.nome && (
-                  <Text style={styles.errorText}>{errors.nome}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Sobrenome</Text>
-
+              <FormInput
+                label="Sobrenome"
+                isTouched={touched.sobrenome}
+                errorMessage={errors.sobrenome}
+              >
                 <TextInput
-                  placeholder="Sobrenome"
-                  style={[
-                    styles.input,
-                    touched.sobrenome && errors.sobrenome
-                      ? styles.inputError
-                      : null,
-                  ]}
+                  placeholder="Seu sobrenome"
+                  placeholderTextColor="#9ca3af"
+                  style={styles.inputText}
                   onChangeText={handleChange("sobrenome")}
                   onBlur={handleBlur("sobrenome")}
                   value={values.sobrenome}
-                  autoCapitalize="sentences"
+                  autoCapitalize="words"
                 />
+              </FormInput>
 
-                {touched.sobrenome && errors.sobrenome && (
-                  <Text style={styles.errorText}>{errors.sobrenome}</Text>
-                )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Registro Profissional</Text>
-
+              <FormInput
+                label="Registro Profissional"
+                isTouched={touched.registro_profissional}
+                errorMessage={errors.registro_profissional}
+              >
                 <MaskedTextInput
-                  style={[
-                    styles.input,
-                    touched.registro_profissional &&
-                    errors.registro_profissional
-                      ? styles.inputError
-                      : null,
-                  ]}
+                  style={styles.inputText}
                   mask="AAA-AA 999999"
-                  onChangeText={(text, rawText) => {
-                    setFieldValue("registro_profissional", text);
-                  }}
+                  onChangeText={(text) =>
+                    setFieldValue("registro_profissional", text)
+                  }
                   onBlur={handleBlur("registro_profissional")}
                   value={values.registro_profissional}
                   placeholder="EX.: CRM-AL 123456"
+                  placeholderTextColor="#9ca3af"
                   autoCapitalize="characters"
                 />
+              </FormInput>
 
-                {touched.registro_profissional &&
-                  errors.registro_profissional && (
-                    <Text style={styles.errorText}>
-                      {errors.registro_profissional}
-                    </Text>
-                  )}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Especialidade</Text>
+              <FormInput
+                label="Especialidade"
+                isTouched={touched.especialidade_id}
+                errorMessage={errors.especialidade_id}
+              >
                 <Dropdown
-                  style={[
-                    styles.dropdown,
-                    touched.especialidade_id && errors.especialidade_id
-                      ? styles.inputError
-                      : null,
-                  ]}
+                  style={styles.dropdown}
                   containerStyle={styles.dropdownContainer}
-                  placeholderStyle={{ fontSize: 16, color: "gray" }}
-                  selectedTextStyle={{ color: "black" }}
+                  placeholderStyle={styles.dropdownPlaceholder}
+                  selectedTextStyle={styles.inputText}
+                  iconStyle={styles.dropdownIcon}
                   data={especialidades}
+                  search
+                  searchPlaceholder="Buscar..."
+                  searchField={"label"}
                   maxHeight={280}
                   valueField={"value"}
                   labelField={"label"}
-                  placeholder="Selecione a especialidade"
-                  search
-                  searchPlaceholder="Nome da Especialidade"
-                  searchField={"label"}
+                  placeholder="Selecione sua especialidade"
                   value={values.especialidade_id}
                   onChange={(item) =>
                     setFieldValue("especialidade_id", item.value)
                   }
                   onBlur={() => handleBlur("especialidade_id")}
                   renderRightIcon={() => {
-                    if (values.especialidade_id != null && !isSubmitting) {
+                    if (values.especialidade_id && !isSubmitting) {
                       return (
                         <TouchableOpacity
                           onPress={() =>
@@ -201,17 +221,11 @@ export default function CadastroEspecialista() {
                       );
                     }
                     return (
-                      <Ionicons name="chevron-down" size={22} color="gray" />
+                      <Ionicons name="chevron-down" size={22} color="#64748b" />
                     );
                   }}
                 />
-
-                {touched.especialidade_id && errors.especialidade_id && (
-                  <Text style={styles.errorText}>
-                    {errors.especialidade_id}
-                  </Text>
-                )}
-              </View>
+              </FormInput>
 
               <TouchableOpacity
                 style={[styles.botao, isSubmitting && styles.botaoDesabilitado]}
@@ -221,79 +235,135 @@ export default function CadastroEspecialista() {
                 {isSubmitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.botaoTexto}>Criar</Text>
+                  <Text style={styles.botaoTexto}>Criar Perfil</Text>
                 )}
               </TouchableOpacity>
             </View>
           )}
         </Formik>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
-    paddingTop: 20,
-    paddingHorizontal: 20,
+    backgroundColor: "#F8FAFC", // Fundo cinza claro
   },
-  titulo: {
-    fontSize: 24,
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  // Cabeçalho Customizado
+  customHeader: {
+    backgroundColor: "#008C9E", // Teal
+    paddingTop: Platform.OS === "android" ? 40 : 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
+  headerTitle: {
+    fontSize: 20,
     fontWeight: "bold",
-    textAlign: "center",
+    color: "#fff",
+  },
+  headerButton: {
+    padding: 5,
+    width: 40,
+    alignItems: "center",
+  },
+  // Formulário
+  form: {
+    paddingVertical: 20,
+  },
+  inputContainer: {
     marginBottom: 20,
   },
-  form: {
-    padding: 20,
+  label: {
+    fontSize: 16,
+    color: "#334155",
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  // Estilo base do input (Card branco elevado)
+  inputBase: {
     backgroundColor: "#fff",
     borderRadius: 10,
-  },
-  inputContainer: { marginBottom: 15 },
-  input: {
+    height: 52,
+    paddingHorizontal: 15,
+    justifyContent: "center",
+    shadowColor: "#9ca3af",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    borderRadius: 8,
+    borderColor: "#e2e8f0",
+  },
+  inputText: {
     fontSize: 16,
-    backgroundColor: "#f9fafb",
-  },
-  label: { fontSize: 16, color: "#333", marginBottom: 5, fontWeight: "500" },
-  dropdown: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    backgroundColor: "#f9fafb",
-    height: 50,
-  },
-  dropdownContainer: {
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderColor: "#ccc",
+    color: "#1e293b",
+    padding: 0,
   },
   inputError: {
-    borderColor: "#ef4444",
-    borderWidth: 2,
+    borderColor: "#EF4444",
   },
   errorText: {
-    color: "#ef4444",
+    color: "#EF4444",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 5,
   },
+  // Dropdown Styles
+  dropdown: {
+    height: "100%",
+  },
+  dropdownPlaceholder: {
+    fontSize: 16,
+    color: "#9ca3af",
+  },
+  dropdownIcon: {
+    width: 22,
+    height: 22,
+    tintColor: "#64748b",
+  },
+  dropdownContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  // Botão
   botao: {
     backgroundColor: "#008C9E",
-    padding: 15,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 20,
+    shadowColor: "#008C9E",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  botaoDesabilitado: { backgroundColor: "#a0d8c5" },
-  botaoTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  botaoDesabilitado: {
+    backgroundColor: "#a5f3fc",
+    shadowOpacity: 0.1,
+    elevation: 2,
+  },
+  botaoTexto: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
 });

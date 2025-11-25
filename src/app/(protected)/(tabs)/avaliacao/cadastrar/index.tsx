@@ -452,6 +452,7 @@ export default function CadastroAvaliacao() {
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled"
           >
+            <Text style={styles.pageIndicator}>Página {pagina + 1}</Text>
             {pagina === 0 && (
               <>
                 <FormInput
@@ -1201,7 +1202,10 @@ export default function CadastroAvaliacao() {
                       styles.botao,
                       (isSubmitting || !isValid) && styles.botaoDesabilitado,
                     ]}
-                    onPress={() => handleSubmit()}
+                    onPress={() => {
+                      setFieldValue("rascunho", false);
+                      handleSubmit();
+                    }}
                     disabled={isSubmitting || !isValid}
                   >
                     {isSubmitting ? (
@@ -1250,6 +1254,13 @@ const styles = StyleSheet.create({
     padding: 5,
     width: 40,
     alignItems: "center",
+  },
+  pageIndicator: {
+    textAlign: "center",
+    fontSize: 20,
+    color: "#334155",
+    fontWeight: "600",
+    marginBottom: 10,
   },
   form: {
     padding: 20,

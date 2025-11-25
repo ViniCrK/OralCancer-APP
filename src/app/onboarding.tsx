@@ -19,21 +19,21 @@ const slides = [
     title: "Bem-vindo ao OralCancer",
     description:
       "Conheça o app que apoia a triagem de lesões bucais e facilita o diagnóstico precoce.",
-    image: require("../assets/imagens/image-2.png"),
+    image: require("../assets/imagens/Vector.png"),
   },
   {
     key: "2",
     title: "Para quem o app foi feito",
     description:
       "Desenvolvido para dentistas e especialistas que realizam triagens e acompanham pacientes com lesões precursoras.",
-    image: require("../assets/imagens/image-2.png"),
+    image: require("../assets/imagens/Vector.png"),
   },
   {
     key: "3",
     title: "Diagnóstico Inteligente",
     description:
       "Registre triagens, avalie riscos e compartilhe resultados entre profissionais.",
-    image: require("../assets/imagens/image-2.png"),
+    image: require("../assets/imagens/Vector.png"),
   },
 ];
 
@@ -41,7 +41,7 @@ const Slide = ({ item }: { item: (typeof slides)[0] }) => {
   return (
     <View style={styles.slide}>
       <View style={styles.imageContainer}>
-        <Image source={item.image} style={styles.image} resizeMode="cover" />
+        <Image source={item.image} style={styles.image} resizeMode="contain" />
       </View>
       <View style={styles.contentContainer}>
         <Text style={styles.title}>{item.title}</Text>
