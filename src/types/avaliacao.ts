@@ -10,12 +10,17 @@ type AvaliacaoCompleta = {
   queixa_principal: string;
   tamanho_aproximado: number;
   tempo_evolucao: number;
-  carga_tabagica_etilica: number;
+  habito_tabagismo_id?: number | null;
+  HABITO_TABAGISMO?: DropdownItem | null; // Objeto retornado pelo relacionamento (Alias)
+  carga_tabagica?: number | null;
+  habito_etilismo_id?: number | null;
+  HABITO_ETILISMO?: DropdownItem | null; // Objeto retornado pelo relacionamento (Alias)
+  carga_etilica?: number | null;
   historico_familiar_cancer: boolean;
   observacoes: string | null;
   rascunho: boolean;
   created_at: string;
-  HABITOS: DropdownItem | null;
+  HABITOS?: DropdownItem | null;
   LOCALIZACOES_INTRAORAIS: DropdownItem | null;
   ASPECTOS_LESAO: DropdownItem | null;
   SUPERFICIES: DropdownItem | null;

@@ -4,11 +4,13 @@ export interface Avaliacao {
   queixa_principal: string;
   tamanho_aproximado: number;
   tempo_evolucao: number;
-  carga_tabagica_etilica: number;
+  carga_tabagica?: number | null;
+  carga_etilica?: number | null;
   historico_familiar_cancer: boolean;
   observacoes: string;
   rascunho: boolean;
-  habito_id: number;
+  habito_tabagismo_id?: number | null;
+  habito_etilismo_id?: number | null;
   localizacao_intraoral_id: number;
   aspecto_lesao_id: number;
   superficie_id: number;
@@ -24,7 +26,7 @@ export interface Avaliacao {
 
 const AvaliacaoService = {
   cadastrar: async (
-    dados: Avaliacao
+    dados: Avaliacao,
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase.from("AVALIACOES").insert(dados);
 
@@ -49,7 +51,7 @@ const AvaliacaoService = {
       CLASSIFICACOES_RISCO ( id, nome ),
       PACIENTES!inner ( id, nome, sobrenome, registro_hospitalar ),
       ESPECIALISTAS ( id, nome, sobrenome )
-      `
+      `,
       )
       .eq("rascunho", false);
 
@@ -58,7 +60,7 @@ const AvaliacaoService = {
 
       query = query.or(
         `nome.ilike.${textoBusca},sobrenome.ilike.${textoBusca},registro_hospitalar.ilike.${textoBusca}`,
-        { foreignTable: "PACIENTES" }
+        { foreignTable: "PACIENTES" },
       );
     }
 
@@ -84,7 +86,7 @@ const AvaliacaoService = {
         created_at,
         PACIENTES ( id, nome, sobrenome ),
         ESPECIALISTAS ( id, nome, sobrenome )
-        `
+        `,
       )
       .eq("rascunho", true)
       .eq("especialista_id", especialistaId)
@@ -104,7 +106,8 @@ const AvaliacaoService = {
       .select(
         `
         *,
-        HABITOS ( id, nome ),
+        HABITO_TABAGISMO:HABITOS!habito_tabagismo_id ( id, nome ),
+        HABITO_ETILISMO:HABITOS!habito_etilismo_id ( id, nome ),
         LOCALIZACOES_INTRAORAIS ( id, nome ),
         ASPECTOS_LESAO ( id, nome ),
         SUPERFICIES ( id, nome ),
@@ -118,7 +121,7 @@ const AvaliacaoService = {
         ESPECIALISTAS ( id, nome, sobrenome ),
         AVALIACAO_IMAGENS_URL ( id, url ),
         AVALIACAO_FATORES_RISCO ( FATORES_RISCO ( id, nome ) )
-        `
+        `,
       )
       .eq("id", id)
       .single();
@@ -132,7 +135,7 @@ const AvaliacaoService = {
 
   atualizar: async (
     id: string,
-    avaliacao: any
+    avaliacao: any,
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase
       .from("AVALIACOES")
@@ -153,7 +156,7 @@ const AvaliacaoService = {
   },
 
   excluir: async (
-    id: string
+    id: string,
   ): Promise<{ sucesso: boolean; mensagem: string }> => {
     const { error } = await supabase.from("AVALIACOES").delete().eq("id", id);
 

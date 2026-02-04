@@ -40,31 +40,26 @@ const ID_CONDICAO = {
 
 const calcularClassificacaoAuto = (values: any) => {
   const {
-    carga_tabagica_etilica,
+    carga_tabagica,
+    carga_etilica,
     historico_familiar_cancer,
     fatores_risco_ids,
-    habito_id,
+    habito_tabagismo_id,
+    habito_etilismo_id,
   } = values;
 
-  const cargaTabagicaEtilica = Number(carga_tabagica_etilica || 0);
+  const tabagismo = Number(carga_tabagica || 0);
+  const etilismo = Number(carga_etilica || 0);
 
   const temFator = (id: number) => fatores_risco_ids?.includes(id);
 
-  const temHabito = (id: number) => habito_id === id;
+  const ehAlcoolatra = habito_etilismo_id === ID_CONDICAO.ALCOOL_EXAGERADO;
 
-  if (
-    temFator(ID_CONDICAO.HPV) &&
-    cargaTabagicaEtilica > 20 &&
-    temHabito(ID_CONDICAO.ALCOOL_EXAGERADO)
-  ) {
+  if (temFator(ID_CONDICAO.HPV) && tabagismo > 20 && ehAlcoolatra) {
     return ID_RISCO.ALTO;
   }
 
-  if (
-    cargaTabagicaEtilica > 0 &&
-    cargaTabagicaEtilica <= 20 &&
-    historico_familiar_cancer === true
-  ) {
+  if (tabagismo > 0 && tabagismo <= 20 && historico_familiar_cancer === true) {
     return ID_RISCO.INTERMEDIARIO;
   }
 
@@ -86,10 +81,12 @@ const AutoCalculoRisco = ({
       setFieldValue("classificacao_risco_id", novoRiscoId);
     }
   }, [
-    values.carga_tabagica_etilica,
+    values.carga_tabagica,
+    values.carga_etilica,
     values.historico_familiar_cancer,
     values.fatores_risco_ids,
-    values.habito_id,
+    values.habito_tabagismo_id,
+    values.habito_etilismo_id,
   ]);
 
   return null;
@@ -136,7 +133,7 @@ export default function CadastroAvaliacao() {
   const [aspectosLesao, setAspectosLesao] = useState<DropdownItem[]>([]);
   const [superficies, setSuperficies] = useState<DropdownItem[]>([]);
   const [sintomasAssociados, setSintomasAssociados] = useState<DropdownItem[]>(
-    []
+    [],
   );
   const [bordas, setBordas] = useState<DropdownItem[]>([]);
   const [linfonodosRegionais, setLinfonodosRegionais] = useState<
@@ -161,7 +158,7 @@ export default function CadastroAvaliacao() {
 
   const proximaPagina = async (
     validateForm: (values?: any) => Promise<FormikErrors<any>>,
-    setTouched: (touched: FormikTouched<any>, shouldValidate?: boolean) => void
+    setTouched: (touched: FormikTouched<any>, shouldValidate?: boolean) => void,
   ) => {
     const erros = await validateForm();
 
@@ -176,7 +173,7 @@ export default function CadastroAvaliacao() {
 
       Alert.alert(
         "Campos Incompletos",
-        "Por favor, preencha os campos obrigatórios em vermelho."
+        "Por favor, preencha os campos obrigatórios em vermelho.",
       );
     }
   };
@@ -249,7 +246,7 @@ export default function CadastroAvaliacao() {
   useFocusEffect(
     useCallback(() => {
       carregarPacientes();
-    }, [carregarPacientes])
+    }, [carregarPacientes]),
   );
 
   useEffect(() => {
@@ -293,7 +290,7 @@ export default function CadastroAvaliacao() {
 
   const handleSalvarAvaliacao = async (
     values: any,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     Alert.alert(
       "Salvar Avaliação",
@@ -311,7 +308,7 @@ export default function CadastroAvaliacao() {
               if (!especialista) {
                 Alert.alert(
                   "Erro",
-                  "Especialista não identificado. Por favor, faça o login novamente."
+                  "Especialista não identificado. Por favor, faça o login novamente.",
                 );
                 setSubmitting(false);
                 return;
@@ -340,7 +337,7 @@ export default function CadastroAvaliacao() {
                   (fatorId: number) => ({
                     avaliacao_id: novaAvaliacaoId,
                     fator_risco_id: fatorId,
-                  })
+                  }),
                 );
 
                 const { error: erroFatorRisco } = await supabase
@@ -352,7 +349,7 @@ export default function CadastroAvaliacao() {
 
               if (imagens && imagens.length > 0) {
                 const uploadPromises = imagens.map((imagem: Imagem) =>
-                  enviarImagem(imagem.uri)
+                  enviarImagem(imagem.uri),
                 );
                 const urlsPublicas = await Promise.all(uploadPromises);
 
@@ -371,7 +368,7 @@ export default function CadastroAvaliacao() {
               if (novaAvaliacao.rascunho == true) {
                 Alert.alert(
                   "Atenção",
-                  "Não esqueça de finalizar sua avaliação posteriormente!"
+                  "Não esqueça de finalizar sua avaliação posteriormente!",
                 );
               } else {
                 Alert.alert("Sucesso", "Avaliação salva com sucesso!");
@@ -382,14 +379,14 @@ export default function CadastroAvaliacao() {
               console.error("Erro no processo de salvamento:", error);
               Alert.alert(
                 "Erro",
-                `Não foi possível salvar a avaliação. Detalhes: ${error}`
+                `Não foi possível salvar a avaliação. Detalhes: ${error}`,
               );
             } finally {
               setSubmitting(false);
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -410,13 +407,15 @@ export default function CadastroAvaliacao() {
           queixa_principal: "",
           tamanho_aproximado: null,
           tempo_evolucao: null,
-          carga_tabagica_etilica: null,
+          habito_tabagismo_id: null,
+          carga_tabagica: null,
+          habito_etilismo_id: null,
+          carga_etilica: null,
           historico_familiar_cancer: false,
           observacoes: "",
           rascunho: true,
           fatores_risco_ids: [],
           imagens: [],
-          habito_id: null,
           localizacao_intraoral_id: null,
           aspecto_lesao_id: null,
           superficie_id: null,
@@ -536,7 +535,7 @@ export default function CadastroAvaliacao() {
                     onChangeText={(text) =>
                       setFieldValue(
                         "tamanho_aproximado",
-                        text.replace(/[^0-9,.]/g, "")
+                        text.replace(/[^0-9,.]/g, ""),
                       )
                     }
                     onBlur={handleBlur("tamanho_aproximado")}
@@ -561,7 +560,7 @@ export default function CadastroAvaliacao() {
                     onChangeText={(text) =>
                       setFieldValue(
                         "tempo_evolucao",
-                        text.replace(/[^0-9]/g, "")
+                        text.replace(/[^0-9]/g, ""),
                       )
                     }
                     onBlur={handleBlur("tempo_evolucao")}
@@ -576,8 +575,8 @@ export default function CadastroAvaliacao() {
 
                 <FormInput
                   label="Hábitos"
-                  isTouched={touched.habito_id}
-                  errorMessage={errors.habito_id as string}
+                  isTouched={touched.habito_tabagismo_id}
+                  errorMessage={errors.habito_tabagismo_id as string}
                 >
                   <Dropdown
                     style={styles.dropdown}
@@ -592,14 +591,18 @@ export default function CadastroAvaliacao() {
                     valueField={"id"}
                     labelField={"nome"}
                     placeholder="Selecione o hábito"
-                    value={values.habito_id}
-                    onChange={(habito) => setFieldValue("habito_id", habito.id)}
-                    onBlur={() => handleBlur("habito_id")}
+                    value={values.habito_tabagismo_id}
+                    onChange={(habito) =>
+                      setFieldValue("habito_tabagismo_id", habito.id)
+                    }
+                    onBlur={() => handleBlur("habito_tabagismo_id")}
                     renderRightIcon={() => {
-                      if (values.habito_id != null && !isSubmitting) {
+                      if (values.habito_tabagismo_id != null && !isSubmitting) {
                         return (
                           <TouchableOpacity
-                            onPress={() => setFieldValue("habito_id", null)}
+                            onPress={() =>
+                              setFieldValue("habito_tabagismo_id", null)
+                            }
                           >
                             <Ionicons
                               name="close-circle"
@@ -617,25 +620,92 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Carga Tabágica/Etílica"
-                  isTouched={touched.carga_tabagica_etilica}
-                  errorMessage={errors.carga_tabagica_etilica as string}
+                  label="Carga Tabágica"
+                  isTouched={touched.carga_tabagica}
+                  errorMessage={errors.carga_tabagica as string}
                 >
                   <TextInput
                     style={styles.inputText}
                     onChangeText={(text) =>
                       setFieldValue(
-                        "carga_tabagica_etilica",
-                        text.replace(/[^0-9]/g, "")
+                        "carga_tabagica",
+                        text.replace(/[^0-9]/g, ""),
                       )
                     }
-                    onBlur={handleBlur("carga_tabagica_etilica")}
+                    onBlur={handleBlur("carga_tabagica")}
                     value={
-                      values.carga_tabagica_etilica
-                        ? String(values.carga_tabagica_etilica)
-                        : ""
+                      values.carga_tabagica ? String(values.carga_tabagica) : ""
                     }
-                    placeholder="Tabágica(maços) / Etílica(ml)"
+                    placeholder="Ex: 20(maços)"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Hábitos"
+                  isTouched={touched.habito_etilismo_id}
+                  errorMessage={errors.habito_etilismo_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={habitos}
+                    search
+                    searchPlaceholder="Hábito"
+                    maxHeight={280}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione o hábito"
+                    value={values.habito_etilismo_id}
+                    onChange={(habito) =>
+                      setFieldValue("habito_etilismo_id", habito.id)
+                    }
+                    onBlur={() => handleBlur("habito_etilismo_id")}
+                    renderRightIcon={() => {
+                      if (values.habito_etilismo_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("habito_etilismo_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Carga Etílica"
+                  isTouched={touched.carga_etilica}
+                  errorMessage={errors.carga_etilica as string}
+                >
+                  <TextInput
+                    style={styles.inputText}
+                    onChangeText={(text) =>
+                      setFieldValue(
+                        "carga_etilica",
+                        text.replace(/[^0-9]/g, ""),
+                      )
+                    }
+                    onBlur={handleBlur("carga_etilica")}
+                    value={
+                      values.carga_etilica ? String(values.carga_etilica) : ""
+                    }
+                    placeholder="Ex: 500(ml/dia)"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
                   />
@@ -954,7 +1024,7 @@ export default function CadastroAvaliacao() {
                     onChange={(linfonodoRegional) =>
                       setFieldValue(
                         "linfonodo_regional_id",
-                        linfonodoRegional.id
+                        linfonodoRegional.id,
                       )
                     }
                     onBlur={() => handleBlur("linfonodo_regional_id")}
@@ -1014,7 +1084,7 @@ export default function CadastroAvaliacao() {
                     onChange={(classificacaoRisco) =>
                       setFieldValue(
                         "classificacao_risco_id",
-                        classificacaoRisco.id
+                        classificacaoRisco.id,
                       )
                     }
                     onBlur={() => handleBlur("classificacao_risco_id")}
@@ -1045,7 +1115,7 @@ export default function CadastroAvaliacao() {
                     onChange={(condutaRecomendada) =>
                       setFieldValue(
                         "conduta_recomendada_id",
-                        condutaRecomendada.id
+                        condutaRecomendada.id,
                       )
                     }
                     onBlur={() => handleBlur("conduta_recomendada_id")}
@@ -1096,7 +1166,7 @@ export default function CadastroAvaliacao() {
                     onChange={(areaEncaminhamento) =>
                       setFieldValue(
                         "area_encaminhamento_id",
-                        areaEncaminhamento.id
+                        areaEncaminhamento.id,
                       )
                     }
                     onBlur={() => handleBlur("area_encaminhamento_id")}

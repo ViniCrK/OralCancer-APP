@@ -51,7 +51,7 @@ export default function DetalheAvaliacao() {
 
   const [modalVisivel, setModalVisivel] = useState(false);
   const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(
-    null
+    null,
   );
 
   const especialistaCriador = especialista?.id === avaliacao?.ESPECIALISTAS?.id;
@@ -77,7 +77,7 @@ export default function DetalheAvaliacao() {
     if (!avaliacao?.AVALIACAO_FATORES_RISCO) return [];
 
     return avaliacao.AVALIACAO_FATORES_RISCO.map(
-      (rel) => rel.FATORES_RISCO
+      (rel) => rel.FATORES_RISCO,
     ).filter(Boolean);
   }, [avaliacao]);
 
@@ -107,7 +107,7 @@ export default function DetalheAvaliacao() {
             setExcluindo(true);
             try {
               const { sucesso, mensagem } = await avaliacaoService.excluir(
-                id as string
+                id as string,
               );
 
               if (sucesso) {
@@ -120,14 +120,14 @@ export default function DetalheAvaliacao() {
               console.error("Erro ao excluir avaliação:", error);
               Alert.alert(
                 "Erro",
-                "Ocorreu uma falha inesperada ao tentar excluir."
+                "Ocorreu uma falha inesperada ao tentar excluir.",
               );
             } finally {
               setExcluindo(false);
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -268,11 +268,21 @@ export default function DetalheAvaliacao() {
             label="Sintoma Associado"
             value={`${avaliacao.SINTOMAS?.nome}`}
           />
-          <InfoRow label="Hábitos" value={avaliacao.HABITOS?.nome} />
-          <InfoRow
-            label="Carga Tabágica/Etílica"
-            value={avaliacao.carga_tabagica_etilica}
-          />
+
+          {avaliacao.carga_tabagica ? (
+            <InfoRow
+              label="Carga Tabágica"
+              value={`${avaliacao.carga_tabagica} cigarros/dia`}
+            />
+          ) : null}
+
+          {avaliacao.carga_etilica ? (
+            <InfoRow
+              label="Carga Etílica"
+              value={`${avaliacao.carga_etilica} ml/dia`}
+            />
+          ) : null}
+
           <InfoRow
             label="Linfonodos Regionais"
             value={avaliacao.LINFONODOS?.nome}
@@ -491,6 +501,14 @@ const styles = StyleSheet.create({
     color: "#334155",
     marginBottom: 10,
   },
+  subSectionTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#008C9E",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  divider: { height: 1, backgroundColor: "#f1f5f9", marginVertical: 10 },
   queixaText: {
     fontSize: 15,
     color: "#475569",

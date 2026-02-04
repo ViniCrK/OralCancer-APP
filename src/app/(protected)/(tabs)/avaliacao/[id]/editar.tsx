@@ -39,34 +39,20 @@ const ID_CONDICAO = {
 
 const calcularClassificacaoAuto = (values: any) => {
   const {
-    carga_tabagica_etilica,
+    carga_tabagica,
+    carga_etilica,
     historico_familiar_cancer,
     fatores_risco_ids,
-    habito_id,
+    habito_etilismo_id,
   } = values;
-
-  const cargaTabagicaEtilica = Number(carga_tabagica_etilica || 0);
-
+  const tabagismo = Number(carga_tabagica || 0);
   const temFator = (id: number) => fatores_risco_ids?.includes(id);
+  const ehAlcoolatra = habito_etilismo_id === ID_CONDICAO.ALCOOL_EXAGERADO;
 
-  const temHabito = (id: number) => habito_id === id;
-
-  if (
-    temFator(ID_CONDICAO.HPV) &&
-    cargaTabagicaEtilica > 20 &&
-    temHabito(ID_CONDICAO.ALCOOL_EXAGERADO)
-  ) {
+  if (temFator(ID_CONDICAO.HPV) && tabagismo > 20 && ehAlcoolatra)
     return ID_RISCO.ALTO;
-  }
-
-  if (
-    cargaTabagicaEtilica > 0 &&
-    cargaTabagicaEtilica <= 20 &&
-    historico_familiar_cancer === true
-  ) {
+  if (tabagismo > 0 && tabagismo <= 20 && historico_familiar_cancer === true)
     return ID_RISCO.INTERMEDIARIO;
-  }
-
   return ID_RISCO.BAIXO;
 };
 
@@ -85,10 +71,12 @@ const AutoCalculoRisco = ({
       setFieldValue("classificacao_risco_id", novoRiscoId);
     }
   }, [
-    values.carga_tabagica_etilica,
+    values.carga_tabagica,
+    values.carga_etilica,
     values.historico_familiar_cancer,
     values.fatores_risco_ids,
-    values.habito_id,
+    values.habito_tabagismo_id,
+    values.habito_etilismo_id,
   ]);
 
   return null;
@@ -137,7 +125,7 @@ export default function EditarAvaliacao() {
   const [aspectosLesao, setAspectosLesao] = useState<DropdownItem[]>([]);
   const [superficies, setSuperficies] = useState<DropdownItem[]>([]);
   const [sintomasAssociados, setSintomasAssociados] = useState<DropdownItem[]>(
-    []
+    [],
   );
   const [bordas, setBordas] = useState<DropdownItem[]>([]);
   const [linfonodosRegionais, setLinfonodosRegionais] = useState<
@@ -223,7 +211,7 @@ export default function EditarAvaliacao() {
       if (avaliacao) {
         const fatoresRiscoIds =
           avaliacao.AVALIACAO_FATORES_RISCO?.map(
-            (rel: any) => rel.FATORES_RISCO?.id
+            (rel: any) => rel.FATORES_RISCO?.id,
           ).filter(Boolean) || [];
 
         const imagensIniciaisFormatadas: Imagem[] =
@@ -238,14 +226,16 @@ export default function EditarAvaliacao() {
           queixa_principal: avaliacao.queixa_principal || "",
           tamanho_aproximado: avaliacao.tamanho_aproximado || null,
           tempo_evolucao: avaliacao.tempo_evolucao || null,
-          carga_tabagica_etilica: avaliacao.carga_tabagica_etilica || null,
+          habito_tabagismo_id: avaliacao.habito_tabagismo_id || null,
+          carga_tabagica: avaliacao.carga_tabagica || null,
+          habito_etilismo_id: avaliacao.habito_etilismo_id || null,
+          carga_etilica: avaliacao.carga_etilica || null,
           historico_familiar_cancer:
             avaliacao.historico_familiar_cancer || false,
           observacoes: avaliacao.observacoes || "",
           rascunho: avaliacao.rascunho || true,
           fatores_risco_ids: fatoresRiscoIds,
           imagens: imagensIniciaisFormatadas,
-          habito_id: avaliacao.habito_id || null,
           localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || null,
           aspecto_lesao_id: avaliacao.aspecto_lesao_id || null,
           superficie_id: avaliacao.superficie_id || null,
@@ -300,7 +290,7 @@ export default function EditarAvaliacao() {
 
   const handleSalvarAlteracoes = async (
     values: any,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     setSubmitting(true);
 
@@ -314,10 +304,10 @@ export default function EditarAvaliacao() {
       const originalImageUris = imagens.map((img) => img.uri);
       const currentImageUris = currentImages.map((img: Imagem) => img.uri);
       const imagensParaAdicionar = currentImages.filter(
-        (img: Imagem) => !img.id && img.uri.startsWith("file://")
+        (img: Imagem) => !img.id && img.uri.startsWith("file://"),
       );
       const imagensParaExcluir = imagens.filter(
-        (origImg: Imagem) => !currentImageUris.includes(origImg.uri)
+        (origImg: Imagem) => !currentImageUris.includes(origImg.uri),
       );
 
       if (imagensParaExcluir.length > 0) {
@@ -332,7 +322,7 @@ export default function EditarAvaliacao() {
             .in("id", deletingIds);
           if (deleteDbError)
             throw new Error(
-              `Erro ao excluir referências de imagens do banco: ${deleteDbError.message}`
+              `Erro ao excluir referências de imagens do banco: ${deleteDbError.message}`,
             );
         }
       }
@@ -340,7 +330,7 @@ export default function EditarAvaliacao() {
       let urlsPublicasNovas: string[] = [];
       if (imagensParaAdicionar.length > 0) {
         const uploadPromises = imagensParaAdicionar.map((img: Imagem) =>
-          enviarImagem(img.uri)
+          enviarImagem(img.uri),
         );
         urlsPublicasNovas = await Promise.all(uploadPromises);
       }
@@ -383,7 +373,7 @@ export default function EditarAvaliacao() {
           .insert(dadosNovasImagens);
         if (insertError)
           throw new Error(
-            `Erro ao salvar novas imagens no banco: ${insertError.message}`
+            `Erro ao salvar novas imagens no banco: ${insertError.message}`,
           );
       }
 
@@ -393,7 +383,7 @@ export default function EditarAvaliacao() {
       console.error("Erro ao atualizar fatores de risco:", error);
       Alert.alert(
         "Erro Parcial",
-        "Os dados principais da avaliação foram salvos, mas houve um erro ao atualizar os fatores de risco. Por favor, tente editar novamente."
+        "Os dados principais da avaliação foram salvos, mas houve um erro ao atualizar os fatores de risco. Por favor, tente editar novamente.",
       );
     } finally {
       setSubmitting(false);
@@ -475,7 +465,7 @@ export default function EditarAvaliacao() {
                     onChangeText={(text) =>
                       setFieldValue(
                         "tamanho_aproximado",
-                        text.replace(/[^0-9,.]/g, "")
+                        text.replace(/[^0-9,.]/g, ""),
                       )
                     }
                     onBlur={handleBlur("tamanho_aproximado")}
@@ -500,7 +490,7 @@ export default function EditarAvaliacao() {
                     onChangeText={(text) =>
                       setFieldValue(
                         "tempo_evolucao",
-                        text.replace(/[^0-9]/g, "")
+                        text.replace(/[^0-9]/g, ""),
                       )
                     }
                     onBlur={handleBlur("tempo_evolucao")}
@@ -515,8 +505,8 @@ export default function EditarAvaliacao() {
 
                 <FormInput
                   label="Hábitos"
-                  isTouched={touched.habito_id}
-                  errorMessage={errors.habito_id as string}
+                  isTouched={touched.habito_tabagismo_id}
+                  errorMessage={errors.habito_tabagismo_id as string}
                 >
                   <Dropdown
                     style={styles.dropdown}
@@ -531,14 +521,18 @@ export default function EditarAvaliacao() {
                     valueField={"id"}
                     labelField={"nome"}
                     placeholder="Selecione o hábito"
-                    value={values.habito_id}
-                    onChange={(habito) => setFieldValue("habito_id", habito.id)}
-                    onBlur={() => handleBlur("habito_id")}
+                    value={values.habito_tabagismo_id}
+                    onChange={(habito) =>
+                      setFieldValue("habito_tabagismo_id", habito.id)
+                    }
+                    onBlur={() => handleBlur("habito_tabagismo_id")}
                     renderRightIcon={() => {
-                      if (values.habito_id != null && !isSubmitting) {
+                      if (values.habito_tabagismo_id != null && !isSubmitting) {
                         return (
                           <TouchableOpacity
-                            onPress={() => setFieldValue("habito_id", null)}
+                            onPress={() =>
+                              setFieldValue("habito_tabagismo_id", null)
+                            }
                           >
                             <Ionicons
                               name="close-circle"
@@ -556,25 +550,92 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Carga Tabágica/Etílica"
-                  isTouched={touched.carga_tabagica_etilica}
-                  errorMessage={errors.carga_tabagica_etilica as string}
+                  label="Carga Tabágica"
+                  isTouched={touched.carga_tabagica}
+                  errorMessage={errors.carga_tabagica as string}
                 >
                   <TextInput
                     style={styles.inputText}
                     onChangeText={(text) =>
                       setFieldValue(
-                        "carga_tabagica_etilica",
-                        text.replace(/[^0-9]/g, "")
+                        "carga_tabagica",
+                        text.replace(/[^0-9]/g, ""),
                       )
                     }
-                    onBlur={handleBlur("carga_tabagica_etilica")}
+                    onBlur={handleBlur("carga_tabagica")}
                     value={
-                      values.carga_tabagica_etilica
-                        ? String(values.carga_tabagica_etilica)
-                        : ""
+                      values.carga_tabagica ? String(values.carga_tabagica) : ""
                     }
-                    placeholder="Tabágica(maços) / Etílica(ml)"
+                    placeholder="Ex: 20(maços)"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Hábitos"
+                  isTouched={touched.habito_etilismo_id}
+                  errorMessage={errors.habito_etilismo_id as string}
+                >
+                  <Dropdown
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    iconStyle={styles.dropdownIcon}
+                    data={habitos}
+                    search
+                    searchPlaceholder="Hábito"
+                    maxHeight={280}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione o hábito"
+                    value={values.habito_etilismo_id}
+                    onChange={(habito) =>
+                      setFieldValue("habito_etilismo_id", habito.id)
+                    }
+                    onBlur={() => handleBlur("habito_etilismo_id")}
+                    renderRightIcon={() => {
+                      if (values.habito_etilismo_id != null && !isSubmitting) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              setFieldValue("habito_etilismo_id", null)
+                            }
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Carga Etílica"
+                  isTouched={touched.carga_etilica}
+                  errorMessage={errors.carga_etilica as string}
+                >
+                  <TextInput
+                    style={styles.inputText}
+                    onChangeText={(text) =>
+                      setFieldValue(
+                        "carga_etilica",
+                        text.replace(/[^0-9]/g, ""),
+                      )
+                    }
+                    onBlur={handleBlur("carga_etilica")}
+                    value={
+                      values.carga_etilica ? String(values.carga_etilica) : ""
+                    }
+                    placeholder="Ex: 500(ml/dia)"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
                   />
@@ -893,7 +954,7 @@ export default function EditarAvaliacao() {
                     onChange={(linfonodoRegional) =>
                       setFieldValue(
                         "linfonodo_regional_id",
-                        linfonodoRegional.id
+                        linfonodoRegional.id,
                       )
                     }
                     onBlur={() => handleBlur("linfonodo_regional_id")}
@@ -953,7 +1014,7 @@ export default function EditarAvaliacao() {
                     onChange={(classificacaoRisco) =>
                       setFieldValue(
                         "classificacao_risco_id",
-                        classificacaoRisco.id
+                        classificacaoRisco.id,
                       )
                     }
                     onBlur={() => handleBlur("classificacao_risco_id")}
@@ -984,7 +1045,7 @@ export default function EditarAvaliacao() {
                     onChange={(condutaRecomendada) =>
                       setFieldValue(
                         "conduta_recomendada_id",
-                        condutaRecomendada.id
+                        condutaRecomendada.id,
                       )
                     }
                     onBlur={() => handleBlur("conduta_recomendada_id")}
@@ -1035,7 +1096,7 @@ export default function EditarAvaliacao() {
                     onChange={(areaEncaminhamento) =>
                       setFieldValue(
                         "area_encaminhamento_id",
-                        areaEncaminhamento.id
+                        areaEncaminhamento.id,
                       )
                     }
                     onBlur={() => handleBlur("area_encaminhamento_id")}
