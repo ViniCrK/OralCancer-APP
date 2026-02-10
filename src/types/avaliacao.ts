@@ -29,7 +29,6 @@ type AvaliacaoCompleta = {
   LINFONODOS: DropdownItem | null;
   CLASSIFICACOES_RISCO: DropdownItem | null;
   CONDUTAS: DropdownItem | null;
-  AREAS_ENCAMINHAMENTO: DropdownItem | null;
   ESPECIALISTAS: Especialista | null;
   PACIENTES: Paciente | null;
   AVALIACAO_IMAGENS_URL: ImagemUrl[] | null;

@@ -205,10 +205,14 @@ export default function DetalheAvaliacao() {
           </View>
 
           <Text style={styles.sectionTitle}>Queixa Principal:</Text>
-          <Text style={styles.queixaText}>{avaliacao.queixa_principal}</Text>
+          <Text style={styles.queixaText}>
+            {avaliacao.queixa_principal || "Não informado"}
+          </Text>
 
           <Text style={styles.sectionTitle}>Observações:</Text>
-          <Text style={styles.queixaText}>{avaliacao.observacoes}</Text>
+          <Text style={styles.queixaText}>
+            {avaliacao.observacoes || "Não informado"}
+          </Text>
         </View>
 
         {avaliacao.AVALIACAO_IMAGENS_URL &&
@@ -249,39 +253,40 @@ export default function DetalheAvaliacao() {
           <Text style={styles.sectionTitle}>Detalhes Clínicos</Text>
           <InfoRow
             label="Tamanho"
-            value={`${avaliacao.tamanho_aproximado} cm`}
+            value={`${avaliacao.tamanho_aproximado || "Não informado"} cm`}
           />
           <InfoRow
             label="Tempo de Evolução"
-            value={`${avaliacao.tempo_evolucao} meses`}
+            value={`${avaliacao.tempo_evolucao || "Não informado"} meses`}
           />
           <InfoRow
-            label="Aspecto"
-            value={`${avaliacao.ASPECTOS_LESAO?.nome}`}
+            label="Caract. Macroscópicas da Lesão"
+            value={`${avaliacao.ASPECTOS_LESAO?.nome || "Não informado"}`}
           />
           <InfoRow
             label="Superfície"
-            value={`${avaliacao.SUPERFICIES?.nome}`}
+            value={`${avaliacao.SUPERFICIES?.nome || "Não informado"}`}
           />
-          <InfoRow label="Bordas" value={`${avaliacao.BORDAS?.nome}`} />
+          <InfoRow
+            label="Bordas"
+            value={`${avaliacao.BORDAS?.nome || "Não informado"}`}
+          />
           <InfoRow
             label="Sintoma Associado"
-            value={`${avaliacao.SINTOMAS?.nome}`}
+            value={`${avaliacao.SINTOMAS?.nome || "Não informado"}`}
           />
 
           {avaliacao.carga_tabagica ? (
             <InfoRow
               label="Carga Tabágica"
-              value={`${avaliacao.carga_tabagica} cigarros/dia`}
+              value={`${avaliacao.carga_tabagica || "Não informado"} cigarros/dia`}
             />
           ) : null}
 
-          {avaliacao.carga_etilica ? (
-            <InfoRow
-              label="Carga Etílica"
-              value={`${avaliacao.carga_etilica} ml/dia`}
-            />
-          ) : null}
+          <InfoRow
+            label="Carga Etílica"
+            value={`${avaliacao.carga_etilica || "Não informado"} ml/dia`}
+          />
 
           <InfoRow
             label="Linfonodos Regionais"
@@ -295,14 +300,7 @@ export default function DetalheAvaliacao() {
             label="Classificação de Risco"
             value={avaliacao.CLASSIFICACOES_RISCO?.nome}
           />
-          <InfoRow
-            label="Conduta Recomendada"
-            value={avaliacao.CONDUTAS?.nome}
-          />
-          <InfoRow
-            label="Área de Encaminhamento"
-            value={avaliacao.AREAS_ENCAMINHAMENTO?.nome}
-          />
+          <InfoRow label="Conduta" value={avaliacao.CONDUTAS?.nome} />
         </View>
 
         <View style={styles.actionsContainer}>

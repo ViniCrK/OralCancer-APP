@@ -68,10 +68,6 @@ export const PaginaTresSchema = Yup.object().shape({
     .nullable()
     .positive("Selecione uma opção válida."),
 
-  area_encaminhamento_id: Yup.number()
-    .nullable()
-    .positive("Selecione uma opção válida."),
-
   imagens: Yup.array().of(Yup.object()).nullable(),
 
   observacoes: Yup.string().optional().max(200, "Máximo de 200 caracteres."),

@@ -145,9 +145,6 @@ export default function CadastroAvaliacao() {
   const [condutasRecomendadas, setCondutasRecomendadas] = useState<
     DropdownItem[]
   >([]);
-  const [areasEncaminhamento, setAreasEncaminhamento] = useState<
-    DropdownItem[]
-  >([]);
   const [fatoresRisco, setFatoresRisco] = useState<DropdownItem[]>([]);
   const [pacientes, setPacientes] = useState<PacienteItem[]>([]);
 
@@ -194,7 +191,6 @@ export default function CadastroAvaliacao() {
         linfonodosRegionaisData,
         classificacoesRiscoData,
         condutasRecomendadasData,
-        areasEncaminhamentoData,
         fatoresRiscoData,
       ] = await Promise.all([
         supabase.from("HABITOS").select("id, nome"),
@@ -205,12 +201,13 @@ export default function CadastroAvaliacao() {
         supabase.from("BORDAS").select("id, nome"),
         supabase.from("LINFONODOS").select("id, nome"),
         supabase.from("CLASSIFICACOES_RISCO").select("id, nome"),
-        supabase.from("CONDUTAS").select("id, nome"),
-        supabase.from("AREAS_ENCAMINHAMENTO").select("id, nome"),
+        supabase
+          .from("CONDUTAS")
+          .select("id, nome")
+          .order("nome", { ascending: true }),
         supabase.from("FATORES_RISCO").select("id, nome"),
       ]);
 
-      setAreasEncaminhamento(areasEncaminhamentoData.data || []);
       setAspectosLesao(aspectosLesaoData.data || []);
       setBordas(bordasData.data || []);
       setClassificacoesRisco(classificacoesRiscoData.data || []);
@@ -424,7 +421,6 @@ export default function CadastroAvaliacao() {
           linfonodo_regional_id: null,
           classificacao_risco_id: null,
           conduta_recomendada_id: null,
-          area_encaminhamento_id: null,
           paciente_id: null,
         }}
         onSubmit={(values, { setSubmitting }) =>
@@ -826,7 +822,7 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Aspecto da Lesão"
+                  label="Características Macroscópicas da Lesão"
                   isTouched={touched.aspecto_lesao_id}
                   errorMessage={errors.aspecto_lesao_id as string}
                 >
@@ -1095,7 +1091,7 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Conduta Recomendada"
+                  label="Condutas"
                   isTouched={touched.conduta_recomendada_id}
                   errorMessage={errors.conduta_recomendada_id as string}
                 >
@@ -1107,7 +1103,7 @@ export default function CadastroAvaliacao() {
                     iconStyle={styles.dropdownIcon}
                     data={condutasRecomendadas}
                     search
-                    searchPlaceholder="Nome da conduta recomendada"
+                    searchPlaceholder="Nome da conduta"
                     valueField={"id"}
                     labelField={"nome"}
                     placeholder="Selecionar"
@@ -1128,57 +1124,6 @@ export default function CadastroAvaliacao() {
                           <TouchableOpacity
                             onPress={() =>
                               setFieldValue("conduta_recomendada_id", null)
-                            }
-                          >
-                            <Ionicons
-                              name="close-circle"
-                              size={22}
-                              color="#9ca3af"
-                            />
-                          </TouchableOpacity>
-                        );
-                      }
-                      return (
-                        <Ionicons name="chevron-down" size={22} color="gray" />
-                      );
-                    }}
-                  />
-                </FormInput>
-
-                <FormInput
-                  label="Área de Encaminhamento"
-                  isTouched={touched.area_encaminhamento_id}
-                  errorMessage={errors.area_encaminhamento_id as string}
-                >
-                  <Dropdown
-                    style={styles.dropdown}
-                    containerStyle={styles.dropdownContainer}
-                    placeholderStyle={styles.dropdownPlaceholder}
-                    selectedTextStyle={styles.inputText}
-                    iconStyle={styles.dropdownIcon}
-                    data={areasEncaminhamento}
-                    search
-                    searchPlaceholder="Nome da área de encaminhamento"
-                    valueField={"id"}
-                    labelField={"nome"}
-                    placeholder="Selecionar"
-                    value={values.area_encaminhamento_id}
-                    onChange={(areaEncaminhamento) =>
-                      setFieldValue(
-                        "area_encaminhamento_id",
-                        areaEncaminhamento.id,
-                      )
-                    }
-                    onBlur={() => handleBlur("area_encaminhamento_id")}
-                    renderRightIcon={() => {
-                      if (
-                        values.area_encaminhamento_id != null &&
-                        !isSubmitting
-                      ) {
-                        return (
-                          <TouchableOpacity
-                            onPress={() =>
-                              setFieldValue("area_encaminhamento_id", null)
                             }
                           >
                             <Ionicons
@@ -1372,7 +1317,6 @@ const styles = StyleSheet.create({
     textAlign: "right",
     color: "#6c757d",
     fontSize: 12,
-    marginTop: 4,
   },
   dropdown: {
     height: 52,

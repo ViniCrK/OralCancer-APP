@@ -19,7 +19,6 @@ export interface Avaliacao {
   linfonodo_regional_id: number;
   classificacao_risco_id: number;
   conduta_recomendada_id: number;
-  area_encaminhamento_id: number;
   especialista_id: string | number;
   paciente_id: string | number;
 }
@@ -116,7 +115,6 @@ const AvaliacaoService = {
         LINFONODOS ( id, nome ),
         CLASSIFICACOES_RISCO ( id, nome ),
         CONDUTAS ( id, nome ),
-        AREAS_ENCAMINHAMENTO ( id, nome ),
         PACIENTES ( id, nome, sobrenome ),
         ESPECIALISTAS ( id, nome, sobrenome ),
         AVALIACAO_IMAGENS_URL ( id, url ),
