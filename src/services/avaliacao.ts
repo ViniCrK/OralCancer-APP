@@ -118,7 +118,8 @@ const AvaliacaoService = {
         PACIENTES ( id, nome, sobrenome ),
         ESPECIALISTAS ( id, nome, sobrenome ),
         AVALIACAO_IMAGENS_URL ( id, url ),
-        AVALIACAO_FATORES_RISCO ( FATORES_RISCO ( id, nome ) )
+        AVALIACAO_FATORES_RISCO ( FATORES_RISCO ( id, nome ) ),
+        AVALIACAO_METASTASES ( METASTASES ( id, nome ) )
         `,
       )
       .eq("id", id)

@@ -33,6 +33,7 @@ type AvaliacaoCompleta = {
   PACIENTES: Paciente | null;
   AVALIACAO_IMAGENS_URL: ImagemUrl[] | null;
   AVALIACAO_FATORES_RISCO: RelacaoFatorRisco[] | null;
+  AVALIACAO_METASTASES: RelacaoMetastase[] | null;
 };
 
 type AvaliacaoBreve = {
@@ -57,6 +58,10 @@ type FatorRisco = { id: number; nome: string };
 
 type RelacaoFatorRisco = { FATORES_RISCO: FatorRisco | null };
 
+type Metastase = { id: number; nome: string };
+
+type RelacaoMetastase = { METASTASES: Metastase | null };
+
 export {
   Avaliacao,
   AvaliacaoSimples,
@@ -67,4 +72,6 @@ export {
   ImagemUrl,
   FatorRisco,
   RelacaoFatorRisco,
+  Metastase,
+  RelacaoMetastase,
 };

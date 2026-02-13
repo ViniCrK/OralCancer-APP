@@ -81,6 +81,14 @@ export default function DetalheAvaliacao() {
     ).filter(Boolean);
   }, [avaliacao]);
 
+  const metastases = useMemo(() => {
+    if (!avaliacao?.AVALIACAO_METASTASES) return [];
+
+    return avaliacao.AVALIACAO_METASTASES.map((rel) => rel.METASTASES).filter(
+      Boolean,
+    );
+  }, [avaliacao]);
+
   const abrirImagem = (url: string) => {
     setImagemSelecionada(url);
     setModalVisivel(true);
@@ -243,6 +251,19 @@ export default function DetalheAvaliacao() {
               {fatoresDeRisco.map((fator) => (
                 <View key={fator!.id} style={styles.chip}>
                   <Text style={styles.chipText}>{fator!.nome}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {metastases.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Metástases Associadas</Text>
+            <View style={styles.chipContainer}>
+              {metastases.map((metastase) => (
+                <View key={metastase!.id} style={styles.chip}>
+                  <Text style={styles.chipText}>{metastase!.nome}</Text>
                 </View>
               ))}
             </View>

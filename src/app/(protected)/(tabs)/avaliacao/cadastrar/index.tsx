@@ -146,6 +146,7 @@ export default function CadastroAvaliacao() {
     DropdownItem[]
   >([]);
   const [fatoresRisco, setFatoresRisco] = useState<DropdownItem[]>([]);
+  const [metastases, setMetastases] = useState<DropdownItem[]>([]);
   const [pacientes, setPacientes] = useState<PacienteItem[]>([]);
 
   const pacientesFormatados = pacientes.map((paciente) => ({
@@ -192,6 +193,7 @@ export default function CadastroAvaliacao() {
         classificacoesRiscoData,
         condutasRecomendadasData,
         fatoresRiscoData,
+        metastasesData,
       ] = await Promise.all([
         supabase.from("HABITOS").select("id, nome"),
         supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
@@ -206,6 +208,7 @@ export default function CadastroAvaliacao() {
           .select("id, nome")
           .order("nome", { ascending: true }),
         supabase.from("FATORES_RISCO").select("id, nome"),
+        supabase.from("METASTASES").select("id, nome"),
       ]);
 
       setAspectosLesao(aspectosLesaoData.data || []);
@@ -213,6 +216,7 @@ export default function CadastroAvaliacao() {
       setClassificacoesRisco(classificacoesRiscoData.data || []);
       setCondutasRecomendadas(condutasRecomendadasData.data || []);
       setFatoresRisco(fatoresRiscoData.data || []);
+      setMetastases(metastasesData.data || []);
       setHabitos(habitosData.data || []);
       setLinfonodosRegionais(linfonodosRegionaisData.data || []);
       setLocalizacoesIntraorais(localizacoesIntraoraisData.data || []);
@@ -313,7 +317,12 @@ export default function CadastroAvaliacao() {
 
               setSubmitting(true);
 
-              const { imagens, fatores_risco_ids, ...dadosAvaliacao } = values;
+              const {
+                imagens,
+                fatores_risco_ids,
+                metastases_ids,
+                ...dadosAvaliacao
+              } = values;
 
               const { data: novaAvaliacao, error: erroAvaliacao } =
                 await supabase
@@ -342,6 +351,21 @@ export default function CadastroAvaliacao() {
                   .insert(fatoresDeRisco);
 
                 if (erroFatorRisco) throw erroFatorRisco;
+              }
+
+              if (metastases_ids && metastases_ids.length > 0) {
+                const metastases = metastases_ids.map(
+                  (metastaseId: number) => ({
+                    avaliacao_id: novaAvaliacaoId,
+                    metastase_id: metastaseId,
+                  }),
+                );
+
+                const { error: erroMetastase } = await supabase
+                  .from("AVALIACAO_METASTASES")
+                  .insert(metastases);
+
+                if (erroMetastase) throw erroMetastase;
               }
 
               if (imagens && imagens.length > 0) {
@@ -412,6 +436,7 @@ export default function CadastroAvaliacao() {
           observacoes: "",
           rascunho: true,
           fatores_risco_ids: [],
+          metastases_ids: [],
           imagens: [],
           localizacao_intraoral_id: null,
           aspecto_lesao_id: null,
@@ -863,6 +888,55 @@ export default function CadastroAvaliacao() {
                         <Ionicons name="chevron-down" size={22} color="gray" />
                       );
                     }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Metástases"
+                  isTouched={!!touched.metastases_ids}
+                  errorMessage={errors.metastases_ids as string}
+                >
+                  <MultiSelect
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    selectedStyle={styles.selectedChip}
+                    activeColor="#d1fae5"
+                    data={metastases}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione um ou mais metastases"
+                    value={values.metastases_ids}
+                    onChange={(metastase) =>
+                      setFieldValue("metastases_ids", metastase)
+                    }
+                    onBlur={() => handleBlur("metastases_ids")}
+                    renderRightIcon={() => {
+                      if (
+                        values.metastases_ids &&
+                        values.metastases_ids.length > 0 &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setFieldValue("metastases_ids", []);
+                            }}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                    mode="modal"
                   />
                 </FormInput>
 

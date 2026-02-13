@@ -138,6 +138,7 @@ export default function EditarAvaliacao() {
     DropdownItem[]
   >([]);
   const [fatoresRisco, setFatoresRisco] = useState<DropdownItem[]>([]);
+  const [metastases, setMetastases] = useState<DropdownItem[]>([]);
 
   const [initialValues, setInitialValues] = useState<any | null>(null);
   const [imagens, setImagens] = useState<Imagem[]>([]);
@@ -168,6 +169,7 @@ export default function EditarAvaliacao() {
           classificacoesRiscoData,
           condutasRecomendadasData,
           fatoresRiscoData,
+          metastasesData,
         ] = await Promise.all([
           supabase.from("HABITOS").select("id, nome"),
           supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
@@ -182,6 +184,7 @@ export default function EditarAvaliacao() {
             .select("id, nome")
             .order("nome", { ascending: true }),
           supabase.from("FATORES_RISCO").select("id, nome"),
+          supabase.from("METASTASES").select("id, nome"),
         ]);
 
         setAspectosLesao(aspectosLesaoData.data || []);
@@ -189,6 +192,7 @@ export default function EditarAvaliacao() {
         setClassificacoesRisco(classificacoesRiscoData.data || []);
         setCondutasRecomendadas(condutasRecomendadasData.data || []);
         setFatoresRisco(fatoresRiscoData.data || []);
+        setMetastases(metastasesData.data || []);
         setHabitos(habitosData.data || []);
         setLinfonodosRegionais(linfonodosRegionaisData.data || []);
         setLocalizacoesIntraorais(localizacoesIntraoraisData.data || []);
@@ -209,6 +213,11 @@ export default function EditarAvaliacao() {
         const fatoresRiscoIds =
           avaliacao.AVALIACAO_FATORES_RISCO?.map(
             (rel: any) => rel.FATORES_RISCO?.id,
+          ).filter(Boolean) || [];
+
+        const metastasesIds =
+          avaliacao.AVALIACAO_METASTASES?.map(
+            (rel: any) => rel.METASTASES?.id,
           ).filter(Boolean) || [];
 
         const imagensIniciaisFormatadas: Imagem[] =
@@ -232,6 +241,7 @@ export default function EditarAvaliacao() {
           observacoes: avaliacao.observacoes || "",
           rascunho: avaliacao.rascunho || true,
           fatores_risco_ids: fatoresRiscoIds,
+          metastases_ids: metastasesIds,
           imagens: imagensIniciaisFormatadas,
           localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || null,
           aspecto_lesao_id: avaliacao.aspecto_lesao_id || null,
@@ -294,6 +304,7 @@ export default function EditarAvaliacao() {
       const {
         imagens: currentImages,
         fatores_risco_ids,
+        metastases_ids,
         ...dadosAvaliacao
       } = values;
 
@@ -355,6 +366,26 @@ export default function EditarAvaliacao() {
         const { error: insertError } = await supabase
           .from("AVALIACAO_FATORES_RISCO")
           .insert(novosFatores);
+
+        if (insertError) throw insertError;
+      }
+
+      const { error: deleteErrorMetastases } = await supabase
+        .from("AVALIACAO_METASTASES")
+        .delete()
+        .eq("avaliacao_id", id);
+
+      if (deleteErrorMetastases) throw deleteErrorMetastases;
+
+      if (metastases_ids && metastases_ids.length > 0) {
+        const novasMetastases = metastases_ids.map((metastaseId: number) => ({
+          avaliacao_id: id,
+          metastase_id: metastaseId,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("AVALIACAO_METASTASES")
+          .insert(novasMetastases);
 
         if (insertError) throw insertError;
       }
@@ -793,6 +824,55 @@ export default function EditarAvaliacao() {
                         <Ionicons name="chevron-down" size={22} color="gray" />
                       );
                     }}
+                  />
+                </FormInput>
+
+                <FormInput
+                  label="Metástases"
+                  isTouched={!!touched.metastases_ids}
+                  errorMessage={errors.metastases_ids as string}
+                >
+                  <MultiSelect
+                    style={styles.dropdown}
+                    containerStyle={styles.dropdownContainer}
+                    placeholderStyle={styles.dropdownPlaceholder}
+                    selectedTextStyle={styles.inputText}
+                    selectedStyle={styles.selectedChip}
+                    activeColor="#d1fae5"
+                    data={metastases}
+                    valueField={"id"}
+                    labelField={"nome"}
+                    placeholder="Selecione um ou mais metastases"
+                    value={values.metastases_ids}
+                    onChange={(metastase) =>
+                      setFieldValue("metastases_ids", metastase)
+                    }
+                    onBlur={() => handleBlur("metastases_ids")}
+                    renderRightIcon={() => {
+                      if (
+                        values.metastases_ids &&
+                        values.metastases_ids.length > 0 &&
+                        !isSubmitting
+                      ) {
+                        return (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setFieldValue("metastases_ids", []);
+                            }}
+                          >
+                            <Ionicons
+                              name="close-circle"
+                              size={22}
+                              color="#9ca3af"
+                            />
+                          </TouchableOpacity>
+                        );
+                      }
+                      return (
+                        <Ionicons name="chevron-down" size={22} color="gray" />
+                      );
+                    }}
+                    mode="modal"
                   />
                 </FormInput>
 

@@ -36,6 +36,8 @@ export const PaginaUmSchema = Yup.object().shape({
 export const PaginaDoisSchema = Yup.object().shape({
   fatores_risco_ids: Yup.array().of(Yup.number()).nullable(),
 
+  metastases_ids: Yup.array().of(Yup.number()).nullable(),
+
   localizacao_intraoral_id: Yup.number()
     .nullable()
     .positive("Selecione uma opção válida."),
