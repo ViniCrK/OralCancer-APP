@@ -119,7 +119,8 @@ const AvaliacaoService = {
         ESPECIALISTAS ( id, nome, sobrenome ),
         AVALIACAO_IMAGENS_URL ( id, url ),
         AVALIACAO_FATORES_RISCO ( FATORES_RISCO ( id, nome ) ),
-        AVALIACAO_METASTASES ( METASTASES ( id, nome ) )
+        AVALIACAO_METASTASES ( METASTASES ( id, nome ) ),
+        ESTADIAMENTOS ( * , ESPECIALISTAS(nome, sobrenome) )
         `,
       )
       .eq("id", id)
@@ -127,6 +128,12 @@ const AvaliacaoService = {
 
     if (error) {
       console.error("Erro ao buscar avaliação:", error.message);
+    }
+
+    if (data && data.ESTADIAMENTOS && data.ESTADIAMENTOS.length > 0) {
+      data.ESTADIAMENTOS = data.ESTADIAMENTOS[0];
+    } else if (data) {
+      data.ESTADIAMENTOS = null;
     }
 
     return data;

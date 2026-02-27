@@ -3,7 +3,7 @@ import { useEspecialistaStore } from "@/store/especialista";
 import { AvaliacaoCompleta } from "@/types/avaliacao";
 import { Link } from "expo-router";
 import { useLocalSearchParams, useRouter } from "expo-router/build/hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -16,6 +16,7 @@ import {
   Image,
   Modal,
   Platform,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -24,6 +25,8 @@ import {
   MenuOptions,
   MenuOption,
 } from "react-native-popup-menu";
+import { supabase } from "@/config/supabase-client";
+import { Formik } from "formik";
 
 const InfoRow = ({
   label,
@@ -54,24 +57,47 @@ export default function DetalheAvaliacao() {
     null,
   );
 
+  const [modalEstadiamentoVisivel, setModalEstadiamentoVisivel] =
+    useState(false);
+
   const especialistaCriador = especialista?.id === avaliacao?.ESPECIALISTAS?.id;
 
-  useEffect(() => {
-    if (!id) return;
+  const buscarAvaliacao = useCallback(async () => {
+    setCarregando(true);
+    try {
+      // 1. Busca a avaliação normalmente pelo service
+      const dados = await avaliacaoService.buscar(id as string);
 
-    const buscarAvaliacao = async () => {
-      setCarregando(true);
+      if (dados) {
+        // 2. BUSCA DIRETA E SEGURA DO ESTADIAMENTO
+        const { data: estadiamentoDb, error: estError } = await supabase
+          .from("ESTADIAMENTOS")
+          .select("*, ESPECIALISTAS(nome, sobrenome)")
+          .eq("avaliacao_id", id)
+          .maybeSingle(); // maybeSingle retorna 1 objeto ou null (nunca array)
 
-      const avaliacao = await avaliacaoService.buscar(id as string);
+        if (estError) {
+          console.error(
+            "Erro ao buscar estadiamento diretamente:",
+            estError.message,
+          );
+        }
 
-      if (avaliacao) {
-        setAvaliacao(avaliacao);
-        setCarregando(false);
+        // Anexa o estadiamento encontrado aos dados da avaliação
+        dados.ESTADIAMENTOS = estadiamentoDb || null;
       }
-    };
 
-    buscarAvaliacao();
-  }, [id]);
+      setAvaliacao(dados);
+    } catch (error) {
+      console.error("Erro ao buscar avaliação:", error);
+    } finally {
+      setCarregando(false);
+    }
+  }, [id, avaliacaoService]);
+
+  useEffect(() => {
+    if (id) buscarAvaliacao();
+  }, [buscarAvaliacao, id]);
 
   const fatoresDeRisco = useMemo(() => {
     if (!avaliacao?.AVALIACAO_FATORES_RISCO) return [];
@@ -137,6 +163,50 @@ export default function DetalheAvaliacao() {
         },
       ],
     );
+  };
+
+  const estadiamentoData = avaliacao?.ESTADIAMENTOS || null;
+
+  const handleSalvarEstadiamento = async (
+    values: any,
+    { setSubmitting }: any,
+  ) => {
+    if (!especialista) return;
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        avaliacao_id: Number(id),
+        especialista_id: especialista.id,
+        tnm_clinico: values.tnm_clinico,
+        tnm_patologico: values.tnm_patologico,
+      };
+
+      if (estadiamentoData?.id) {
+        // Atualiza
+        const { error } = await supabase
+          .from("ESTADIAMENTOS")
+          .update(payload)
+          .eq("id", estadiamentoData.id);
+        if (error) throw error;
+      } else {
+        // Cria
+        const { error } = await supabase.from("ESTADIAMENTOS").insert(payload);
+        if (error) throw error;
+      }
+
+      Alert.alert("Sucesso", "Estadiamento salvo com sucesso!");
+      setModalEstadiamentoVisivel(false);
+      buscarAvaliacao(); // Recarrega para exibir
+    } catch (error: any) {
+      console.error("Erro ao salvar estadiamento:", error);
+      Alert.alert(
+        "Erro",
+        `Não foi possível salvar o estadiamento: ${error.message}`,
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (carregando) {
@@ -221,6 +291,54 @@ export default function DetalheAvaliacao() {
           <Text style={styles.queixaText}>
             {avaliacao.observacoes || "Não informado"}
           </Text>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.headerComBotao}>
+            <Text style={styles.sectionTitle}>Estadiamento (TNM)</Text>
+
+            {/* Usa a variável tratada aqui */}
+            {estadiamentoData && (
+              <TouchableOpacity
+                onPress={() => setModalEstadiamentoVisivel(true)}
+              >
+                <Ionicons name="pencil" size={20} color="#008C9E" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Usa a variável tratada aqui */}
+          {estadiamentoData ? (
+            <>
+              <InfoRow
+                label="Estadiamento Clínico (TNM)"
+                value={estadiamentoData.tnm_clinico}
+              />
+              <InfoRow
+                label="Estadiamento Patológico (pTNM)"
+                value={estadiamentoData.tnm_patologico}
+              />
+              <Text style={styles.autorEstadiamento}>
+                Preenchido por: Dr(a). {estadiamentoData.ESPECIALISTAS?.nome}{" "}
+                {estadiamentoData.ESPECIALISTAS?.sobrenome}
+              </Text>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={styles.botaoOutline}
+              onPress={() => setModalEstadiamentoVisivel(true)}
+            >
+              <Ionicons
+                name="add-circle-outline"
+                size={20}
+                color="#008C9E"
+                style={styles.buttonIcon}
+              />
+              <Text style={styles.botaoOutlineTexto}>
+                Preencher Estadiamento
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {avaliacao.AVALIACAO_IMAGENS_URL &&
@@ -442,6 +560,93 @@ export default function DetalheAvaliacao() {
               resizeMode="contain"
             />
           )}
+        </View>
+      </Modal>
+
+      <Modal
+        visible={modalEstadiamentoVisivel}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalEstadiamentoVisivel(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Estadiamento (TNM)</Text>
+
+            <Formik
+              initialValues={{
+                tnm_clinico: estadiamentoData?.tnm_clinico || "",
+                tnm_patologico: estadiamentoData?.tnm_patologico || "",
+              }}
+              enableReinitialize // Importante ter isso aqui
+              onSubmit={handleSalvarEstadiamento}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                isSubmitting,
+              }) => (
+                <View>
+                  <Text style={styles.label}>Estadiamento Clínico (TNM)</Text>
+                  <View style={styles.inputBase}>
+                    <TextInput
+                      style={styles.inputText}
+                      placeholder="Ex: T2 N1 M0"
+                      placeholderTextColor="#9ca3af"
+                      onChangeText={handleChange("tnm_clinico")}
+                      onBlur={handleBlur("tnm_clinico")}
+                      value={values.tnm_clinico}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+
+                  <Text style={[styles.label, { marginTop: 15 }]}>
+                    Estadiamento Patológico (pTNM)
+                  </Text>
+                  <View style={styles.inputBase}>
+                    <TextInput
+                      style={styles.inputText}
+                      placeholder="Ex: pT2 pN1 pM0"
+                      placeholderTextColor="#9ca3af"
+                      onChangeText={handleChange("tnm_patologico")}
+                      onBlur={handleBlur("tnm_patologico")}
+                      value={values.tnm_patologico}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+
+                  <View style={styles.botoesModalContainer}>
+                    <TouchableOpacity
+                      style={styles.botaoModalCancelar}
+                      onPress={() => setModalEstadiamentoVisivel(false)}
+                      disabled={isSubmitting}
+                    >
+                      <Text style={styles.botaoModalCancelarTexto}>
+                        Cancelar
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.botaoModalSalvar,
+                        isSubmitting && styles.botaoDesabilitado,
+                      ]}
+                      onPress={() => handleSubmit()}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.botaoModalSalvarTexto}>Salvar</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </Formik>
+          </View>
         </View>
       </Modal>
     </View>
@@ -699,6 +904,95 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
+  headerComBotao: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  autorEstadiamento: {
+    fontSize: 13,
+    color: "#9ca3af",
+    fontStyle: "italic",
+    marginTop: 10,
+    textAlign: "right",
+  },
+  botaoOutline: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#008C9E",
+    borderStyle: "dashed",
+  },
+  botaoOutlineTexto: { color: "#008C9E", fontWeight: "bold", fontSize: 15 },
+  modalImagemContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalImagemExibida: { width: "90%", height: "80%" },
+  botaoFecharImagem: { position: "absolute", top: 50, right: 20, zIndex: 1 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 24,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1e293b",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  label: { fontSize: 15, color: "#334155", marginBottom: 8, fontWeight: "600" },
+  inputBase: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 10,
+    height: 52,
+    justifyContent: "center",
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  inputText: { fontSize: 16, color: "#1e293b" },
+  botoesModalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 25,
+    gap: 10,
+  },
+  botaoModalCancelar: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#f1f5f9",
+  },
+  botaoModalCancelarTexto: {
+    color: "#64748b",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  botaoModalSalvar: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#008C9E",
+  },
+  botaoModalSalvarTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });
 
 const optionsStyles = {

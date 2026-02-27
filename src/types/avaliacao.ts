@@ -1,6 +1,16 @@
 import { Especialista } from "./especialista";
 import { Paciente, PacienteDados } from "./paciente";
 
+type Estadiamento = {
+  id: number;
+  avaliacao_id: number;
+  especialista_id: string;
+  tnm_clinico: string | null;
+  tnm_patologico: string | null;
+  observacoes: string | null;
+  ESPECIALISTAS?: { nome: string; sobrenome: string }; // Para saber quem preencheu
+};
+
 type Avaliacao = { PACIENTES: Paciente | null };
 
 type AvaliacaoSimples = { id: number; rascunho: boolean; created_at: string };
@@ -34,6 +44,7 @@ type AvaliacaoCompleta = {
   AVALIACAO_IMAGENS_URL: ImagemUrl[] | null;
   AVALIACAO_FATORES_RISCO: RelacaoFatorRisco[] | null;
   AVALIACAO_METASTASES: RelacaoMetastase[] | null;
+  ESTADIAMENTOS?: Estadiamento | null;
 };
 
 type AvaliacaoBreve = {
@@ -74,4 +85,5 @@ export {
   RelacaoFatorRisco,
   Metastase,
   RelacaoMetastase,
+  Estadiamento,
 };
