@@ -115,6 +115,14 @@ export default function DetalheAvaliacao() {
     );
   }, [avaliacao]);
 
+  const localizacoes = useMemo(() => {
+    if (!avaliacao?.AVALIACAO_LOCALIZACOES) return [];
+
+    return avaliacao.AVALIACAO_LOCALIZACOES.map(
+      (rel: any) => rel.LOCALIZACOES_INTRAORAIS,
+    ).filter(Boolean);
+  }, [avaliacao]);
+
   const abrirImagem = (url: string) => {
     setImagemSelecionada(url);
     setModalVisivel(true);
@@ -297,7 +305,6 @@ export default function DetalheAvaliacao() {
           <View style={styles.headerComBotao}>
             <Text style={styles.sectionTitle}>Estadiamento (TNM)</Text>
 
-            {/* Usa a variável tratada aqui */}
             {estadiamentoData && (
               <TouchableOpacity
                 onPress={() => setModalEstadiamentoVisivel(true)}
@@ -307,7 +314,6 @@ export default function DetalheAvaliacao() {
             )}
           </View>
 
-          {/* Usa a variável tratada aqui */}
           {estadiamentoData ? (
             <>
               <InfoRow
@@ -361,6 +367,19 @@ export default function DetalheAvaliacao() {
               />
             </View>
           )}
+
+        {localizacoes.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Localização(ões) da Lesão</Text>
+            <View style={styles.chipContainer}>
+              {localizacoes.map((loc: any) => (
+                <View key={loc.id} style={styles.chipLocalizacao}>
+                  <Text style={styles.chipTextLocalizacao}>{loc.nome}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {fatoresDeRisco.length > 0 && (
           <View style={styles.card}>
@@ -993,6 +1012,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#008C9E",
   },
   botaoModalSalvarTexto: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  chipLocalizacao: {
+    backgroundColor: "#e0f2fe",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    marginRight: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#7dd3fc",
+  },
+  chipTextLocalizacao: { color: "#0369a1", fontSize: 14, fontWeight: "600" },
 });
 
 const optionsStyles = {

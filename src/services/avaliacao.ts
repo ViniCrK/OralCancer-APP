@@ -107,7 +107,7 @@ const AvaliacaoService = {
         *,
         HABITO_TABAGISMO:HABITOS!habito_tabagismo_id ( id, nome ),
         HABITO_ETILISMO:HABITOS!habito_etilismo_id ( id, nome ),
-        LOCALIZACOES_INTRAORAIS ( id, nome ),
+        AVALIACAO_LOCALIZACOES ( LOCALIZACOES_INTRAORAIS ( id, nome ) ),
         ASPECTOS_LESAO ( id, nome ),
         SUPERFICIES ( id, nome ),
         SINTOMAS ( id, nome ),

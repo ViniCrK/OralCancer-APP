@@ -196,7 +196,10 @@ export default function CadastroAvaliacao() {
         metastasesData,
       ] = await Promise.all([
         supabase.from("HABITOS").select("id, nome"),
-        supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
+        supabase
+          .from("LOCALIZACOES_INTRAORAIS")
+          .select("id, nome")
+          .order("nome", { ascending: true }),
         supabase.from("ASPECTOS_LESAO").select("id, nome"),
         supabase.from("SUPERFICIES").select("id, nome"),
         supabase.from("SINTOMAS").select("id, nome"),
@@ -321,6 +324,7 @@ export default function CadastroAvaliacao() {
                 imagens,
                 fatores_risco_ids,
                 metastases_ids,
+                localizacoes_intraorais_ids,
                 ...dadosAvaliacao
               } = values;
 
@@ -337,6 +341,22 @@ export default function CadastroAvaliacao() {
               if (erroAvaliacao) throw erroAvaliacao;
 
               const novaAvaliacaoId = novaAvaliacao.id;
+
+              if (
+                localizacoes_intraorais_ids &&
+                localizacoes_intraorais_ids.length > 0
+              ) {
+                const locais = localizacoes_intraorais_ids.map(
+                  (locId: number) => ({
+                    avaliacao_id: novaAvaliacaoId,
+                    localizacao_id: locId,
+                  }),
+                );
+                const { error: erroLocal } = await supabase
+                  .from("AVALIACAO_LOCALIZACOES")
+                  .insert(locais);
+                if (erroLocal) throw erroLocal;
+              }
 
               if (fatores_risco_ids && fatores_risco_ids.length > 0) {
                 const fatoresDeRisco = fatores_risco_ids.map(
@@ -438,7 +458,7 @@ export default function CadastroAvaliacao() {
           fatores_risco_ids: [],
           metastases_ids: [],
           imagens: [],
-          localizacao_intraoral_id: null,
+          localizacoes_intraorais_ids: [],
           aspecto_lesao_id: null,
           superficie_id: null,
           sintoma_associado_id: null,
@@ -799,36 +819,36 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Localização Intraoral"
-                  isTouched={touched.localizacao_intraoral_id}
-                  errorMessage={errors.localizacao_intraoral_id as string}
+                  label="Localização Intraoral (Pode selecionar várias)"
+                  isTouched={!!touched.localizacoes_intraorais_ids}
+                  errorMessage={errors.localizacoes_intraorais_ids as string}
                 >
-                  <Dropdown
+                  <MultiSelect
                     style={styles.dropdown}
                     containerStyle={styles.dropdownContainer}
                     placeholderStyle={styles.dropdownPlaceholder}
                     selectedTextStyle={styles.inputText}
-                    iconStyle={styles.dropdownIcon}
+                    selectedStyle={styles.selectedChip}
+                    activeColor="#d1fae5"
                     data={localizacoesIntraorais}
-                    search
-                    searchPlaceholder="Nome da localização"
                     valueField={"id"}
                     labelField={"nome"}
-                    placeholder="Selecionar"
-                    value={values.localizacao_intraoral_id}
-                    onChange={(loc) =>
-                      setFieldValue("localizacao_intraoral_id", loc.id)
+                    placeholder="Selecionar localizações"
+                    value={values.localizacoes_intraorais_ids}
+                    onChange={(locais) =>
+                      setFieldValue("localizacoes_intraorais_ids", locais)
                     }
-                    onBlur={() => handleBlur("localizacao_intraoral_id")}
+                    onBlur={() => handleBlur("localizacoes_intraorais_ids")}
                     renderRightIcon={() => {
                       if (
-                        values.localizacao_intraoral_id != null &&
+                        values.localizacoes_intraorais_ids &&
+                        values.localizacoes_intraorais_ids.length > 0 &&
                         !isSubmitting
                       ) {
                         return (
                           <TouchableOpacity
                             onPress={() =>
-                              setFieldValue("localizacao_intraoral_id", null)
+                              setFieldValue("localizacoes_intraorais_ids", [])
                             }
                           >
                             <Ionicons
@@ -843,6 +863,7 @@ export default function CadastroAvaliacao() {
                         <Ionicons name="chevron-down" size={22} color="gray" />
                       );
                     }}
+                    mode="modal"
                   />
                 </FormInput>
 

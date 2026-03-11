@@ -172,7 +172,10 @@ export default function EditarAvaliacao() {
           metastasesData,
         ] = await Promise.all([
           supabase.from("HABITOS").select("id, nome"),
-          supabase.from("LOCALIZACOES_INTRAORAIS").select("id, nome"),
+          supabase
+            .from("LOCALIZACOES_INTRAORAIS")
+            .select("id, nome")
+            .order("nome", { ascending: true }),
           supabase.from("ASPECTOS_LESAO").select("id, nome"),
           supabase.from("SUPERFICIES").select("id, nome"),
           supabase.from("SINTOMAS").select("id, nome"),
@@ -210,6 +213,11 @@ export default function EditarAvaliacao() {
       const avaliacao = await avaliacaoService.buscar(id as string);
 
       if (avaliacao) {
+        const localizacoesIds =
+          avaliacao.AVALIACAO_LOCALIZACOES?.map(
+            (rel: any) => rel.LOCALIZACOES_INTRAORAIS?.id,
+          ).filter(Boolean) || [];
+
         const fatoresRiscoIds =
           avaliacao.AVALIACAO_FATORES_RISCO?.map(
             (rel: any) => rel.FATORES_RISCO?.id,
@@ -243,7 +251,7 @@ export default function EditarAvaliacao() {
           fatores_risco_ids: fatoresRiscoIds,
           metastases_ids: metastasesIds,
           imagens: imagensIniciaisFormatadas,
-          localizacao_intraoral_id: avaliacao.localizacao_intraoral_id || null,
+          localizacoes_intraorais_ids: localizacoesIds,
           aspecto_lesao_id: avaliacao.aspecto_lesao_id || null,
           superficie_id: avaliacao.superficie_id || null,
           sintoma_associado_id: avaliacao.sintoma_associado_id || null,
@@ -305,6 +313,7 @@ export default function EditarAvaliacao() {
         imagens: currentImages,
         fatores_risco_ids,
         metastases_ids,
+        localizacoes_intraorais_ids,
         ...dadosAvaliacao
       } = values;
 
@@ -356,6 +365,21 @@ export default function EditarAvaliacao() {
         .eq("avaliacao_id", id);
 
       if (deleteError) throw deleteError;
+
+      await supabase
+        .from("AVALIACAO_LOCALIZACOES")
+        .delete()
+        .eq("avaliacao_id", id);
+      if (
+        localizacoes_intraorais_ids &&
+        localizacoes_intraorais_ids.length > 0
+      ) {
+        const locais = localizacoes_intraorais_ids.map((locId: number) => ({
+          avaliacao_id: id,
+          localizacao_id: locId,
+        }));
+        await supabase.from("AVALIACAO_LOCALIZACOES").insert(locais);
+      }
 
       if (fatores_risco_ids && fatores_risco_ids.length > 0) {
         const novosFatores = fatores_risco_ids.map((fatorId: number) => ({
@@ -735,37 +759,37 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Localização Intraoral"
-                  isTouched={touched.localizacao_intraoral_id}
-                  errorMessage={errors.localizacao_intraoral_id as string}
+                  label="Localização Intratoral(Poder ser mais de uma)"
+                  isTouched={!!touched.localizacoes_intraorais_ids}
+                  errorMessage={errors.localizacoes_intraorais_ids as string}
                 >
-                  <Dropdown
+                  <MultiSelect
                     style={styles.dropdown}
                     containerStyle={styles.dropdownContainer}
                     placeholderStyle={styles.dropdownPlaceholder}
                     selectedTextStyle={styles.inputText}
-                    iconStyle={styles.dropdownIcon}
+                    selectedStyle={styles.selectedChip}
+                    activeColor="#d1fae5"
                     data={localizacoesIntraorais}
-                    search
-                    searchPlaceholder="Nome da localização"
                     valueField={"id"}
                     labelField={"nome"}
-                    placeholder="Selecionar"
-                    value={values.localizacao_intraoral_id}
-                    onChange={(loc) =>
-                      setFieldValue("localizacao_intraoral_id", loc.id)
+                    placeholder="Selecione um ou mais localizações"
+                    value={values.localizacoes_intraorais_ids}
+                    onChange={(localizacao) =>
+                      setFieldValue("localizacoes_intraorais_ids", localizacao)
                     }
-                    onBlur={() => handleBlur("localizacao_intraoral_id")}
+                    onBlur={() => handleBlur("localizacoes_intraorais_ids")}
                     renderRightIcon={() => {
                       if (
-                        values.localizacao_intraoral_id != null &&
+                        values.localizacoes_intraorais_ids &&
+                        values.localizacoes_intraorais_ids.length > 0 &&
                         !isSubmitting
                       ) {
                         return (
                           <TouchableOpacity
-                            onPress={() =>
-                              setFieldValue("localizacao_intraoral_id", null)
-                            }
+                            onPress={() => {
+                              setFieldValue("localizacoes_intraorais_ids", []);
+                            }}
                           >
                             <Ionicons
                               name="close-circle"
@@ -779,6 +803,7 @@ export default function EditarAvaliacao() {
                         <Ionicons name="chevron-down" size={22} color="gray" />
                       );
                     }}
+                    mode="modal"
                   />
                 </FormInput>
 

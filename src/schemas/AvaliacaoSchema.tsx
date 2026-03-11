@@ -38,9 +38,10 @@ export const PaginaDoisSchema = Yup.object().shape({
 
   metastases_ids: Yup.array().of(Yup.number()).nullable(),
 
-  localizacao_intraoral_id: Yup.number()
-    .nullable()
-    .positive("Selecione uma opção válida."),
+  localizacoes_intraorais_ids: Yup.array().min(
+    1,
+    "Selecione pelo menos uma localização.",
+  ),
 
   aspecto_lesao_id: Yup.number()
     .nullable()

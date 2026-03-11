@@ -31,7 +31,7 @@ type AvaliacaoCompleta = {
   rascunho: boolean;
   created_at: string;
   HABITOS?: DropdownItem | null;
-  LOCALIZACOES_INTRAORAIS: DropdownItem | null;
+  // LOCALIZACOES_INTRAORAIS: DropdownItem | null;
   ASPECTOS_LESAO: DropdownItem | null;
   SUPERFICIES: DropdownItem | null;
   SINTOMAS: DropdownItem | null;
@@ -45,6 +45,9 @@ type AvaliacaoCompleta = {
   AVALIACAO_FATORES_RISCO: RelacaoFatorRisco[] | null;
   AVALIACAO_METASTASES: RelacaoMetastase[] | null;
   ESTADIAMENTOS?: Estadiamento | null;
+  AVALIACAO_LOCALIZACOES:
+    | { LOCALIZACOES_INTRAORAIS: DropdownItem | null }[]
+    | null;
 };
 
 type AvaliacaoBreve = {
