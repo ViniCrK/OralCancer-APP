@@ -507,7 +507,7 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Tamanho Aproximado (cm)"
+                  label="Tumor Primário (T)"
                   isTouched={touched.tamanho_aproximado}
                   errorMessage={errors.tamanho_aproximado as string}
                 >
@@ -853,7 +853,7 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Metástases"
+                  label="Metástase (M)"
                   isTouched={!!touched.metastases_ids}
                   errorMessage={errors.metastases_ids as string}
                 >
@@ -1034,7 +1034,7 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Linfonodo Regional"
+                  label="Linfonodo Regional (N)"
                   isTouched={touched.linfonodo_regional_id}
                   errorMessage={errors.linfonodo_regional_id as string}
                 >

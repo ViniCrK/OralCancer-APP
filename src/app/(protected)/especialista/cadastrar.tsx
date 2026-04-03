@@ -58,7 +58,8 @@ export default function CadastroEspecialista() {
     const buscarEspecialidades = async () => {
       const { data, error } = await supabase
         .from("ESPECIALIDADES")
-        .select("id, nome");
+        .select("id, nome")
+        .order("nome", { ascending: true });
 
       if (error) {
         console.error(error.message);
@@ -77,7 +78,7 @@ export default function CadastroEspecialista() {
 
   const handleCadastrar = async (
     dados: any,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     const { sucesso, mensagem } = await especialistaService.cadastrar(dados);
 

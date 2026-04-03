@@ -53,13 +53,11 @@ const calcularClassificacaoAuto = (values: any) => {
 
   const temFator = (id: number) => fatores_risco_ids?.includes(id);
 
-  const ehAlcoolatra = habito_etilismo_id === ID_CONDICAO.ALCOOL_EXAGERADO;
-
-  if (temFator(ID_CONDICAO.HPV) && tabagismo > 20 && ehAlcoolatra) {
+  if (temFator(ID_CONDICAO.HPV) || tabagismo > 20) {
     return ID_RISCO.ALTO;
   }
 
-  if (tabagismo > 0 && tabagismo <= 20 && historico_familiar_cancer === true) {
+  if (tabagismo <= 20 && historico_familiar_cancer === true) {
     return ID_RISCO.INTERMEDIARIO;
   }
 
@@ -567,7 +565,7 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Tamanho Aproximado (cm)"
+                  label="Tumor Primário (T)"
                   isTouched={touched.tamanho_aproximado}
                   errorMessage={errors.tamanho_aproximado as string}
                 >
@@ -913,7 +911,7 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Metástases"
+                  label="Metástase (M)"
                   isTouched={!!touched.metastases_ids}
                   errorMessage={errors.metastases_ids as string}
                 >
@@ -1094,7 +1092,7 @@ export default function CadastroAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Linfonodo Regional"
+                  label="Linfonodo Regional (N)"
                   isTouched={touched.linfonodo_regional_id}
                   errorMessage={errors.linfonodo_regional_id as string}
                 >
