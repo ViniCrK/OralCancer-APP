@@ -38,10 +38,7 @@ export const PaginaDoisSchema = Yup.object().shape({
 
   metastases_ids: Yup.array().of(Yup.number()).nullable(),
 
-  localizacoes_intraorais_ids: Yup.array().min(
-    1,
-    "Selecione pelo menos uma localização.",
-  ),
+  localizacoes_intraorais_ids: Yup.array().of(Yup.number()).nullable(),
 
   aspecto_lesao_id: Yup.number()
     .nullable()

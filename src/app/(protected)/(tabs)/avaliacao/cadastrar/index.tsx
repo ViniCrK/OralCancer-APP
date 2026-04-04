@@ -53,9 +53,7 @@ const calcularClassificacaoAuto = (values: any) => {
 
   const temFator = (id: number) => fatores_risco_ids?.includes(id);
 
-  if (temFator(ID_CONDICAO.HPV) || tabagismo > 20) {
-    return ID_RISCO.ALTO;
-  }
+  if (temFator(ID_CONDICAO.HPV) || tabagismo > 20) return ID_RISCO.ALTO;
 
   if (tabagismo <= 20 && historico_familiar_cancer === true) {
     return ID_RISCO.INTERMEDIARIO;

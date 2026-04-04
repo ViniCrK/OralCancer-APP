@@ -45,13 +45,13 @@ const calcularClassificacaoAuto = (values: any) => {
     fatores_risco_ids,
     habito_etilismo_id,
   } = values;
+
   const tabagismo = Number(carga_tabagica || 0);
   const temFator = (id: number) => fatores_risco_ids?.includes(id);
-  const ehAlcoolatra = habito_etilismo_id === ID_CONDICAO.ALCOOL_EXAGERADO;
 
-  if (temFator(ID_CONDICAO.HPV) && tabagismo > 20 && ehAlcoolatra)
-    return ID_RISCO.ALTO;
-  if (tabagismo > 0 && tabagismo <= 20 && historico_familiar_cancer === true)
+  if (temFator(ID_CONDICAO.HPV) || tabagismo > 20) return ID_RISCO.ALTO;
+
+  if (tabagismo <= 20 && historico_familiar_cancer === true)
     return ID_RISCO.INTERMEDIARIO;
   return ID_RISCO.BAIXO;
 };
@@ -759,7 +759,7 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Localização Intratoral(Poder ser mais de uma)"
+                  label="Localização Intratoral (Poder ser mais de uma)"
                   isTouched={!!touched.localizacoes_intraorais_ids}
                   errorMessage={errors.localizacoes_intraorais_ids as string}
                 >
