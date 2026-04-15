@@ -72,13 +72,16 @@ export default function EditarPerfil() {
       try {
         const [dadosPerfil, especialidadesData] = await Promise.all([
           especialistaService.buscar(especialista.id),
-          supabase.from("ESPECIALIDADES").select("id, nome"),
+          supabase
+            .from("ESPECIALIDADES")
+            .select("id, nome")
+            .order("nome", { ascending: true }),
         ]);
 
         if (especialidadesData.error) {
           console.error(
             "Erro ao buscar especialidades:",
-            especialidadesData.error.message
+            especialidadesData.error.message,
           );
         } else {
           const dadosFormatados = especialidadesData.data.map((item) => ({
@@ -110,7 +113,7 @@ export default function EditarPerfil() {
 
   const handleAlterarDados = async (
     dados: any,
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     Alert.alert(
       "Alterar Dados",
@@ -138,7 +141,7 @@ export default function EditarPerfil() {
 
               const { sucesso, mensagem } = await especialistaService.atualizar(
                 especialista.id,
-                dadosParaAtualizar
+                dadosParaAtualizar,
               );
 
               if (!sucesso) {
@@ -155,7 +158,7 @@ export default function EditarPerfil() {
             }
           },
         },
-      ]
+      ],
     );
   };
 

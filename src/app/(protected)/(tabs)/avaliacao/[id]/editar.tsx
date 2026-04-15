@@ -187,7 +187,10 @@ export default function EditarAvaliacao() {
             .select("id, nome")
             .order("nome", { ascending: true }),
           supabase.from("FATORES_RISCO").select("id, nome"),
-          supabase.from("METASTASES").select("id, nome"),
+          supabase
+            .from("METASTASES")
+            .select("id, nome")
+            .order("nome", { ascending: true }),
         ]);
 
         setAspectosLesao(aspectosLesaoData.data || []);
@@ -507,7 +510,7 @@ export default function EditarAvaliacao() {
                 </FormInput>
 
                 <FormInput
-                  label="Tumor Primário (T)"
+                  label="Tumor Primário (T) (em cm)"
                   isTouched={touched.tamanho_aproximado}
                   errorMessage={errors.tamanho_aproximado as string}
                 >
@@ -525,7 +528,7 @@ export default function EditarAvaliacao() {
                         ? String(values.tamanho_aproximado)
                         : ""
                     }
-                    placeholder="Ex: 2.5"
+                    placeholder="Ex: 2.5 cm"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
                   />
@@ -617,7 +620,7 @@ export default function EditarAvaliacao() {
                     value={
                       values.carga_tabagica ? String(values.carga_tabagica) : ""
                     }
-                    placeholder="Ex: 20(maços)"
+                    placeholder="Ex: 20(cigarros/dia)"
                     placeholderTextColor="#9ca3af"
                     keyboardType="numeric"
                   />
